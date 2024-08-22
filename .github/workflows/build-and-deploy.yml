@@ -64,4 +64,4 @@ jobs:
 
       - name: Deploy with Helm
         run: |
-          helm upgrade --install kiln ./helm --set image.tag=${{ needs.build.outputs.image_tag }}
+          helm upgrade --install kiln ./helm --set image.tag=${{ needs.build_image.outputs.image_tag }}
