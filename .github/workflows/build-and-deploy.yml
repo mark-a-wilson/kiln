@@ -64,6 +64,9 @@ jobs:
 
       - name: Deploy with Helm
         run: |
+          echo ${{ env.REGISTRY }}
+          echo ${{ env.IMAGE_NAME }}
+          echo ${{ needs.build_and_push.outputs.image_tag }}
           helm upgrade --install kiln ./helm \
             --namespace ${{ github.ref == 'refs/heads/main' && secrets.OPENSHIFT_PROD_NAMESPACE || (github.ref == 'refs/heads/dev' && secrets.OPENSHIFT_DEV_NAMESPACE) || secrets.OPENSHIFT_TEST_NAMESPACE }} \
             --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} \
