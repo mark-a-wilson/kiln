@@ -9,5 +9,5 @@ spec:
     app.kubernetes.io/name: kiln
   ports:
     - protocol: TCP
-      port: {{ .Values.service.port }}
+      port: {{ .values.service.port }}
       targetPort: 8080
