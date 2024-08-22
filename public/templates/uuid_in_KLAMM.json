@@ -1,0 +1,151 @@
+{
+  "version": "0.0.1",
+  "ministry_id": "2",
+  "id": "ebaec195-1218-4aa7-98e2-caf66a8912a1",
+  "lastModified": "2024-07-23T20:32:16+00:00",
+  "title": "New Form",
+  "data": {
+    "items": [
+      {
+        "type": "text-input",
+        "label": "First Name",
+        "id": "first_name",
+        "codeContext": {
+          "name": "first_name"
+        },
+        "placeholder": "Enter your First Name",
+        "helperText": "First Name as it appears on official documents",
+        "inputType": "text"
+      },
+      {
+        "type": "date-picker",
+        "label": "Date of Birth",
+        "id": "date_of_birth",
+        "fieldId": "3",
+        "codeContext": {
+            "name": "date_of_birth"
+        },
+        "labelText": "Date of Birth",
+        "placeholder": "mm\/dd\/yyyy"
+      },
+      {
+        "type": "number-input",
+        "label": "Age",
+        "id": "age",
+        "codeContext": {
+          "name": "age"
+        },
+        "placeholder": "Enter your Age",
+        "helperText": "Age as it appears on official documents"
+      },
+      {
+        "type": "text-area",
+        "label": "Comments",
+        "id": "comments",
+        "codeContext": {
+          "name": "comments"
+        },
+        "placeholder": "Enter your Comments",
+        "helperText": "Comments as it appears on official documents",
+        "inputType": "text"
+      },
+      {
+        "type": "link",
+        "label": "Link",
+        "id": "link",
+        "codeContext": {
+          "name": "link"
+        },
+        "placeholder": "Enter your Link",
+        "value": "#"
+      },
+      {
+        "type": "toggle",
+        "label": "Canadian Citizen",
+        "id": "canadian_citizen",
+        "codeContext": {
+          "name": "canadian_citizen"
+        },
+        "header": "Enable Canadian Citizen",
+        "offText": "Off",
+        "onText": "On",
+        "disabled": false,
+        "checked": false,
+        "size": "md"
+      },
+	  {
+		"type": "checkbox",
+		"label": "Previous Military Service",
+		"id": "previous_military_service",
+		"fieldId": "6",
+		"codeContext": {
+			"name": "previous_military_service"
+		},
+		"helperText": "Select item on or off"
+	},
+	{
+		"type": "select",
+		"label": "Eye Colour",
+		"id": "eye_colour",
+		"fieldId": 4,
+		"codeContext": {
+			"name": "eye_colour"
+		},
+		"placeholder": "Select your Eye Colour",
+		"isMulti": false,
+		"isInline": false,
+		"selectionFeedback": "top-after-reopen",
+		"direction": "bottom",
+		"size": "md",
+		"helperText": "Choose one from the list",
+		"listItems": [
+			{
+				"value": "1",
+				"text": "Brown"
+			},
+			{
+				"value": "2",
+				"text": "Black"
+			},
+			{
+				"value": "3",
+				"text": "Blue"
+			},
+			{
+				"value": "4",
+				"text": "Green"
+			}
+		]
+	},
+  {
+    "type": "radio",
+    "label": "Gender",
+    "id": "gender",
+    "fieldId": 16,
+    "codeContext": {
+        "name": "gender"
+    },
+    "placeholder": "Select your Gender",
+    "helperText": "Choose one from the list",
+    "listItems": [
+        {
+            "value": "1",
+            "text": "Male"
+        },
+        {
+            "value": "2",
+            "text": "Female"
+        },
+        {
+            "value": "3",
+            "text": "Other"
+        },
+        {
+            "value": "4",
+            "text": "Prefer not to say"
+        }
+    ]
+}
+    ]
+  }
+}

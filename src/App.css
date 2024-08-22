@@ -1,0 +1,29 @@
+.group-container {
+    border: 1px solid #ccc;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+}
+.fixed-save-buttons {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #fff;
+    padding: 10px 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    z-index: 1000; /* Ensure it's on top of other content */
+  }
+  
+  .fixed-save-buttons button {
+    margin: 0 10px;
+  }
+
+  .content-wrapper {
+    padding-top: 60px; /* Adjust based on the height of the fixed header */
+    
+  }
+  
+  
