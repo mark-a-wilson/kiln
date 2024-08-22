@@ -40,4 +40,4 @@ ENV PORT 8080
 EXPOSE 8080
 
 # Set the command to start the application
-CMD ["serve", "-s", "build", "-l", "8080"]
+CMD ["serve", "-s", "dist", "-l", "8080"]
