@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: kiln
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ .Values.image.tag }}"
           ports:
             - containerPort: 8080
           resources: {{- toYaml .Values.resources | nindent 12 }}
