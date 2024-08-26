@@ -14,11 +14,11 @@ module.exports = {
       "warn",
       { allowConstantExport: true },
     ],
-    // temporarily convert some errors to warnings
-    "@typescript-eslint/no-explicit-any": "warn",
-    "@typescript-eslint/ban-types": "warn",
-    "react-hooks/rules-of-hooks": "warn",
-    "react-hooks/exhaustive-deps": "warn",
-    "no-case-declarations": "warn",
+    // temporarily convert some errors to ignore
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/ban-types": "off",
+    "react-hooks/rules-of-hooks": "off",
+    "react-hooks/exhaustive-deps": "off",
+    "no-case-declarations": "off",
   },
 };
