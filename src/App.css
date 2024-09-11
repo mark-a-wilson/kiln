@@ -26,6 +26,7 @@
 }
 
 .required-asterisk {
-  color: red;
+  color: #b30000; /* Darker red for better contrast */
+  font-weight: bold; /* Make the asterisk bold */
   margin-left: 2px;
 }

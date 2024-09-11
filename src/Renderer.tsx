@@ -22,11 +22,13 @@ import {
 import DynamicTable from "./DynamicTable";
 import { parseISO, format } from "date-fns";
 import { Heading, FlexGrid } from "@carbon/react";
+import InputMask from "react-input-mask";
 interface Item {
   type: string;
   label?: string;
   placeholder?: string;
   id: string;
+  mask?: string;
   codeContext?: { name: string };
   header?: string;
   offText?: string;
@@ -209,23 +211,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
   const handleLinkClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
     window.open(event.currentTarget.href, "_blank", "noopener,noreferrer");
-  };
-
-  /* const handleDropdownChange = (groupId: string | null, groupIndex: number | null, fieldId: string) => (event: React.ChangeEvent<HTMLSelectElement>) => {
-        if (groupId !== null && groupIndex !== null) {
-            setGroupStates((prevState) => ({
-                ...prevState,
-                [groupId]: prevState[groupId].map((item, index) =>
-                    index === groupIndex ? { ...item, [fieldId]: event.target.value } : item
-                ),
-            }));
-        } else {
-            setFormStates((prevState) => ({
-                ...prevState,
-                [fieldId]: event.target.value,
-            }));
-        }
-    }; */
+  };  
 
   const handleAddGroupItem = (
     groupId: string,
@@ -337,101 +323,103 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
             }
             break;
           case "pattern":
-            const regex = new RegExp(validation.value);
-            if (!regex.test(fieldValue)) {
-              return (
-                validation.errorMessage ||
-                `${field.label} is of invalid format.`
-              );
+            if (fieldValue !== null && fieldValue.trim()!==""){
+              const regex = new RegExp(validation.value);
+              if (!regex.test(fieldValue)) {
+                return (
+                  validation.errorMessage ||
+                  `${field.label} is of invalid format.`
+                );
+              }
             }
             break;
           // Add more validation types as needed
           case "minLength":
-            if (fieldValue.length < validation.value) {
-              return (
-                validation.errorMessage ||
-                `${field.label} must be at least ${validation.value} characters.`
-              );
+            if (fieldValue !== null && fieldValue.trim()!==""){
+              if (fieldValue.length < validation.value) {
+                return (
+                  validation.errorMessage ||
+                  `${field.label} must be at least ${validation.value} characters.`
+                );
+              }
             }
             break;
           case "maxLength":
-            if (fieldValue.length > validation.value) {
-              return (
-                validation.errorMessage ||
-                `${field.label} must be at most ${validation.value} characters.`
-              );
+            if (fieldValue !== null && fieldValue.trim()!==""){
+              if (fieldValue.length > validation.value) {
+                return (
+                  validation.errorMessage ||
+                  `${field.label} must be at most ${validation.value} characters.`
+                );
+              }
             }
             break;
           case "minDate":
-            if (validation.value && fieldValue < validation.value) {
-              return (
-                validation.errorMessage ||
-                `${field.label} should not be earlier than ${validation.value}`
-              );
+            if (fieldValue !== null && fieldValue.trim()!==""){
+              if (validation.value && fieldValue < validation.value) {
+                return (
+                  validation.errorMessage ||
+                  `${field.label} should not be earlier than ${validation.value}`
+                );
+              }
             }
             break;
           case "maxDate":
-            if (validation.value && fieldValue > validation.value) {
-              return (
-                validation.errorMessage ||
-                `${field.label} should not be later than ${validation.value}`
-              );
+            if (fieldValue !== null && fieldValue.trim()!==""){
+              if (validation.value && fieldValue > validation.value) {
+                return (
+                  validation.errorMessage ||
+                  `${field.label} should not be later than ${validation.value}`
+                );
+              }
             }
             break;
           case "minValue":
-            if (validation.value && fieldValue < validation.value) {
-              return (
-                validation.errorMessage ||
-                `${field.label} should not be less than ${validation.value}`
-              );
+            if (fieldValue !== null ){
+              if (validation.value && fieldValue < validation.value) {
+                return (
+                  validation.errorMessage ||
+                  `${field.label} should not be less than ${validation.value}`
+                );
+              }
             }
             break;
           case "maxValue":
-            if (validation.value && fieldValue > validation.value) {
-              return (
-                validation.errorMessage ||
-                `${field.label} should not be greater than ${validation.value}`
-              );
+            if (fieldValue !== null){
+              if (validation.value && fieldValue > validation.value) {
+                return (
+                  validation.errorMessage ||
+                  `${field.label} should not be greater than ${validation.value}`
+                );
+              }
             }
             break;
+        case "javascript":
+            if (fieldValue !== null && fieldValue.trim()!==""){
+              try {
+                  // Dynamically execute JavaScript validation
+                  const validateFunction = new Function('value', validation.value);
+                  const isValid = validateFunction(fieldValue);
+                  if (!isValid) {
+                      return validation.errorMessage || `${field.label} is invalid.`;
+                  }
+              } catch (error) {
+                  console.error('Error executing custom validation:', error);
+                  return 'Invalid custom validation script.';
+              }
+            }
+            break; 
+           
           default:
             break;
         }
       }
       return "";
     }
-    return "";
-
-    //for dates
-    /* if (field?.type === "date-picker") {
-            return validateDate(validation,value);
-        } */
+    return "";   
   };
 
-  /*    const validateDate = (validation: any, value:any) => {
-        const selectedDate = value;
-
-        console.log("selectedDate>>>",selectedDate);
-    
-       /*  if (isNaN(selectedDate.getTime())) {
-            return "Invalid date format";
-        } */
-
-  /* if ( validation.minDate && selectedDate < validation.minDate) {
-            return `Date should not be earlier than ${validation.minDate}`;
-        }
-    
-        if (validation.maxDate && selectedDate > validation.maxDate) {
-            return `Date should not be later than ${validation.maxDate}`;
-        }
-    
-        if (validation.isInPast && selectedDate > new Date()) {
-            return "Date should be less than today";
-        }
-    
-        return null;
-    };
-     */
+ 
 
   const isFieldRequired = (validations: Array<any>): boolean => {
     return validations.some((validation) => validation.type === "required");
@@ -467,18 +455,12 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
         {isRequired && <span className="required-asterisk"> *</span>}
       </span>
     );
-
-    //const toggleLabelId = `toggle-${fieldId}-label`;
-    //const toggleId = `toggle-${fieldId}`;
+   
     switch (item.type) {
-      case "text-input":
+      case "text-input":               
         return (
-          <Component
-            key={fieldId}
-            id={fieldId}
-            labelText={label}
-            placeholder={item.placeholder}
-            name={fieldId}
+          <InputMask
+            mask={item.mask || ''}
             value={
               groupId
                 ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || ""
@@ -487,10 +469,18 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               handleInputChange(fieldId, e.target.value, groupId, groupIndex)
             }
-            style={{ marginBottom: "15px" }}
-            invalid={!!error}
-            invalidText={error || ""}
-          />
+          >  
+              <Component               
+                key={fieldId}
+                id={fieldId}
+                labelText={label}
+                placeholder={item.placeholder}
+                name={fieldId}
+                style={{ marginBottom: "15px" }}
+                invalid={!!error}
+                invalidText={error || ""}
+              />            
+          </InputMask>
         );
       case "dropdown":
         const items =
@@ -652,7 +642,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
             key={fieldId}
             id={fieldId}
             name={fieldId}
-            size="md"
+            size="md"            
             onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
               handleInputChange(
                 fieldId,
@@ -672,8 +662,10 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
             helperText={item.helperText}
             key={fieldId}
             id={fieldId}
+            label={label}
             labelText={label}
             name={fieldId}
+            hideSteppers="true"
             value={
               groupId
                 ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || 0
