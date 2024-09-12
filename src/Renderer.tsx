@@ -23,6 +23,7 @@ import DynamicTable from "./DynamicTable";
 import { parseISO, format } from "date-fns";
 import { Heading, FlexGrid } from "@carbon/react";
 import InputMask from "react-input-mask";
+import { CurrencyInput } from "react-currency-mask";
 interface Item {
   type: string;
   label?: string;
@@ -98,6 +99,7 @@ const componentMapping: { [key: string]: React.ElementType } = {
   group: FlexGrid,
   radio: RadioButtonGroup,
   select: Select,
+  "currency-input":TextInput,
 };
 
 interface RendererProps {
@@ -423,20 +425,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
 
   const isFieldRequired = (validations: Array<any>): boolean => {
     return validations.some((validation) => validation.type === "required");
-  };
-
-  const getDateFormat = (validations: Array<any>): string => {
-    const formatValidation = validations.find(
-      (validation) => validation.type === "format"
-    );
-
-    if (formatValidation) {
-      const formatValue = formatValidation.value; // Access the 'value' for 'format'
-      return formatValue;
-    } else {
-      return "Y-m-d";
-    }
-  };
+  }; 
 
   const renderComponent = (
     item: Item,
@@ -482,6 +471,35 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
               />            
           </InputMask>
         );
+        case "currency-input":               
+        return (
+          <CurrencyInput           
+            value={
+              groupId
+                ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || ""
+                : formStates[fieldId] || ""
+            }
+            onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) =>
+              handleInputChange(fieldId, e.target.value, groupId, groupIndex)
+            }
+            currency="CAD"
+            locale ="en-CA"
+            autoReset
+            InputElement={
+            
+              <Component               
+                key={fieldId}
+                id={fieldId}
+                labelText={label}
+                placeholder={item.placeholder}
+                name={fieldId}
+                style={{ marginBottom: "15px" }}
+                invalid={!!error}
+                invalidText={error || ""}
+              />}
+              >            
+          </CurrencyInput>
+        );  
       case "dropdown":
         const items =
           item.listItems?.map(({ value, text }) => ({ value, label: text })) ||
@@ -572,7 +590,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
           : formStates[fieldId]
           ? parseISO(formStates[fieldId])
           : undefined;
-        const dateFormat = getDateFormat(item.validation || []);
+        const dateFormat = item.mask || "Y-m-d";
         const internalDateFormat = "yyyy-MM-dd"; // Use this format to store internally
         return (
           <Component
@@ -841,6 +859,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
       form_definition: data.form_definition,
       metadata: data.metadata,
     };
+    //console.log("Saved Data",JSON.stringify(savedData));
     return savedData;
   };
 
