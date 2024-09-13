@@ -320,7 +320,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
       for (const validation of validations) {
         switch (validation.type) {
           case "required":
-            if (!fieldValue || fieldValue.trim() === "") {
+            if (fieldValue === null || fieldValue === undefined || fieldValue === "") {
               return validation.errorMessage || `${field.label} is required.`;
             }
             break;
@@ -337,7 +337,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
             break;
           // Add more validation types as needed
           case "minLength":
-            if (fieldValue !== null && fieldValue.trim()!==""){
+            if (fieldValue !== null && fieldValue.trim()!==""){              
               if (fieldValue.length < validation.value) {
                 return (
                   validation.errorMessage ||
