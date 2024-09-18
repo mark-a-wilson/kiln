@@ -47,6 +47,7 @@ interface Item {
   initialRows?: string;
   initialColumns?: string;
   initialHeaderNames?: string;
+  condition?:string;
   validation?: {
     type: string;
     value: string | number | boolean;
@@ -420,12 +421,45 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
     }
     return "";   
   };
-
  
 
   const isFieldRequired = (validations: Array<any>): boolean => {
     return validations.some((validation) => validation.type === "required");
   }; 
+
+  const isFieldVisible = (item: Item ,groupId: string | null = null,
+    groupIndex: number | null = null) : boolean => {
+    
+      if (!item.condition) {
+        return true; // No condition means always visible
+      }
+      try {
+        // If the field is in a group, pass groupStates and groupIndex
+        if (groupId !== null && groupIndex !== null) {
+          const conditionFunction = new Function(
+            "formStates",            
+            "groupStates",
+            "groupId",
+            "groupIndex",
+            item.condition
+          );         
+          
+          return conditionFunction(formStates, groupStates,groupId, groupIndex);
+        } else {
+          // For non-group fields, evaluate using formStates
+          const conditionFunction = new Function(
+            "formStates",
+            item.condition
+          );
+          console.log("conditionFunction",conditionFunction);
+          return conditionFunction(formStates);
+        }
+      } catch (error) {
+        console.error("Error evaluating condition script:", error);
+        return true; // Default to visible if the script fails
+      }
+      return true;
+  }
 
   const renderComponent = (
     item: Item,
@@ -434,6 +468,10 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
   ) => {
     const Component = componentMapping[item.type];
     if (!Component) return null;
+
+    if (!isFieldVisible(item, groupId, groupIndex)) {
+      return null; // Field is not visible based on condition
+    }
 
     const fieldId = item.id;
     const error = formErrors[fieldId];
@@ -550,7 +588,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
                 groupId
                   ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || false
                   : formStates[fieldId] || false
-              }
+              }              
               onChange={({ checked }: { checked: boolean }) =>
                 handleInputChange(fieldId, String(checked), groupId, groupIndex)
               }
