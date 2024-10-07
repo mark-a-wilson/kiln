@@ -22,6 +22,7 @@ import {
 import DynamicTable from "./DynamicTable";
 import { parseISO, format } from "date-fns";
 import { Heading, FlexGrid } from "@carbon/react";
+import { Add,Subtract } from '@carbon/icons-react';
 import InputMask from "react-input-mask";
 import { CurrencyInput } from "react-currency-mask";
 import {  
@@ -29,6 +30,8 @@ import {
   handleLinkClick,
   validateField,
   isFieldRequired,
+  doesFieldHaveSaveOnSubmitFlag,
+  isFieldReadOnly,
 } from "./utils/helpers"; // Import from the helpers file
 interface Item {
   type: string;
@@ -53,16 +56,17 @@ interface Item {
   initialRows?: string;
   initialColumns?: string;
   initialHeaderNames?: string;
-  condition?:string;
-  calculatedValue?:string;
   validation?: {
     type: string;
     value: string | number | boolean;
     errorMessage: string;
   }[];
-  saveOnSubmit?:boolean;
-  readOnly?:boolean;
-  
+  //saveOnSubmit?:boolean;
+  //readOnly?:boolean;
+  conditions?: {
+    type: string;
+    value: string;    
+  }[];
 
 }
 
@@ -323,7 +327,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
   const shouldFieldBeIncludedForSaving = (item: Item ,groupId: string | null = null,
     groupIndex: number | null = null) : boolean => {
 
-      if (isFieldVisible(item, groupId, groupIndex) || item.saveOnSubmit) {
+      if (isFieldVisible(item, groupId, groupIndex) || doesFieldHaveSaveOnSubmitFlag(item)) {
         return true; // Field is not visible based on condition
       }
 
@@ -331,89 +335,121 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
   }
 
   const isFieldVisible = (item: Item ,groupId: string | null = null,
-    groupIndex: number | null = null) : boolean => {
-    
-      if (!item.condition) {
-        return true; // No condition means always visible
+    groupIndex: number | null = null) : boolean => {    
+      
+      if (!item.conditions || item.conditions.length === 0) {
+        return true; // Default to visible if there are no conditions
       }
-      try {
-        // If the field is in a group, pass groupStates and groupIndex
-        if (groupId !== null && groupIndex !== null) {
-          const conditionFunction = new Function(
-            "formStates",            
-            "groupStates",
-            "groupId",
-            "groupIndex",
-            item.condition
-          );         
-          
-          return conditionFunction(formStates, groupStates,groupId, groupIndex);
-        } else {
-          // For non-group fields, evaluate using formStates
-          const conditionFunction = new Function(
-            "formStates",
-            item.condition
-          );
-          console.log("conditionFunction",conditionFunction);
-          return conditionFunction(formStates);
+      
+      const visibilityCondition = item.conditions.find(condition => condition.type === 'visibility');
+
+      if (visibilityCondition) {
+        try {
+          // If the field is in a group, pass groupStates and groupIndex
+          if (groupId !== null && groupIndex !== null) {
+            const conditionFunction = new Function(
+              "formStates",            
+              "groupStates",
+              "groupId",
+              "groupIndex",
+              visibilityCondition.value
+            );         
+            
+            return conditionFunction(formStates, groupStates,groupId, groupIndex);
+          } else {
+            // For non-group fields, evaluate using formStates
+            const conditionFunction = new Function(
+              "formStates",
+              visibilityCondition.value
+            );            
+            return conditionFunction(formStates);
+          }
+        } catch (error) {
+          console.error("Error evaluating condition script:", error);
+          return true; // Default to visible if the script fails
         }
-      } catch (error) {
-        console.error("Error evaluating condition script:", error);
-        return true; // Default to visible if the script fails
+      } else {
+        return true;
       }
-      return true;
+     
   }
 
-  const executeCalculatedValue = (item: Item ,groupId: string | null = null,
-    groupIndex: number | null = null)   => {
-    
-      let calculatedFieldValue ="";
-      if (!item.calculatedValue) {
-        return calculatedFieldValue; // No calculation means empty
+  const executeCalculatedValueAndSetIfExists = (item: Item ,groupId: string | null = null,
+    groupIndex: number | null = null) :boolean  => {         
+
+      if (!item.conditions || item.conditions.length === 0) {
+        return false; // Default to false if there are no conditions
       }
-      try {       
-        // If the field is in a group, pass groupStates and groupIndex
-        //if (groupId !== null && groupIndex !== null) {
+      
+      const calculatedValCondition = item.conditions.find(condition => condition.type === 'calculatedValue');
+
+      if (calculatedValCondition) {
+        try {  
+          let calculatedFieldValue ="";     
+                 
           const calculationFunction = new Function(
             "formStates",            
             "groupStates",
             "groupId",
             "groupIndex",
-            item.calculatedValue
+            calculatedValCondition.value
           );         
-          //const calculationFunction = new Function("formStates", calculationScript);
-          //return calculationFunction(formStates);
+            
 
           calculatedFieldValue = calculationFunction(formStates, groupStates,groupId, groupIndex);
-       /*  //} else {
-          // For non-group fields, evaluate using formStates
-          const calculationFunction = new Function(
-            "formStates",
-            item.calculatedValue
-          );
-          console.log("calculationFunction",calculationFunction);
-          calculatedFieldValue =  calculationFunction(formStates);
-        } */
-          let currentValue ;
-        console.log("calculatedFieldValue",calculatedFieldValue);
-         if (groupId !== null && groupIndex !== null) {
-          currentValue=  groupStates[groupId]?.[groupIndex]?.[item.id];
         
-         }else {
-          currentValue = formStates[item.id];
-         }
-        if (calculatedFieldValue !== currentValue) {
-          handleInputChange(item.id, calculatedFieldValue, groupId, groupIndex);
+          let currentValue ;
          
-        }
-        //handleInputChange(item.id, calculatedFieldValue, groupId, groupIndex);
+          if (groupId !== null && groupIndex !== null) {
+            currentValue=  groupStates[groupId]?.[groupIndex]?.[item.id];        
+          }else {
+            currentValue = formStates[item.id];
+          }
+          if (calculatedFieldValue !== currentValue) {
+            setFieldValue(item.id, calculatedFieldValue, groupId, groupIndex);
+          
+          }  
+          return true;      
 
-      } catch (error) {
-        console.error("Error evaluating calculationFunction script:", error);
-        return calculatedFieldValue; // Default to empty if the script fails
+        } catch (error) {
+          
+          return false; // Default to false if the script fails
+        }
       }
-      return calculatedFieldValue;
+
+
+      return false;
   }
+
+  const setFieldValue = (fieldId: string,
+    value: any,
+    groupId: string | null = null,
+    groupIndex: number | null = null) => {
+    if (groupId !== null && groupIndex !== null) {
+      setGroupStates((prevState) => ({
+        ...prevState,
+        [groupId]: prevState[groupId].map((item, index) =>
+          index === groupIndex ? { ...item, [fieldId]: value } : item
+        ),
+      }));
+    } else {
+      setFormStates((prevState) => ({
+        ...prevState,
+        [fieldId]: value,
+      }));
+    }
+  };
+
+  /* const getFieldValue = (fieldName :string) => {   
+      return formStates[fieldName] || '';
+    
+  };
+
+  const getGroupFieldValue = (groupId: string , groupIndex: number , fieldName :string) => {
+   
+      return groupStates[groupId]?.[groupIndex]?.[fieldName] || '';
+    
+  }; */
 
   const renderComponent = (
     item: Item,
@@ -422,15 +458,13 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
   ) => {
     const Component = componentMapping[item.type];
     if (!Component) return null;
-
-    if (item.calculatedValue) {
-      executeCalculatedValue(item, groupId, groupIndex);
-      
-    } 
+    
+    const calcValExists = executeCalculatedValueAndSetIfExists(item, groupId, groupIndex);  
+    
 
     if (!isFieldVisible(item, groupId, groupIndex)) {
       return null; // Field is not visible based on condition
-    }
+    }    
 
     const fieldId = item.id;
     const error = formErrors[fieldId];
@@ -457,7 +491,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
               handleInputChange(fieldId, e.target.value, groupId, groupIndex)
               
             }
-            readOnly={formData.readOnly || item.readOnly || !!item.calculatedValue}
+            readOnly={formData.readOnly || isFieldReadOnly(item) || calcValExists}
           >  
               <Component               
                 key={fieldId}
@@ -535,7 +569,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
               )
             }
             style={{ marginBottom: "15px" }}
-            readOnly={formData.readOnly || item.readOnly || !!item.calculatedValue}
+            readOnly={formData.readOnly || isFieldReadOnly(item) || calcValExists}
             invalid={!!error}
             invalidText={error || ""}
           />
@@ -546,7 +580,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
             <Component
               key={fieldId}
               id={fieldId}
-              labelText={label}
+              labelText={item.label}
               name={fieldId}
               checked={
                 groupId
@@ -556,7 +590,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
               onChange={({ checked }: { checked: boolean }) =>
                 handleInputChange(fieldId, String(checked), groupId, groupIndex)
               }
-              readOnly={formData.readOnly || item.readOnly || !!item.calculatedValue}
+              readOnly={formData.readOnly || isFieldReadOnly(item) || calcValExists}
               invalid={!!error}
               invalidText={error || ""}
             />
@@ -565,10 +599,10 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
       case "toggle":
         return (
           <div key={fieldId} style={{ marginBottom: "15px" }}>
-            <div id={`${fieldId}-label`}>{item.header}</div>
+            
             <Component
               id={fieldId}
-              aria-labelledby={`${fieldId}-label`}
+              labelText={item.label}   
               labelA={item.offText}
               labelB={item.onText}
               size={item.size}
@@ -580,7 +614,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
               onToggle={(checked: boolean) =>
                 handleInputChange(fieldId, checked, groupId, groupIndex)
               }
-              readOnly={formData.readOnly || item.readOnly || !!item.calculatedValue}
+              readOnly={formData.readOnly || isFieldReadOnly(item) || calcValExists}
               invalid={!!error}
               invalidText={error || ""}
             />
@@ -623,7 +657,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
             }}
             style={{ marginBottom: "15px" }}
             dateFormat={dateFormat}
-            readOnly={formData.readOnly || item.readOnly || !!item.calculatedValue}
+            readOnly={formData.readOnly || isFieldReadOnly(item) || calcValExists}
             invalid={!!error}
             invalidText={error || ""}
           >
@@ -631,7 +665,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
               id={fieldId}
               placeholder={item.placeholder}
               labelText={label}
-              readOnly={formData.readOnly || item.readOnly || !!item.calculatedValue}
+              readOnly={formData.readOnly || isFieldReadOnly(item) || calcValExists}
               invalid={!!error}
               invalidText={error || ""}
             />
@@ -656,7 +690,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
             }
             rows={4}
             style={{ marginBottom: "15px" }}
-            readOnly={formData.readOnly || item.readOnly || !!item.calculatedValue}
+            readOnly={formData.readOnly || isFieldReadOnly(item) || calcValExists}
             invalid={!!error}
             invalidText={error || ""}
           />
@@ -778,7 +812,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
                 ? groupStates[groupId]?.[groupIndex!]?.[fieldId]
                 : formStates[fieldId]
             }
-            readOnly={formData.readOnly || item.readOnly || !!item.calculatedValue}
+            readOnly={formData.readOnly || isFieldReadOnly(item) || calcValExists}
             invalid={!!error}
             invalidText={error || ""}
           >
@@ -820,7 +854,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
       case "group":
         return (
           <div key={item.id} className="group-container">
-            <h2>{item.label}</h2>
+            <h3>{item.label}</h3>
             {item.groupItems?.map((groupItem, groupIndex) => (
               <div key={`${item.id}-${groupIndex}`} className="group-container">
                 {groupItem.fields.map((groupField) => (
@@ -832,8 +866,9 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
                 ))}
                 {item.groupItems && item.groupItems.length > 1 && (
                   <Button
-                    kind="danger"
+                    kind="ghost"
                     onClick={() => handleRemoveGroupItem(item.id, groupIndex)}
+                    renderIcon={Subtract}
                   >
                     Remove {item.label}
                   </Button>
@@ -842,10 +877,11 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
             ))}
             {item.repeater && (
               <Button
-                kind="primary"
+                kind="ghost"
                 onClick={() => handleAddGroupItem(item.id)}
+                renderIcon={Add}
               >
-                Add {item.label}
+                Add {item.label} 
               </Button>
             )}
           </div>
@@ -857,12 +893,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
   };
 
   const createSavedData = () => {
-    console.log("in createSavedData");
-   /*  const saveFieldData: SavedFieldData = { ...formStates };
-    Object.keys(groupStates).forEach((groupId) => {
-      saveFieldData[groupId] = groupStates[groupId];
-    }); */
-
+   
     const saveFieldData: SavedFieldData = {};
     //save date based on visibility
 
@@ -975,8 +1006,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
       }
     });
 
-    setFormErrors(errors);
-    console.log("errors>>>",errors);
+    setFormErrors(errors);    
     return isValid;
   };
   const handleSave = async () => {
@@ -1010,7 +1040,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
   return (
     <div>
       <div className="fixed-save-buttons">
-        <Button onClick={handleSave} kind="primary">
+        <Button onClick={handleSave} kind="secondary">
           Save
         </Button>
         <Button onClick={handleSaveAndClose} kind="secondary">
@@ -1028,7 +1058,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
             alt="ministry logo"
           />
         )}
-        <Heading style={{ marginBottom: "20px", fontSize: "24px" }}>
+        <Heading style={{ marginBottom: "20px" }}>
           {formData.title}
         </Heading>
         <FlexGrid>
