@@ -29,9 +29,8 @@ import {
   generateUniqueId, 
   handleLinkClick,
   validateField,
-  isFieldRequired,
-  doesFieldHaveSaveOnSubmitFlag,
-  isFieldReadOnly,
+  isFieldRequired, 
+ 
 } from "./utils/helpers"; // Import from the helpers file
 interface Item {
   type: string;
@@ -327,7 +326,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
   const shouldFieldBeIncludedForSaving = (item: Item ,groupId: string | null = null,
     groupIndex: number | null = null) : boolean => {
 
-      if (isFieldVisible(item, groupId, groupIndex) || doesFieldHaveSaveOnSubmitFlag(item)) {
+      if (isFieldVisible(item, groupId, groupIndex) || doesFieldNeedToSet("saveOnSubmit",item, groupId, groupIndex)) {
         return true; // Field is not visible based on condition
       }
 
@@ -421,6 +420,32 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
       return false;
   }
 
+  const doesFieldNeedToSet = (type:string, item: Item ,groupId: string | null = null,
+    groupIndex: number | null = null ) : boolean => { 
+    
+    if (!item.conditions || item.conditions.length === 0) {
+      return false; // Default to false if there are no conditions
+    }  
+    const readOnlyCondition = item.conditions.find((condition) => condition.type === type);
+    if (readOnlyCondition) {
+      try {  
+         
+               
+        const readOnlyFunction = new Function(
+          "formStates",            
+          "groupStates",
+          "groupId",
+          "groupIndex",
+          readOnlyCondition.value
+        );
+        return readOnlyFunction(formStates, groupStates,groupId, groupIndex); 
+      } catch (error) {        
+        return false; // Default to false if the script fails
+      }
+    }
+    return false;
+  } 
+
   const setFieldValue = (fieldId: string,
     value: any,
     groupId: string | null = null,
@@ -491,7 +516,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
               handleInputChange(fieldId, e.target.value, groupId, groupIndex)
               
             }
-            readOnly={formData.readOnly || isFieldReadOnly(item) || calcValExists}
+            readOnly={formData.readOnly || doesFieldNeedToSet("readOnly",item, groupId, groupIndex) || calcValExists}
           >  
               <Component               
                 key={fieldId}
@@ -569,7 +594,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
               )
             }
             style={{ marginBottom: "15px" }}
-            readOnly={formData.readOnly || isFieldReadOnly(item) || calcValExists}
+            readOnly={formData.readOnly || doesFieldNeedToSet("readOnly",item, groupId, groupIndex) || calcValExists}
             invalid={!!error}
             invalidText={error || ""}
           />
@@ -590,7 +615,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
               onChange={({ checked }: { checked: boolean }) =>
                 handleInputChange(fieldId, String(checked), groupId, groupIndex)
               }
-              readOnly={formData.readOnly || isFieldReadOnly(item) || calcValExists}
+              readOnly={formData.readOnly || doesFieldNeedToSet("readOnly",item, groupId, groupIndex) || calcValExists}
               invalid={!!error}
               invalidText={error || ""}
             />
@@ -614,7 +639,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
               onToggle={(checked: boolean) =>
                 handleInputChange(fieldId, checked, groupId, groupIndex)
               }
-              readOnly={formData.readOnly || isFieldReadOnly(item) || calcValExists}
+              readOnly={formData.readOnly || doesFieldNeedToSet("readOnly",item, groupId, groupIndex) || calcValExists}
               invalid={!!error}
               invalidText={error || ""}
             />
@@ -657,7 +682,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
             }}
             style={{ marginBottom: "15px" }}
             dateFormat={dateFormat}
-            readOnly={formData.readOnly || isFieldReadOnly(item) || calcValExists}
+            readOnly={formData.readOnly || doesFieldNeedToSet("readOnly",item, groupId, groupIndex) || calcValExists}
             invalid={!!error}
             invalidText={error || ""}
           >
@@ -665,7 +690,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
               id={fieldId}
               placeholder={item.placeholder}
               labelText={label}
-              readOnly={formData.readOnly || isFieldReadOnly(item) || calcValExists}
+              readOnly={formData.readOnly || doesFieldNeedToSet("readOnly",item, groupId, groupIndex) || calcValExists}
               invalid={!!error}
               invalidText={error || ""}
             />
@@ -690,7 +715,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
             }
             rows={4}
             style={{ marginBottom: "15px" }}
-            readOnly={formData.readOnly || isFieldReadOnly(item) || calcValExists}
+            readOnly={formData.readOnly || doesFieldNeedToSet("readOnly",item, groupId, groupIndex) || calcValExists}
             invalid={!!error}
             invalidText={error || ""}
           />
@@ -800,6 +825,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
             label: text,
           })) || [];
         return (
+          <div key={fieldId} style={{ marginBottom: "15px" }}>
           <Component
             legendText={label}
             id={fieldId}
@@ -812,7 +838,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
                 ? groupStates[groupId]?.[groupIndex!]?.[fieldId]
                 : formStates[fieldId]
             }
-            readOnly={formData.readOnly || isFieldReadOnly(item) || calcValExists}
+            readOnly={formData.readOnly || doesFieldNeedToSet("readOnly",item, groupId, groupIndex) || calcValExists}
             invalid={!!error}
             invalidText={error || ""}
           >
@@ -824,7 +850,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
                 id={`${fieldId}-${index}`}
               />
             ))}
-          </Component>
+          </Component></div>
         );
       case "select":
         const itemsForSelect = item.listItems || [];

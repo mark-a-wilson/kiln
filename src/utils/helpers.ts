@@ -123,29 +123,6 @@ export const isFieldRequired = (validations: Array<any>): boolean => {
     return validations.some((validation) => validation.type === "required");
   };  
   
-export  const doesFieldHaveSaveOnSubmitFlag = (item: any ) : boolean => { 
-    
-    if (!item.conditions || item.conditions.length === 0) {
-      return false; // Default to visible if there are no conditions
-    }
 
-    return  item.conditions.some((condition: { type: string; value: boolean; }) => {
-      if (condition.type === 'saveOnSubmit'  && condition.value !== undefined) {
-        return condition.value;
-      }
-      return false;
-    });   
-} 
 
-export  const isFieldReadOnly = (item: any ) : boolean => { 
-    
-  if (!item.conditions || item.conditions.length === 0) {
-    return false; // Default to false if there are no conditions
-  }  
-  const readOnlyCondition = item.conditions.find((condition: { type: string, value:boolean}) => condition.type === 'readOnly');
-  if (readOnlyCondition) {
-    return readOnlyCondition.value;
-  }
-  return false;
-} 
    
