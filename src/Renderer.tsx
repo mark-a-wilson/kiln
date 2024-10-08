@@ -326,7 +326,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
   const shouldFieldBeIncludedForSaving = (item: Item ,groupId: string | null = null,
     groupIndex: number | null = null) : boolean => {
 
-      if (isFieldVisible(item, groupId, groupIndex) || doesFieldNeedToSet("saveOnSubmit",item, groupId, groupIndex)) {
+      if (isFieldVisible(item, groupId, groupIndex) || doesFieldHasCondition("saveOnSubmit",item, groupId, groupIndex)) {
         return true; // Field is not visible based on condition
       }
 
@@ -420,25 +420,25 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
       return false;
   }
 
-  const doesFieldNeedToSet = (type:string, item: Item ,groupId: string | null = null,
+  const doesFieldHasCondition = (type:string, item: Item ,groupId: string | null = null,
     groupIndex: number | null = null ) : boolean => { 
     
     if (!item.conditions || item.conditions.length === 0) {
       return false; // Default to false if there are no conditions
     }  
-    const readOnlyCondition = item.conditions.find((condition) => condition.type === type);
-    if (readOnlyCondition) {
+    const typeCondition = item.conditions.find((condition) => condition.type === type);
+    if (typeCondition) {
       try {  
          
                
-        const readOnlyFunction = new Function(
+        const typeConditionFunction = new Function(
           "formStates",            
           "groupStates",
           "groupId",
           "groupIndex",
-          readOnlyCondition.value
+          typeCondition.value
         );
-        return readOnlyFunction(formStates, groupStates,groupId, groupIndex); 
+        return typeConditionFunction(formStates, groupStates,groupId, groupIndex); 
       } catch (error) {        
         return false; // Default to false if the script fails
       }
@@ -516,7 +516,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
               handleInputChange(fieldId, e.target.value, groupId, groupIndex)
               
             }
-            readOnly={formData.readOnly || doesFieldNeedToSet("readOnly",item, groupId, groupIndex) || calcValExists}
+            readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists}
           >  
               <Component               
                 key={fieldId}
@@ -594,7 +594,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
               )
             }
             style={{ marginBottom: "15px" }}
-            readOnly={formData.readOnly || doesFieldNeedToSet("readOnly",item, groupId, groupIndex) || calcValExists}
+            readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists}
             invalid={!!error}
             invalidText={error || ""}
           />
@@ -615,7 +615,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
               onChange={({ checked }: { checked: boolean }) =>
                 handleInputChange(fieldId, String(checked), groupId, groupIndex)
               }
-              readOnly={formData.readOnly || doesFieldNeedToSet("readOnly",item, groupId, groupIndex) || calcValExists}
+              readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists}
               invalid={!!error}
               invalidText={error || ""}
             />
@@ -639,7 +639,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
               onToggle={(checked: boolean) =>
                 handleInputChange(fieldId, checked, groupId, groupIndex)
               }
-              readOnly={formData.readOnly || doesFieldNeedToSet("readOnly",item, groupId, groupIndex) || calcValExists}
+              readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists}
               invalid={!!error}
               invalidText={error || ""}
             />
@@ -682,7 +682,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
             }}
             style={{ marginBottom: "15px" }}
             dateFormat={dateFormat}
-            readOnly={formData.readOnly || doesFieldNeedToSet("readOnly",item, groupId, groupIndex) || calcValExists}
+            readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists}
             invalid={!!error}
             invalidText={error || ""}
           >
@@ -690,7 +690,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
               id={fieldId}
               placeholder={item.placeholder}
               labelText={label}
-              readOnly={formData.readOnly || doesFieldNeedToSet("readOnly",item, groupId, groupIndex) || calcValExists}
+              readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists}
               invalid={!!error}
               invalidText={error || ""}
             />
@@ -715,7 +715,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
             }
             rows={4}
             style={{ marginBottom: "15px" }}
-            readOnly={formData.readOnly || doesFieldNeedToSet("readOnly",item, groupId, groupIndex) || calcValExists}
+            readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists}
             invalid={!!error}
             invalidText={error || ""}
           />
@@ -838,7 +838,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
                 ? groupStates[groupId]?.[groupIndex!]?.[fieldId]
                 : formStates[fieldId]
             }
-            readOnly={formData.readOnly || doesFieldNeedToSet("readOnly",item, groupId, groupIndex) || calcValExists}
+            readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists}
             invalid={!!error}
             invalidText={error || ""}
           >
