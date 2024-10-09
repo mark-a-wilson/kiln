@@ -2,6 +2,7 @@
   border: 1px solid #ccc;
   padding: 15px;
   margin-bottom: 20px;
+  margin-top: 20px;
   border-radius: 5px;
 }
 .fixed-save-buttons {
@@ -13,7 +14,7 @@
   padding: 10px 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   z-index: 1000; /* Ensure it's on top of other content */
 }
 
