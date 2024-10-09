@@ -106,3 +106,7 @@ jobs:
       - name: Deploy with Helm
         run: |
           helm upgrade --install kiln ./helm --set image.tag=${{ needs.build_and_push.outputs.image_tag }}
+
+      - name: Trigger OpenShift Rollout
+        run: |
+         oc rollout restart deployment/kiln    
