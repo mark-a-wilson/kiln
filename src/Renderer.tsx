@@ -523,6 +523,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
                 id={fieldId}
                 labelText={label}
                 placeholder={item.placeholder}
+                helperText={item.helperText}
                 name={fieldId}
                 style={{ marginBottom: "15px" }}                
                 invalid={!!error}

@@ -4,36 +4,39 @@ import Presenter from "./Presenter";
 import "@carbon/styles/css/styles.css";
 
 const NewFormPage: React.FC = () => {
-  const [jsonContent, setJsonContent] = useState<object>({});
-  
+  const [jsonContent, setJsonContent] = useState<object>({});  
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
     
-    const formIdParam = urlParams.get("formId");
-    const caseIdParam = urlParams.get("caseId");
-    if(formIdParam && caseIdParam) {
+    const queryParams = new URLSearchParams(window.location.search);
+    const params: { [key: string]: string | null } = {};
+
+        // Iterate over all query parameters and store them in the params object
+    queryParams.forEach((value, key) => {
+      params[key] = value;
+    });
+    
+    if(params) {
       
-      console.log("caseIdParam>>",caseIdParam);
-      console.log("formIdParam>>",formIdParam);
-      handleGenerateTemplate(caseIdParam,formIdParam);
+      handleGenerateTemplate(params);
     }
     
   
   }, []);
 
-  const handleGenerateTemplate = async (caseIdParam:string,formIdParam:string) => {   
-
+  const handleGenerateTemplate = async (params: { [key: string]: string | null }) => {  
     
     try {
-      const response = await fetch("http://localhost:3000/generate", {
+      const generateDataEndpoint = import.meta.env
+        .VITE_COMM_API_GENERATE_ENDPOINT_URL;
+        console.log(generateDataEndpoint);
+      const response = await fetch(generateDataEndpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          case_id: caseIdParam,
-          template_id: formIdParam,
+          ...params
         }),
       });
 
@@ -41,11 +44,9 @@ const NewFormPage: React.FC = () => {
         throw new Error(`Error: ${response.statusText}`);
       }
 
-      const result = await response.json();     
-      console.log("result.save_data>>",result.save_data);
-      //const decodedData = JSON.parse(result.save_data || {});
+      const result = await response.json();       
       setJsonContent(result.save_data);
-      //setJsonContent(result.save_data || {});
+     
     } catch (error) {
       console.error("Failed to generate template:", error);
     }
