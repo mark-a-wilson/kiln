@@ -1,25 +1,21 @@
-import { useState, useEffect } from "react";
 import "./App.css";
-import Presenter from "./Presenter";
+import NewFormPage from "./NewFormPage";
+import EditFormPage from "./EditFormPage";
 import "@carbon/styles/css/styles.css";
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 const App: React.FC = () => {
-  const [jsonContent, setJsonContent] = useState<object>({});
+  return (
+    <Router>
+      <Routes>
+        {/* Route for new */}
+        <Route path="/new" element={<NewFormPage />} />
 
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const data = urlParams.get("data");
-    if (data) {
-      try {
-        const decodedData = JSON.parse(decodeURIComponent(data));
-        setJsonContent(decodedData);
-      } catch (error) {
-        console.error("Failed to parse data from URL:", error);
-      }
-    }
-  }, []);
-
-  return <Presenter data={jsonContent} />;
+        {/* Renderer page */}
+        <Route path="/edit" element={<EditFormPage />} />
+      </Routes>
+    </Router>
+  );
 };
 
 export default App;
