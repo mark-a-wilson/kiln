@@ -108,7 +108,7 @@ const componentMapping: { [key: string]: React.ElementType } = {
   "text-area": TextArea,
   button: Button,
   "number-input": NumberInput,
-  "text-info": Heading,
+  "text-info": "div",
   link: Link,
   file: FileUploader,
   table: DynamicTable,
@@ -772,17 +772,14 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
           />
         );
       case "text-info":
-        return (
+        return (  
           <Component
-            key={fieldId}
-            id={fieldId}
-            style={{
-              marginBottom: item.style?.marginBottom,
-              fontSize: item.style?.fontSize,
-            }}
-          >
-            {item.label}
-          </Component>
+          className="override-font"
+          key={fieldId}
+          id={fieldId}  
+          style={{ font: "initial !important" }}        
+          dangerouslySetInnerHTML={{ __html: item.value }}
+        />
         );
       case "link":
         return (
