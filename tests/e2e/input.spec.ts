@@ -10,7 +10,7 @@ test("should have input with id first_name_1", async ({ page }) => {
     "description": 'This is a mocked description.',
     "data":{
       "items":[
-	  {
+	{
             "type":"text-input",
             "label":"First Name",
             "id":"firstName",
@@ -23,7 +23,7 @@ test("should have input with id first_name_1", async ({ page }) => {
             "inputType":"text",           
             
          },
-	  {
+	{
             "type":"text-input",
             "label":"Case Name",
             "id":"case_name_1",
@@ -42,21 +42,12 @@ test("should have input with id first_name_1", async ({ page }) => {
     }
   };
    // Intercept the API request and respond with mock JSON
-   await page.route('**/generate', async (route, request) => {
-    const postData = request.postDataJSON(); // Parse the request payload
-    //if (postData && postData.formId === 123) {
+   await page.route('**/generate', async (route) => {   
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify(mockJson),
-      });
-    /* } else {
-      await route.fulfill({
-        status: 400,
-        contentType: 'application/json',
-        body: JSON.stringify({ error: 'Invalid data' }),
-      });
-    } */
+      });   
   });
   await page.goto(`/new?formId=123`);  
   await expect(page.locator('input#firstName')).toBeVisible();
