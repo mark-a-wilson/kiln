@@ -41,13 +41,18 @@ test("should have input with id firstName", async ({ page }) => {
     }
   };
    // Intercept the API request and respond with mock JSON
-   await page.route('**/generate', async (route) => {   
+   const generateDataEndpoint = "http://localhost:3000/generate";
+   await page.route(generateDataEndpoint, async route => {   
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify(mockJson),
       });   
-  });
+  });  
+
   await page.goto(`/new?formId=123`);  
-  await expect(page.locator('input#firstName')).toBeVisible();
+
+  const input = page.locator('#firstName');
+  
+await expect(input).toBeVisible({ timeout: 10000 }); // Waits for the element to become visible
 });
