@@ -8,7 +8,7 @@ interface PresenterProps {
 const Presenter: React.FC<PresenterProps> = ({ data }) => {
 
   if (!data || (typeof data === 'object' && Object.keys(data).length === 0)) {
-    return <div>Loading...</div>;
+    return <div>Retrieving ICM Data...</div>;
   }
 
   return <Renderer data={data} />;

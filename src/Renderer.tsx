@@ -525,7 +525,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
                 placeholder={item.placeholder}
                 helperText={item.helperText}
                 name={fieldId}
-                style={{ marginBottom: "15px" }}                
+                style={{ marginBottom: "5px" }}                
                 invalid={!!error}
                 invalidText={error || ""}
               />            
@@ -554,7 +554,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
                 labelText={label}
                 placeholder={item.placeholder}
                 name={fieldId}
-                style={{ marginBottom: "15px" }}
+                style={{ marginBottom: "5px" }}
                 invalid={!!error}
                 invalidText={error || ""}
               />}
@@ -594,7 +594,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
                 groupIndex
               )
             }
-            style={{ marginBottom: "15px" }}
+            style={{ marginBottom: "5px" }}
             readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists}
             invalid={!!error}
             invalidText={error || ""}
@@ -602,7 +602,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
         );
       case "checkbox":
         return (
-          <div style={{ marginBottom: "15px" }}>
+          <div style={{ marginBottom: "5px" }}>
             <Component
               key={fieldId}
               id={fieldId}
@@ -624,7 +624,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
         );
       case "toggle":
         return (
-          <div key={fieldId} style={{ marginBottom: "15px" }}>
+          <div key={fieldId} style={{ marginBottom: "5px" }}>
             
             <Component
               id={fieldId}
@@ -681,7 +681,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
                 );
               }
             }}
-            style={{ marginBottom: "15px" }}
+            style={{ marginBottom: "5px" }}
             dateFormat={dateFormat}
             readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists}
             invalid={!!error}
@@ -715,7 +715,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
               handleInputChange(fieldId, e.target.value, groupId, groupIndex)
             }
             rows={4}
-            style={{ marginBottom: "15px" }}
+            style={{ marginBottom: "5px" }}
             readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists}
             invalid={!!error}
             invalidText={error || ""}
@@ -736,7 +736,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
                 groupIndex
               )
             }
-            style={{ marginBottom: "15px" }}
+            style={{ marginBottom: "5px" }}
           >
             {item.label}
           </Component>
@@ -823,7 +823,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
             label: text,
           })) || [];
         return (
-          <div key={fieldId} style={{ marginBottom: "15px" }}>
+          <div key={fieldId} style={{ marginBottom: "5px" }}>
           <Component
             legendText={label}
             id={fieldId}
@@ -882,7 +882,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
             {item.groupItems?.map((groupItem, groupIndex) => (
               <div key={`${item.id}-${groupIndex}`} className="group-container">
                 {groupItem.fields.map((groupField) => (
-                  <Row key={groupField.id}>
+                  <Row key={groupField.id} style={{marginBottom:"15px"}}>
                     <Column>
                       {renderComponent(groupField, item.id, groupIndex)}
                     </Column>
@@ -966,7 +966,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
     return savedData;
   };
 
-  const saveDataToApi = async () => {
+  /*const saveDataToApi = async () => {
     try {
       const saveDataEndpoint = import.meta.env
         .VITE_COMM_API_SAVEDATA_ENDPOINT_URL;
@@ -989,8 +989,41 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
       console.error("Error:", error);
       return "failed";
     }
-  };
+  };*/
+  const saveDataToICMApi = async () => {
+    try {
+      const saveDataICMEndpoint = import.meta.env
+        .VITE_COMM_API_SAVEDATA_ICM_ENDPOINT_URL;
+      const queryParams = new URLSearchParams(window.location.search);
+      const params: { [key: string]: string | null } = {};
+      queryParams.forEach((value, key) => {
+        params[key] = value;
+      });
+      let savedJson={
+        "attachmentId": params["attachmentId"],
+        "OfficeName": params["OfficeName"],
+        "savedForm": JSON.stringify(createSavedData())};
 
+      const response = await fetch(saveDataICMEndpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(savedJson),
+      });
+      if (response.ok) {
+        const result = await response.json();
+        console.log("Result ", result);
+        return "success";
+      } else {
+        console.error("Error:", response.statusText);
+        return "failed";
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      return "failed";
+    }
+  };
   const validateAllFields = (): boolean => {
     const errors: { [key: string]: string | null } = {};
     let isValid = true;
@@ -1035,7 +1068,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
   };
   const handleSave = async () => {
     if (validateAllFields()) {
-      const returnMessage = saveDataToApi();
+      const returnMessage = saveDataToICMApi();
       if ((await returnMessage) === "success") {
         window.alert("Form Saved Successfully!!!");
       } else {
@@ -1048,7 +1081,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
 
   const handleSaveAndClose = async () => {
     if (validateAllFields()) {
-      const returnMessage = saveDataToApi();
+      const returnMessage = saveDataToICMApi();
       if ((await returnMessage) === "success") {
         window.opener = null;
         window.open("", "_self");
@@ -1087,7 +1120,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
         </Heading>
         <FlexGrid>
           {formData.data.items.map((item, index) => (
-            <Row key={item.id}>
+            <Row key={item.id} style={{ marginBottom:"15px"}}>
               <Column>
                 {renderComponent(
                   item,
