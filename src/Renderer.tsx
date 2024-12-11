@@ -1135,7 +1135,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode }) => {
 
   return (
     <div>
-      {mode=="edit" &&formData.readOnly== false &&(
+      {mode=="edit" &&formData.readOnly!= true &&(
       <div className="fixed-save-buttons">
         <Button onClick={handleSave} kind="secondary">
           Save
