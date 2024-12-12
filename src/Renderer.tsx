@@ -1,4 +1,5 @@
 import "./App.css";
+import "./print.css";
 import React, { useState, useEffect } from "react";
 import {
   TextInput,
@@ -32,6 +33,8 @@ import {
   isFieldRequired, 
  
 } from "./utils/helpers"; // Import from the helpers file
+//import Paged from 'pagedjs';
+//import  { Previewer } from 'pagedjs';
 interface Item {
   type: string;
   label?: string;
@@ -66,6 +69,10 @@ interface Item {
     type: string;
     value: string;    
   }[];
+  customStyle?: {
+    columns:string;
+  }
+  
 
 }
 
@@ -76,6 +83,7 @@ interface Template {
   lastModified: string;
   title: string;
   readOnly?:boolean;
+  form_id:string;
   data: {
     items: Item[];
   };
@@ -140,10 +148,25 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
     return <div>Invalid Form</div>;
   }
 
+  //const printRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const initialFormStates: { [key: string]: string } = {};
     const initialGroupStates: { [key: string]: GroupState } = {}; // Changed type here
+    
 
+    const formId = formData.form_id || "Unknown Form ID";
+
+    // Generate the creation date dynamically
+    const creationDate = new Date().toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+
+    // Set these values as attributes on the <body> tag
+    document.documentElement.setAttribute("data-form-id", formId);
+    document.documentElement.setAttribute("data-date", creationDate);
     formData?.data?.items.forEach((item) => {
       if (item.type === "group") {
         initialGroupStates[item.id] =
@@ -506,6 +529,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
       case "text-input":               
         return (
           <InputMask
+          className="field-container"
             mask={item.mask || ''}
             value={
               groupId
@@ -518,7 +542,8 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
             }
             readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists}
           >  
-              <Component               
+              <Component 
+                className="field-container"              
                 key={fieldId}
                 id={fieldId}
                 labelText={label}
@@ -548,7 +573,8 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
             autoReset
             InputElement={
             
-              <Component               
+              <Component 
+              className="field-container"              
                 key={fieldId}
                 id={fieldId}
                 labelText={label}
@@ -582,6 +608,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
             key={fieldId}
             id={fieldId}
             titleText={label}
+            className="field-container"
             label={item.placeholder}
             items={items}
             itemToString={itemToString}
@@ -604,6 +631,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
         return (
           <div style={{ marginBottom: "5px" }}>
             <Component
+            className="field-container"
               key={fieldId}
               id={fieldId}
               labelText={item.label}
@@ -627,6 +655,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
           <div key={fieldId} style={{ marginBottom: "5px" }}>
             
             <Component
+            className="field-container"
               id={fieldId}
               labelText={item.label}   
               labelA={item.offText}
@@ -658,6 +687,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
         const internalDateFormat = "yyyy-MM-dd"; // Use this format to store internally
         return (
           <Component
+          className="field-container"
             key={fieldId}
             datePickerType="single"
             value={selectedDate ? [selectedDate] : []}
@@ -701,6 +731,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
         return (
           <Component
             key={fieldId}
+            className="field-container"
             id={fieldId}
             labelText={label}
             placeholder={item.placeholder}
@@ -773,8 +804,8 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
         );
       case "text-info":
         return (  
-          <Component
-          className="override-font"
+          <Component          
+          className="override-font field-container"
           key={fieldId}
           id={fieldId}  
           style={{ font: "initial !important" }}        
@@ -825,6 +856,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
         return (
           <div key={fieldId} style={{ marginBottom: "5px" }}>
           <Component
+          className="field-container"
             legendText={label}
             id={fieldId}
             name={fieldId}
@@ -854,6 +886,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
         const itemsForSelect = item.listItems || [];
         return (
           <Select
+          className="field-container"
             id={fieldId}
             name={fieldId}
             labelText={label}
@@ -880,9 +913,10 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
           <div key={item.id} className="group-container">
             <h3>{item.label}</h3>
             {item.groupItems?.map((groupItem, groupIndex) => (
-              <div key={`${item.id}-${groupIndex}`} className="group-container">
+              <div key={`${item.id}-${groupIndex}`} className="group-container"
+              data-print-columns={item.customStyle?.columns || 3}>
                 {groupItem.fields.map((groupField) => (
-                  <Row key={groupField.id} style={{marginBottom:"15px"}}>
+                  <Row key={groupField.id} style={{marginBottom:"15px"}} >
                     <Column>
                       {renderComponent(groupField, item.id, groupIndex)}
                     </Column>
@@ -893,6 +927,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
                     kind="ghost"
                     onClick={() => handleRemoveGroupItem(item.id, groupIndex)}
                     renderIcon={Subtract}
+                    className="no-print"
                   >
                     Remove {item.label}
                   </Button>
@@ -904,6 +939,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
                 kind="ghost"
                 onClick={() => handleAddGroupItem(item.id)}
                 renderIcon={Add}
+                className="no-print"
               >
                 Add {item.label} 
               </Button>
@@ -999,7 +1035,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
       queryParams.forEach((value, key) => {
         params[key] = value;
       });
-      let savedJson={
+      const savedJson={
         "attachmentId": params["attachmentId"],
         "OfficeName": params["OfficeName"],
         "savedForm": JSON.stringify(createSavedData())};
@@ -1094,33 +1130,92 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
     }
   };
 
+  const handlePrint = async () => {
+    try {
+      //const Paged :any = (await import("pagedjs")).default; // Dynamically import Paged.js
+      //console.log("Paged>>",Paged);
+      /* const content = printRef.current;
+  
+      if (content) {
+        const clonedContent = content.cloneNode(true) as HTMLElement;
+        clonedContent.style.maxWidth = "none";
+        clonedContent.style.margin = "0";
+  
+        document.body.appendChild(clonedContent);
+  
+        const previewer =  new Previewer(); // Create a new instance of Previewer
+        await new Promise<void>((resolve) => {
+          previewer.on("rendered", resolve); // Wait for the "rendered" event
+          previewer.preview(clonedContent); // Start previewing
+        });
+  
+        document.body.removeChild(clonedContent); */
+        //new Paged.Previewer().preview();
+
+        //here
+
+       /*  const previewer = new Previewer(); // Create an instance of Previewer
+    const content = document.getElementById('printRef'); // Get the content to paginate
+
+    if (content) {
+      previewer.preview(content).then(() => {
+        console.log('Paged.js content is ready');
+        window.print(); // Trigger printing after the preview is complete
+      });
+
+      previewer.on('page', (page: any) => {
+        console.log(`Page ${page.pageNumber} is ready`);
+      }); */
+      const originalTitle = document.title;
+      document.title = formData.form_id || 'CustomFormName';
+      window.print();
+      document.title = originalTitle; 
+      //window.print();
+    
+    
+      } catch (error) {
+      console.error("Error during print:", error);
+    }
+  };
+
   return (
-    <div>
+    <div >
       <div className="fixed-save-buttons">
-        <Button onClick={handleSave} kind="secondary">
+        <Button onClick={handleSave} kind="secondary" className="no-print">
           Save
         </Button>
-        <Button onClick={handleSaveAndClose} kind="secondary">
+        <Button onClick={handleSaveAndClose} kind="secondary" className="no-print">
           Save & Close
+        </Button>
+        <Button onClick={handlePrint} kind="secondary" className="no-print">
+          Print
         </Button>
       </div>
       <div
-        className="content-wrapper"
+        className="content-wrapper" id="printRef"
         style={{ maxWidth: "1000px", margin: "0 auto" }}
       >
-        {formData.ministry_id && (
-          <img
-            src={`/ministries/${formData.ministry_id}.png`}
-            width="350px"
-            alt="ministry logo"
-          />
-        )}
-        <Heading style={{ marginBottom: "20px" }}>
-          {formData.title}
-        </Heading>
+       <div
+    style={{
+      display: "flex",
+      justifyContent: "space-between", // Pushes image to the left and title to the right
+      alignItems: "center",
+      marginBottom: "20px",
+    }}
+  >
+    {formData.ministry_id && (
+      <img
+        id="print-header"
+        src={`/ministries/${formData.ministry_id}.png`}
+        width="350px"
+        alt="ministry logo"
+      />
+    )}
+    <Heading>{formData.title}</Heading>
+  </div>
         <FlexGrid>
           {formData.data.items.map((item, index) => (
-            <Row key={item.id} style={{ marginBottom:"15px"}}>
+            <Row key={item.id} style={{ marginBottom:"15px"}} >
               <Column>
                 {renderComponent(
                   item,

@@ -1,0 +1,129 @@
+/* Ensure styles apply only to printed pages */
+@media print {
+    
+    /* Hide buttons and other unwanted elements */
+    button,
+    .no-print {
+        display: none !important;
+    }
+    .fixed-save-buttons {
+        display: none !important;
+    }
+
+    /* Set page size and margins */
+    @page {
+        @top-left {
+            content: none;
+        }
+    
+        @top-center {
+            content: none;
+        }
+    
+        @top-right {
+            content: none;
+        }
+        @bottom-left {
+            content: "Form ID: " attr(data-form-id);
+          }
+          @bottom-center {
+            content: "Page " counter(page);
+          }
+          @bottom-right {
+            content: "Date: " attr(data-date);
+          }
+        size: A4; /* Options: A4, Letter, etc. */
+        margin: 1in;    
+        /* Footer styling */
+        
+    }
+
+    /* Style headers and footers */
+    /* header, footer {
+        position: fixed;
+        width: 100%;
+    }
+    header {
+        top: 0;
+    }
+    footer {
+        bottom: 0;
+    } */
+
+    .bx--label {
+        font-weight: bold;
+    }
+    
+    /* Input styles */  
+    .bx--text-input {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        white-space: normal;
+        overflow: visible;
+    }
+
+    /* Ensure grid layout and consistent spacing */
+    .carbon-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* Adjust as needed */
+        gap: 1rem;
+    }
+
+    /* Keep grouped fields together */
+    
+
+    .group-container {
+        display: grid;
+        gap: 10px;
+        border: 1px solid #ccc;
+        padding: 10px;
+        page-break-inside: avoid;
+    }
+
+    /* Dynamic column styling based on JSON */
+    .group-container[data-print-columns="2"] {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .group-container[data-print-columns="3"] {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .group-container[data-print-columns="4"] {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .field-container {
+        all: unset; /* Clears competing styles */
+    border: 1px solid #000;
+    padding: 5px;
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        word-break: break-word;
+        white-space: normal; /* Allow wrapping */
+        font-size: 6pt; 
+    }
+    .field-container input {
+        display: block; /* Ensure block-level behavior */
+        width: 100%;
+        height: auto; /* Allow height to expand */
+        overflow-wrap: anywhere; /* Break long words */
+        word-break: break-word;
+        white-space: normal; /* Allow wrapping */
+        line-height: 1.2;
+        resize: none; /* Prevent user resizing */
+        overflow: visible; /* Ensure no clipping */
+        padding: 5px; /* Add padding for readability */
+      }
+    
+    /* Text styles */
+    h1 {
+        font-size: 18pt;
+        font-weight: bold;
+    }
+    p {
+        font-size: 12pt;
+    }
+
+    
+}
