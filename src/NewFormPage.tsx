@@ -52,7 +52,7 @@ const NewFormPage: React.FC = () => {
     }
   };
 
-  return <Presenter data={jsonContent} />;
+  return <Presenter data={jsonContent} mode="edit" />;
 };
 
 export default NewFormPage;

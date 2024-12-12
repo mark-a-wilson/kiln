@@ -119,12 +119,13 @@ const componentMapping: { [key: string]: React.ElementType } = {
 };
 
 interface RendererProps {
-  data: any;
+  data: any,
+  mode: string;
 }
 
 
 
-const Renderer: React.FC<RendererProps> = ({ data }) => {
+const Renderer: React.FC<RendererProps> = ({ data, mode }) => {
   const [formStates, setFormStates] = useState<{ [key: string]: string }>({});
   const [groupStates, setGroupStates] = useState<{ [key: string]: GroupState }>(
     {}
@@ -516,7 +517,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
               handleInputChange(fieldId, e.target.value, groupId, groupIndex)
               
             }
-            readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists}
+            readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists || mode=="view"}
           >  
               <Component               
                 key={fieldId}
@@ -595,7 +596,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
               )
             }
             style={{ marginBottom: "5px" }}
-            readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists}
+            readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists || mode=="view"}
             invalid={!!error}
             invalidText={error || ""}
           />
@@ -616,7 +617,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
               onChange={({ checked }: { checked: boolean }) =>
                 handleInputChange(fieldId, String(checked), groupId, groupIndex)
               }
-              readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists}
+              readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists || mode=="view"}
               invalid={!!error}
               invalidText={error || ""}
             />
@@ -640,7 +641,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
               onToggle={(checked: boolean) =>
                 handleInputChange(fieldId, checked, groupId, groupIndex)
               }
-              readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists}
+              readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists || mode=="view"}
               invalid={!!error}
               invalidText={error || ""}
             />
@@ -683,7 +684,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
             }}
             style={{ marginBottom: "5px" }}
             dateFormat={dateFormat}
-            readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists}
+            readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists || mode=="view"}
             invalid={!!error}
             invalidText={error || ""}
           >
@@ -691,7 +692,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
               id={fieldId}
               placeholder={item.placeholder}
               labelText={label}
-              readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists}
+              readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists || mode=="view"}
               invalid={!!error}
               invalidText={error || ""}
             />
@@ -716,7 +717,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
             }
             rows={4}
             style={{ marginBottom: "5px" }}
-            readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists}
+            readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists || mode=="view"}
             invalid={!!error}
             invalidText={error || ""}
           />
@@ -836,7 +837,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
                 ? groupStates[groupId]?.[groupIndex!]?.[fieldId]
                 : formStates[fieldId]
             }
-            readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists}
+            readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists || mode=="view"}
             invalid={!!error}
             invalidText={error || ""}
           >
@@ -1066,6 +1067,39 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
     setFormErrors(errors);    
     return isValid;
   };
+  const unlockICMFinalFlags = async () => {
+    try {
+      const unlockICMFinalEdpoint = import.meta.env
+        .VITE_COMM_API_UNLOCK_ICM_FORM_URL;
+      const queryParams = new URLSearchParams(window.location.search);
+      const params: { [key: string]: string | null } = {};
+      queryParams.forEach((value, key) => {
+        params[key] = value;
+      });
+      
+      const response = await fetch(unlockICMFinalEdpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...params
+        }),
+      });
+      if (response.ok) {
+        const result = await response.json();
+        console.log("Result ", result);
+        return "success";
+      } else {
+        console.error("Error:", response.statusText);
+        return "failed";
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      return "failed";
+    }
+  };
+  
   const handleSave = async () => {
     if (validateAllFields()) {
       const returnMessage = saveDataToICMApi();
@@ -1083,9 +1117,14 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
     if (validateAllFields()) {
       const returnMessage = saveDataToICMApi();
       if ((await returnMessage) === "success") {
-        window.opener = null;
-        window.open("", "_self");
-        window.close();
+        const unlockMessage = unlockICMFinalFlags();
+        if ((await unlockMessage) == "success")
+        {
+          window.opener = null;
+          window.open("", "_self");
+          window.close();
+        }
+        else {window.alert("Error clearing locked flags. Please try again.");}
       } else {
         window.alert("Error saving form. Please try again !!!");
       }
@@ -1096,6 +1135,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
 
   return (
     <div>
+      {mode=="edit" &&formData.readOnly!= true &&(
       <div className="fixed-save-buttons">
         <Button onClick={handleSave} kind="secondary">
           Save
@@ -1103,7 +1143,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
         <Button onClick={handleSaveAndClose} kind="secondary">
           Save & Close
         </Button>
-      </div>
+      </div>)}
       <div
         className="content-wrapper"
         style={{ maxWidth: "1000px", margin: "0 auto" }}
