@@ -72,11 +72,11 @@ const handleSubmit = (event: any) => {
                 <br />
                 
                 <Button
-                  kind="primary"
+                  kind="secondary"
                   tabIndex={0}
                   type="submit"
                 >
-                  Submit
+                 Preview
                 </Button>
             </Form>
         </div>
