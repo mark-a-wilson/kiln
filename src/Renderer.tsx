@@ -121,11 +121,12 @@ const componentMapping: { [key: string]: React.ElementType } = {
 interface RendererProps {
   data: any,
   mode: string;
+  goBack?: () => void; // Add a goBack prop
 }
 
 
 
-const Renderer: React.FC<RendererProps> = ({ data, mode }) => {
+const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
   const [formStates, setFormStates] = useState<{ [key: string]: string }>({});
   const [groupStates, setGroupStates] = useState<{ [key: string]: GroupState }>(
     {}
@@ -1000,7 +1001,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode }) => {
       queryParams.forEach((value, key) => {
         params[key] = value;
       });
-      let savedJson={
+      const savedJson={
         "attachmentId": params["attachmentId"],
         "OfficeName": params["OfficeName"],
         "savedForm": JSON.stringify(createSavedData())};
@@ -1133,6 +1134,8 @@ const Renderer: React.FC<RendererProps> = ({ data, mode }) => {
     }
   };
 
+  
+
   return (
     <div>
       {mode=="edit" &&formData.readOnly!= true &&(
@@ -1143,6 +1146,15 @@ const Renderer: React.FC<RendererProps> = ({ data, mode }) => {
         <Button onClick={handleSaveAndClose} kind="secondary">
           Save & Close
         </Button>
+      </div>)}
+      {goBack &&(
+      <div className="fixed-preview-buttons">
+        <Heading >
+          Preview
+        </Heading>
+        <Button onClick={goBack} kind="secondary">
+          Back
+        </Button>       
       </div>)}
       <div
         className="content-wrapper"
