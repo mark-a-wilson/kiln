@@ -244,16 +244,7 @@ test('should fill preview text area and click preview', async ({ page }) => {
        ]
     }
  };
-   // Intercept the API request and respond with mock JSON
-   const generateDataEndpoint = "http://localhost:3000/generate";
-   await page.route(generateDataEndpoint, async route => {   
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify(mockJson),
-      });   
-  });  
-
+ 
   await page.goto(`/preview`);
   const textArea = page.locator('#jsonData'); // Replace with the actual selector
   await textArea.fill(JSON.stringify(mockJson));
