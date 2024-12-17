@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
 import Presenter from "./Presenter";
 import "@carbon/styles/css/styles.css";
@@ -16,6 +16,50 @@ const PreviewFormPage: React.FC = () => {
   const [content, setContent] = useState('');
   const [error, setError] = useState(""); // State to track the error message
   
+  // Listen for messages from Template Repository and KLAMM
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      const trustedOrigins = [
+        import.meta.env.VITE_TEMPLATE_REPO_URL, //Template Repository URL
+        import.meta.env.VITE_KLAMM_URL, //KLAMM URL
+      ]
+      
+      // Verify the message origin
+      if (!trustedOrigins.includes(event.origin)) {
+        console.warn("Received message from untrusted origin:", event.origin);
+        return;
+      }
+  
+      // Check the message type and update content
+      if (event.data && event.data.type === "LOAD_JSON") {
+        setContent(event.data.data); // Populate the textarea with the received JSON
+  
+        try {
+          const fullJSON = {
+            data: {},
+            form_definition: JSON.parse(event.data.data), 
+            metadata: {
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+              version: "1.0.0",
+            },
+          };
+          setJsonContent(fullJSON);
+          setPresent(true); 
+        } catch (e) {
+          console.error("Invalid JSON received:", e);
+          setError("Invalid JSON format. Please correct it.");
+        }
+      }
+    };
+  
+    window.addEventListener("message", handleMessage);
+  
+    return () => {
+      window.removeEventListener("message", handleMessage);
+    };
+  }, []);
+
 
 const handleSubmit = (event: any) => {
     event.preventDefault();
