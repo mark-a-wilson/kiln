@@ -1,4 +1,5 @@
-import "./App.css";
+import '@carbon/styles/css/styles.css';
+import "./page.scss";
 import React, { useState, useEffect } from "react";
 import {
   TextInput,
@@ -519,6 +520,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
               
             }
             readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists || mode=="view"}
+            
           >  
               <Component               
                 key={fieldId}
@@ -530,6 +532,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
                 style={{ marginBottom: "5px" }}                
                 invalid={!!error}
                 invalidText={error || ""}
+                
               />            
           </InputMask>
         );
@@ -600,6 +603,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
             readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists || mode=="view"}
             invalid={!!error}
             invalidText={error || ""}
+            
           />
         );
       case "checkbox":
@@ -688,6 +692,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
             readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists || mode=="view"}
             invalid={!!error}
             invalidText={error || ""}
+            
           >
             <DatePickerInput
               id={fieldId}
@@ -696,6 +701,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
               readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists || mode=="view"}
               invalid={!!error}
               invalidText={error || ""}
+              
             />
           </Component>
         );
@@ -776,10 +782,9 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
       case "text-info":
         return (  
           <Component
-          className="override-font"
+          className="text-block"
           key={fieldId}
-          id={fieldId}  
-          style={{ font: "initial !important" }}        
+          id={fieldId}                  
           dangerouslySetInnerHTML={{ __html: item.value }}
         />
         );
@@ -880,9 +885,10 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
       case "group":
         return (
           <div key={item.id} className="group-container">
-            <h3>{item.label}</h3>
+            {!item.repeater && (<div className="group-header">{item.label}</div>)}
             {item.groupItems?.map((groupItem, groupIndex) => (
-              <div key={`${item.id}-${groupIndex}`} className="group-container">
+              <div key={`${item.id}-${groupIndex}`} className="group-item-container">
+                {item.repeater && (<div className="group-header">{item.label} {groupIndex+1}</div>)}
                 {groupItem.fields.map((groupField) => (
                   <Row key={groupField.id} style={{marginBottom:"15px"}}>
                     <Column>
@@ -896,7 +902,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
                     onClick={() => handleRemoveGroupItem(item.id, groupIndex)}
                     renderIcon={Subtract}
                   >
-                    Remove {item.label}
+                    Remove {item.label} {groupIndex+1}
                   </Button>
                 )}
               </div>
@@ -1139,14 +1145,32 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
   return (
     <div>
       {mode=="edit" &&formData.readOnly!= true &&(
-      <div className="fixed-save-buttons">
-        <Button onClick={handleSave} kind="secondary">
-          Save
-        </Button>
-        <Button onClick={handleSaveAndClose} kind="secondary">
-          Save & Close
-        </Button>
+      <div className="header-section">  
+      <div className="header-image"> 
+        {formData.ministry_id && (
+            <img
+              src={`/ministries/${formData.ministry_id}.png`}
+             width="232px"
+              alt="ministry logo"
+              
+            />
+          )}
+      </div>
+      <div className="header-title-buttons"> 
+      <div className="header-title-only">        
+                  {formData.title}
+        </div>
+        <div className="header-buttons-only">
+          <Button onClick={handleSave} kind="secondary">
+            Save
+          </Button>
+          <Button onClick={handleSaveAndClose} kind="secondary">
+            Save & Close
+          </Button>
+        </div>
+      </div>
       </div>)}
+      
       {goBack &&(
       <div className="fixed-preview-buttons">
         <Heading >
@@ -1156,23 +1180,11 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
           Back
         </Button>       
       </div>)}
-      <div
-        className="content-wrapper"
-        style={{ maxWidth: "1000px", margin: "0 auto" }}
-      >
-        {formData.ministry_id && (
-          <img
-            src={`/ministries/${formData.ministry_id}.png`}
-            width="350px"
-            alt="ministry logo"
-          />
-        )}
-        <Heading style={{ marginBottom: "20px" }}>
-          {formData.title}
-        </Heading>
+      
+      <div className="content-wrapper">       
         <FlexGrid>
           {formData.data.items.map((item, index) => (
-            <Row key={item.id} style={{ marginBottom:"15px"}}>
+            <Row key={item.id} style={{ marginBottom:"25px"}}>
               <Column>
                 {renderComponent(
                   item,
