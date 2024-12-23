@@ -1,0 +1,188 @@
+// Variables
+$border-color: #ccc;
+$fixed-bg-color: #fff;
+$box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+$z-index-top: 1000;
+$dark-red: #b30000;
+$default-font-family: "BC Sans";
+$default-font-size: 16px;
+$outer-padding:12px 80px;
+
+
+// Mixins
+@mixin button-style($bg-color, $border-color, $text-color) {
+  display: flex;
+  height: 40px;
+  padding:  8px, 16px;
+  justify-content: center;
+  align-items: center;
+  gap:  8px;
+  border-radius:  4px;
+  border: 1px solid $border-color;
+  background: $bg-color;
+  color: $text-color;
+  text-align: center;
+  font-family: $default-font-family;
+  font-size: $default-font-size;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 27.008px; /* 168.8% */
+}
+html, body {
+  font-family: $default-font-family, sans-serif;
+}
+
+// Styles
+.group-container {
+  //border: 1px solid $border-color;
+  //padding: 15px;
+  margin: 40px 0;
+  //border-radius: 5px;
+}
+
+.group-item-container {
+  //border: 1px solid $border-color;
+  //padding: 15px;
+  margin: 20px 0;
+  //border-radius: 5px;
+}
+
+.fixed-save-buttons,
+.fixed-preview-buttons {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: $fixed-bg-color;
+  padding: 10px 20px;
+  box-shadow: $box-shadow;
+  display: flex;
+  z-index: $z-index-top;
+
+  &.fixed-save-buttons {
+    justify-content: center;
+
+    button {
+      margin: 0 10px;
+    }
+  }
+
+  &.fixed-preview-buttons {
+    justify-content: space-between;
+
+    Button {
+      margin-left: auto; /* Push the button to the right */
+    }
+  }
+}
+
+.content-wrapper {
+  //padding-top: 60px; /* Adjust based on the height of the fixed header */
+  display: flex;
+width: 100%;
+padding: $outer-padding;
+flex-direction: column;
+//align-items: flex-start;
+gap: 42px;
+}
+
+.required-asterisk {
+  color: $dark-red;
+  font-weight: bold;
+  margin-left: 2px;
+}
+
+.override-font {
+  padding: 10px 0px;
+  font: initial;
+  font-weight: normal;
+  font-family: $default-font-family;
+  font-size: $default-font-size;
+}
+
+.header-section {
+  display: flex;
+  width: 100%;
+  padding: $outer-padding;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;  
+  background: $fixed-bg-color;
+  border-bottom: 1px solid #C8C8C8;    
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+
+  .header-image,
+  .header-title-buttons {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+
+   
+
+  }
+
+  .header-buttons-only {
+    display: flex;
+    align-items: right;
+    gap: 12px;
+
+    button {
+      @include button-style( $fixed-bg-color, #353433 ,#2D2D2D)
+      ;
+    }
+  }
+
+  .header-title-only {
+    color: #000;
+    text-align: center;
+    font-family: $default-font-family;
+    font-size: 28px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 54px;
+  }
+}
+
+.group-header {
+  color: #000;
+font-family: $default-font-family;
+font-size: 20px;
+font-style: normal;
+font-weight: 700;
+line-height: normal;
+margin-bottom: 15px;
+}
+
+.text-block {
+  padding: 10px 0px;
+  font: initial;
+  font-weight: normal;
+  font-family: $default-font-family;
+  font-size: $default-font-size; 
+
+
+  // Nested styles for h1
+  h1 {
+    font-size: 20px;
+    font-weight: 700;
+    //color: $heading-color;
+  }
+
+  // Nested styles for paragraphs
+  p {
+    font-size: 16px;
+    //color: $text-color;
+    line-height: 1.6;
+  }
+
+  // Nested styles for links
+  a {
+    //color: $link-color;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
