@@ -95,6 +95,9 @@ jobs:
       - name: Checkout the repository
         uses: actions/checkout@v4
 
+      - name: Install oc CLI
+        uses: redhat-actions/oc-installer@v1
+
       - name: Authenticate with OpenShift
         uses: redhat-actions/oc-login@v1
         with:

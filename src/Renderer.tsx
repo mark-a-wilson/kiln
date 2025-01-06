@@ -1,5 +1,7 @@
 import "./App.css";
 import "./print.css";
+import '@carbon/styles/css/styles.css';
+import "./page.scss";
 import React, { useState, useEffect } from "react";
 import {
   TextInput,
@@ -127,12 +129,14 @@ const componentMapping: { [key: string]: React.ElementType } = {
 };
 
 interface RendererProps {
-  data: any;
+  data: any,
+  mode: string;
+  goBack?: () => void; // Add a goBack prop
 }
 
 
 
-const Renderer: React.FC<RendererProps> = ({ data }) => {
+const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
   const [formStates, setFormStates] = useState<{ [key: string]: string }>({});
   const [groupStates, setGroupStates] = useState<{ [key: string]: GroupState }>(
     {}
@@ -540,7 +544,8 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
               handleInputChange(fieldId, e.target.value, groupId, groupIndex)
               
             }
-            readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists}
+            readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists || mode=="view"}
+            
           >  
               <Component 
                 className="field-container"              
@@ -553,6 +558,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
                 style={{ marginBottom: "5px" }}                
                 invalid={!!error}
                 invalidText={error || ""}
+                
               />            
           </InputMask>
         );
@@ -622,9 +628,10 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
               )
             }
             style={{ marginBottom: "5px" }}
-            readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists}
+            readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists || mode=="view"}
             invalid={!!error}
             invalidText={error || ""}
+            
           />
         );
       case "checkbox":
@@ -644,7 +651,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
               onChange={({ checked }: { checked: boolean }) =>
                 handleInputChange(fieldId, String(checked), groupId, groupIndex)
               }
-              readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists}
+              readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists || mode=="view"}
               invalid={!!error}
               invalidText={error || ""}
             />
@@ -669,7 +676,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
               onToggle={(checked: boolean) =>
                 handleInputChange(fieldId, checked, groupId, groupIndex)
               }
-              readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists}
+              readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists || mode=="view"}
               invalid={!!error}
               invalidText={error || ""}
             />
@@ -713,17 +720,19 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
             }}
             style={{ marginBottom: "5px" }}
             dateFormat={dateFormat}
-            readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists}
+            readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists || mode=="view"}
             invalid={!!error}
             invalidText={error || ""}
+            
           >
             <DatePickerInput
               id={fieldId}
               placeholder={item.placeholder}
               labelText={label}
-              readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists}
+              readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists || mode=="view"}
               invalid={!!error}
               invalidText={error || ""}
+              
             />
           </Component>
         );
@@ -747,7 +756,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
             }
             rows={4}
             style={{ marginBottom: "5px" }}
-            readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists}
+            readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists || mode=="view"}
             invalid={!!error}
             invalidText={error || ""}
           />
@@ -804,11 +813,10 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
         );
       case "text-info":
         return (  
-          <Component          
-          className="override-font field-container"
+          <Component
+          className="text-block field-container"
           key={fieldId}
-          id={fieldId}  
-          style={{ font: "initial !important" }}        
+          id={fieldId}                  
           dangerouslySetInnerHTML={{ __html: item.value }}
         />
         );
@@ -868,7 +876,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
                 ? groupStates[groupId]?.[groupIndex!]?.[fieldId]
                 : formStates[fieldId]
             }
-            readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists}
+            readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists || mode=="view"}
             invalid={!!error}
             invalidText={error || ""}
           >
@@ -911,10 +919,10 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
       case "group":
         return (
           <div key={item.id} className="group-container">
-            <h3>{item.label}</h3>
+            {!item.repeater && (<div className="group-header">{item.label}</div>)}
             {item.groupItems?.map((groupItem, groupIndex) => (
-              <div key={`${item.id}-${groupIndex}`} className="group-container"
-              data-print-columns={item.customStyle?.columns || 3}>
+              <div key={`${item.id}-${groupIndex}`} className="group-item-container" data-print-columns={item.customStyle?.columns || 3}>
+                {item.repeater && (<div className="group-header">{item.label} {groupIndex+1}</div>)}
                 {groupItem.fields.map((groupField) => (
                   <Row key={groupField.id} style={{marginBottom:"15px"}} >
                     <Column>
@@ -929,7 +937,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
                     renderIcon={Subtract}
                     className="no-print"
                   >
-                    Remove {item.label}
+                    Remove {item.label} {groupIndex+1}
                   </Button>
                 )}
               </div>
@@ -1102,6 +1110,39 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
     setFormErrors(errors);    
     return isValid;
   };
+  const unlockICMFinalFlags = async () => {
+    try {
+      const unlockICMFinalEdpoint = import.meta.env
+        .VITE_COMM_API_UNLOCK_ICM_FORM_URL;
+      const queryParams = new URLSearchParams(window.location.search);
+      const params: { [key: string]: string | null } = {};
+      queryParams.forEach((value, key) => {
+        params[key] = value;
+      });
+      
+      const response = await fetch(unlockICMFinalEdpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...params
+        }),
+      });
+      if (response.ok) {
+        const result = await response.json();
+        console.log("Result ", result);
+        return "success";
+      } else {
+        console.error("Error:", response.statusText);
+        return "failed";
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      return "failed";
+    }
+  };
+  
   const handleSave = async () => {
     if (validateAllFields()) {
       const returnMessage = saveDataToICMApi();
@@ -1119,9 +1160,14 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
     if (validateAllFields()) {
       const returnMessage = saveDataToICMApi();
       if ((await returnMessage) === "success") {
-        window.opener = null;
-        window.open("", "_self");
-        window.close();
+        const unlockMessage = unlockICMFinalFlags();
+        if ((await unlockMessage) == "success")
+        {
+          window.opener = null;
+          window.open("", "_self");
+          window.close();
+        }
+        else {window.alert("Error clearing locked flags. Please try again.");}
       } else {
         window.alert("Error saving form. Please try again !!!");
       }
@@ -1129,6 +1175,7 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
       window.alert("Please clear the errors in the form before saving !!!");
     }
   };
+
 
   const handlePrint = async () => {
     try {
@@ -1178,44 +1225,56 @@ const Renderer: React.FC<RendererProps> = ({ data }) => {
     }
   };
 
+  
+
   return (
-    <div >
-      <div className="fixed-save-buttons">
-        <Button onClick={handleSave} kind="secondary" className="no-print">
-          Save
-        </Button>
-        <Button onClick={handleSaveAndClose} kind="secondary" className="no-print">
-          Save & Close
-        </Button>
-        <Button onClick={handlePrint} kind="secondary" className="no-print">
+    <div>
+      {mode=="edit" &&formData.readOnly!= true &&(
+      <div className="header-section">  
+      <div className="header-image"> 
+        {formData.ministry_id && (
+            <img
+              src={`/ministries/${formData.ministry_id}.png`}
+             width="232px"
+              alt="ministry logo"
+              
+            />
+          )}
+      </div>
+      <div className="header-title-buttons"> 
+      <div className="header-title-only">        
+                  {formData.title}
+        </div>
+        <div className="header-buttons-only">
+          <Button onClick={handleSave} kind="secondary" className="no-print">
+            Save
+          </Button>
+          <Button onClick={handleSaveAndClose} kind="secondary" className="no-print">
+            Save & Close
+          </Button>
+          <Button onClick={handlePrint} kind="secondary" className="no-print">
           Print
         </Button>
+
+        </div>
       </div>
-      <div
-        className="content-wrapper" id="printRef"
-        style={{ maxWidth: "1000px", margin: "0 auto" }}
-      >
-       <div
-    style={{
-      display: "flex",
-      justifyContent: "space-between", // Pushes image to the left and title to the right
-      alignItems: "center",
-      marginBottom: "20px",
-    }}
-  >
-    {formData.ministry_id && (
-      <img
-        id="print-header"
-        src={`/ministries/${formData.ministry_id}.png`}
-        width="350px"
-        alt="ministry logo"
-      />
-    )}
-    <Heading>{formData.title}</Heading>
-  </div>
+      </div>)}
+      
+      {goBack &&(
+      <div className="fixed-preview-buttons">
+        <Heading >
+          Preview
+        </Heading>
+        <Button onClick={goBack} kind="secondary">
+          Back
+        </Button>       
+      </div>)}
+      
+      <div className="content-wrapper">       
         <FlexGrid>
           {formData.data.items.map((item, index) => (
-            <Row key={item.id} style={{ marginBottom:"15px"}} >
+            <Row key={item.id} style={{ marginBottom:"25px"}}>
+
               <Column>
                 {renderComponent(
                   item,
