@@ -1144,32 +1144,45 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
 
   return (
     <div>
-      {mode=="edit" &&formData.readOnly!= true &&(
-      <div className="header-section">  
-      <div className="header-image"> 
-        {formData.ministry_id && (
-            <img
-              src={`/ministries/${formData.ministry_id}.png`}
-             width="232px"
-              alt="ministry logo"
-              
-            />
-          )}
+      
+      <div className="header-section fixed">  
+          <div className="header-image">
+                  <div className="header-image-only"> 
+                    {formData.ministry_id && (
+                        <img
+                          src={`/ministries/${formData.ministry_id}.png`}
+                        width="232px"
+                          alt="ministry logo"
+                          
+                        />
+                      )}
+                  </div>
+          {mode=="edit" &&formData.readOnly!= true &&(
+            <div className="header-buttons-only">
+              <Button onClick={handleSave} kind="secondary">
+                Save
+              </Button>
+              <Button onClick={handleSaveAndClose} kind="secondary">
+                Save And Close
+              </Button>
+              <Button  kind="secondary">
+                Print
+              </Button>
+              <Button  kind="secondary">
+                Finalize
+              </Button>
+            </div>)}
+          </div>
       </div>
+      <div className="scrollable-content">
+      <div className="header-section">
       <div className="header-title-buttons"> 
       <div className="header-title-only">        
                   {formData.title}
         </div>
-        <div className="header-buttons-only">
-          <Button onClick={handleSave} kind="secondary">
-            Save
-          </Button>
-          <Button onClick={handleSaveAndClose} kind="secondary">
-            Save & Close
-          </Button>
-        </div>
+        
       </div>
-      </div>)}
+      </div>
       
       {goBack &&(
       <div className="fixed-preview-buttons">
@@ -1195,6 +1208,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
             </Row>
           ))}
         </FlexGrid>
+      </div>
       </div>
     </div>
   );
