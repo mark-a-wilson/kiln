@@ -1157,28 +1157,33 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
                         />
                       )}
                   </div>
+        <div className="header-buttons-only">        
           {mode=="edit" &&formData.readOnly!= true &&(
-            <div className="header-buttons-only">
+           <>
               <Button onClick={handleSave} kind="secondary">
                 Save
               </Button>
               <Button onClick={handleSaveAndClose} kind="secondary">
                 Save And Close
-              </Button>
-              <Button  kind="secondary">
-                Print
-              </Button>
+              </Button>              
               <Button  kind="secondary">
                 Finalize
               </Button>
-            </div>)}
-            {goBack &&(
-              <div className="header-buttons-only">                
+              </>
+            )}
+            {goBack &&(                           
                 <Button onClick={goBack} kind="secondary">
                   Back
-                </Button>       
-              </div>
+                </Button>    
             )}
+              <Button  kind="secondary">
+                  Print
+                </Button>
+            </div>
+            
+           
+            
+               
           </div>
       </div>
       <div className="scrollable-content">
