@@ -22,7 +22,7 @@ import {
 } from "carbon-components-react";
 import DynamicTable from "./DynamicTable";
 import { parseISO, format } from "date-fns";
-import { Heading, FlexGrid } from "@carbon/react";
+import { FlexGrid } from "@carbon/react";
 import { Add,Subtract } from '@carbon/icons-react';
 import InputMask from "react-input-mask";
 import { CurrencyInput } from "react-currency-mask";
@@ -896,7 +896,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
                     </Column>
                   </Row>
                 ))}
-                {item.groupItems && item.groupItems.length > 1 && (
+                {item.groupItems && item.groupItems.length > 1 &&  mode=="edit" && formData.readOnly!= true &&(
                   <Button
                     kind="ghost"
                     onClick={() => handleRemoveGroupItem(item.id, groupIndex)}
@@ -907,7 +907,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
                 )}
               </div>
             ))}
-            {item.repeater && (
+            {item.repeater && mode=="edit" && formData.readOnly!= true &&(
               <Button
                 kind="ghost"
                 onClick={() => handleAddGroupItem(item.id)}
@@ -1172,27 +1172,26 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
                 Finalize
               </Button>
             </div>)}
+            {goBack &&(
+              <div className="header-buttons-only">                
+                <Button onClick={goBack} kind="secondary">
+                  Back
+                </Button>       
+              </div>
+            )}
           </div>
       </div>
       <div className="scrollable-content">
       <div className="header-section">
       <div className="header-title-buttons"> 
       <div className="header-title-only">        
-                  {formData.title}
+                  {formData.title} {goBack &&(<span>(Preview)</span>)}
         </div>
         
       </div>
       </div>
       
-      {goBack &&(
-      <div className="fixed-preview-buttons">
-        <Heading >
-          Preview
-        </Heading>
-        <Button onClick={goBack} kind="secondary">
-          Back
-        </Button>       
-      </div>)}
+      
       
       <div className="content-wrapper">       
         <FlexGrid>
