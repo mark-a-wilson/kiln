@@ -226,3 +226,11 @@ margin-bottom: 15px;
     align-items: center; /* Center align on smaller screens */
   }
 }
+
+.cds--form__helper-text {
+  color: #6c757d; /* Bootstrap's default grey shade */
+}
+
+.cds--label {
+  font-weight: bold;
+}
