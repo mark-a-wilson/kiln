@@ -34,10 +34,10 @@ html, body {
 
 // Styles
 .group-container {
-  //border: 1px solid $border-color;
-  //padding: 15px;
+  border: 1px solid $border-color;
+  padding: 15px;
   margin: 40px 0;
-  //border-radius: 5px;
+  border-radius: 5px;
 }
 
 .group-item-container {
@@ -45,6 +45,26 @@ html, body {
   //padding: 15px;
   margin: 20px 0;
   //border-radius: 5px;
+}
+
+.fixed {
+  position: sticky; /* Fix the header at the top */
+  top: 0; /* Position it at the very top */
+  left: 0;
+  width: 100%; /* Make it span the entire width */
+  z-index: 1000; /* Ensure it stays above other content */
+  //background-color: #fff; /* Optional: Set a background color */
+  //box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: Add a shadow */
+  flex-wrap: wrap; 
+}
+
+.scrollable-content {
+  margin-top: 0; /* No need for margin when using sticky headers */
+  //height: calc(100vh - 120px); /* Adjust this based on the height of your header */
+  //overflow-y: auto; /* Enable scrolling only for the content */
+  //padding: 16px;
+  //padding: 16px; /* Add padding for better visuals */
+  //background-color: #f9f9f9; /* Optional: Add background to distinguish sections */
 }
 
 .fixed-save-buttons,
@@ -101,32 +121,45 @@ gap: 42px;
 }
 
 .header-section {
+  //position: fixed;
   display: flex;
   width: 100%;
-  padding: $outer-padding;
-  flex-direction: column;
+  padding: $outer-padding;  
+  display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
   gap: 10px;  
   background: $fixed-bg-color;
-  border-bottom: 1px solid #C8C8C8;    
-  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+  //overflow: hidden; 
+  //border-bottom: 1px solid #C8C8C8;    
+  //box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
 
   .header-image,
   .header-title-buttons {
     display: flex;
     width: 100%;
     justify-content: space-between;
-    align-items: center;
+    align-items: center;  
 
-   
-
+    
   }
 
+  
+
+  .header-image-only{
+    align-items: left;
+  }
+  
   .header-buttons-only {
-    display: flex;
+    /* display: flex;
     align-items: right;
     gap: 12px;
+ */
 
+  display: flex;
+  flex-wrap: wrap; /* Allow wrapping of buttons on smaller screens */
+  justify-content: flex-end; /* Align buttons to the right */
+  gap: 12px; /* Maintain spacing between buttons */
     button {
       @include button-style( $fixed-bg-color, #353433 ,#2D2D2D)
       ;
@@ -185,4 +218,19 @@ margin-bottom: 15px;
       text-decoration: underline;
     }
   }
+}
+
+@media (max-width: 768px) {
+  .fixed {
+    flex-direction: column; /* Stack elements vertically on smaller screens */
+    align-items: center; /* Center align on smaller screens */
+  }
+}
+
+.cds--form__helper-text {
+  color: #6c757d; /* Bootstrap's default grey shade */
+}
+
+.cds--label {
+  font-weight: bold;
 }

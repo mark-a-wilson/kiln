@@ -23,6 +23,8 @@ const PreviewFormPage: React.FC = () => {
         import.meta.env.VITE_TEMPLATE_REPO_URL, //Template Repository URL
         import.meta.env.VITE_KLAMM_URL, //KLAMM URL
       ]
+
+      console.log("Trusted origins:", trustedOrigins);
       
       // Verify the message origin
       if (!trustedOrigins.includes(event.origin)) {
