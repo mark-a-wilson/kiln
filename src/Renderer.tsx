@@ -534,6 +534,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
         return (
           <InputMask
           className="field-container"
+          data-print-columns={item.customStyle?.columns || "1"}              
             mask={item.mask || ''}
             value={
               groupId
@@ -548,14 +549,15 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
             
           >  
               <Component 
-                className="field-container"              
+                className="field-container"
+                data-print-columns={item.customStyle?.columns || "1"}              
                 key={fieldId}
                 id={fieldId}
                 labelText={label}
                 placeholder={item.placeholder}
                 helperText={item.helperText}
                 name={fieldId}
-                style={{ marginBottom: "5px" }}                
+                style={{ marginBottom: "5px"}}                
                 invalid={!!error}
                 invalidText={error || ""}
                 
@@ -1285,18 +1287,17 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
       
       <div className="content-wrapper">       
         <FlexGrid>
+        <Row style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1rem" }}>
           {formData.data.items.map((item, index) => (
-            <Row key={item.id} style={{ marginBottom:"25px"}}>
-
-              <Column>
+            <div key={item.id} style={{ gridColumn: `span ${item.customStyle?.columns || 4}`, marginBottom:"25px"}}>
                 {renderComponent(
                   item,
                   item.type === "group" ? item.id : null,
                   index
                 )}
-              </Column>
-            </Row>
+            </div>
           ))}
+          </Row>
         </FlexGrid>
       </div>
       </div>

@@ -1,49 +1,47 @@
 /* Ensure styles apply only to printed pages */
 @media print {
+  .hidden-on-screen {
+    display: block; /* Show only during printing */
+  }
 
-    .hidden-on-screen {
-        display: block; /* Show only during printing */
-      }
-    
-    /* Hide buttons and other unwanted elements */
-    button,
-    .no-print {
-        display: none !important;
-    }
-    .fixed-save-buttons {
-        display: none !important;
-    }    
+  /* Hide buttons and other unwanted elements */
+  button,
+  .no-print {
+    display: none !important;
+  }
+  .fixed-save-buttons {
+    display: none !important;
+  }
 
-    /* Set page size and margins */
-    @page {
-        @top-left {
-            content: none;
-        }
-    
-        @top-center {
-            content: none;
-        }
-    
-        @top-right {
-            content: none;
-        }
-        @bottom-left {
-            content:  attr(data-form-id);
-          }
-          @bottom-center {
-            content: "Page " counter(page);
-          }
-          @bottom-right {
-            content: "Date: " attr(data-date);
-          }
-        size: A4; /* Options: A4, Letter, etc. */
-        margin: 1in 0.25in 1in 0.25in;    
-        /* Footer styling */
-        
+  /* Set page size and margins */
+  @page {
+    @top-left {
+      content: none;
     }
 
-    /* Style headers and footers */
-    /* header, footer {
+    @top-center {
+      content: none;
+    }
+
+    @top-right {
+      content: none;
+    }
+    @bottom-left {
+      content: attr(data-form-id);
+    }
+    @bottom-center {
+      content: "Page " counter(page);
+    }
+    @bottom-right {
+      content: "Date: " attr(data-date);
+    }
+    size: A4; /* Options: A4, Letter, etc. */
+    margin: 1in 0.25in 1in 0.25in;
+    /* Footer styling */
+  }
+
+  /* Style headers and footers */
+  /* header, footer {
         position: fixed;
         width: 100%;
     }
@@ -54,102 +52,113 @@
         bottom: 0;
     } */
 
-    
-    
-    /* Input styles */  
-    
-    /* Ensure grid layout and consistent spacing */
-    .carbon-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr; /* Adjust as needed */
-        gap: 1rem;
-    }
+  /* Input styles */
 
-    /* Keep grouped fields together */
-    
+  /* Ensure grid layout and consistent spacing */
+  .carbon-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Adjust as needed */
+    gap: 1rem;
+  }
 
-    .group-container {
-        display: grid;
-        gap: 10px;
-        border: 1px solid #ccc;
-        padding: 10px;
-        page-break-inside: avoid;
-    }
+  /* Keep grouped fields together */
 
-    /* Dynamic column styling based on JSON */
-    .group-container[data-print-columns="2"] {
-        grid-template-columns: repeat(2, 1fr);
-    }
+  .group-container {
+    display: grid;
+    gap: 10px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    page-break-inside: avoid;
+  }
 
-    .group-container[data-print-columns="3"] {
-        grid-template-columns: repeat(3, 1fr);
-    }
+  /* Dynamic column styling based on JSON */
+  .group-container[data-print-columns="2"] {
+    grid-template-columns: repeat(2, 1fr);
+  }
 
-    .group-container[data-print-columns="4"] {
-        grid-template-columns: repeat(4, 1fr);
-    }
+  .group-container[data-print-columns="3"] {
+    grid-template-columns: repeat(3, 1fr);
+  }
 
-    .field-container {
-        all: unset; /* Clears competing styles */    
-        padding: 5px;
-        overflow-wrap: break-word;
-        word-wrap: break-word;
-        word-break: break-word;
-        white-space: normal; /* Allow wrapping */
-        font-size: 2pt; 
-    }
-    .field-container input {
-        display: block; /* Ensure block-level behavior */
-        width: 100%;
-        height: auto; /* Allow height to expand */
-        overflow-wrap: anywhere; /* Break long words */
-        word-break: break-word;
-        white-space: normal; /* Allow wrapping */
-        line-height: 1.2;
-        resize: none; /* Prevent user resizing */
-        overflow: visible; /* Ensure no clipping */
-        padding: 5px; /* Add padding for readability */
-      }
-    
-    /* Text styles */
-    h1 {
-        font-size: 18pt;
-        font-weight: bold;
-    }
-    p {
-        font-size: 12pt;
-    }
+  .group-container[data-print-columns="4"] {
+    grid-template-columns: repeat(4, 1fr);
+  }
 
-    .cds--text-input__field-wrapper  {
-        font-size: 14px; /* Adjust font size for print */
-        padding: 2px; /* Reduce padding for more space */
-        word-wrap: break-word;
-        white-space: normal;
-        overflow-wrap: break-word; /* Ensure text wraps */
-        padding: 5px;
-    }
+  .field-container {
+    display: flex;
+    flex-direction: column;
+    all: unset; /* Clears competing styles */
+    padding: 5px;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+    white-space: normal; /* Allow wrapping */
+    font-size: 2pt;
+    grid-column: span 4;
+  }
 
-    .cds--text-input{
-        font-size: 16px; /* Adjust font size for print */
-        padding: 2px; /* Reduce padding for more space */
-        word-wrap: break-word;
-        white-space: normal;
-        overflow-wrap: break-word; /* Ensure text wraps */
-        padding: 5px;
-    }
-    .bx--field {
-        width: 100%;
-        display: inline-block;
-        box-sizing: border-box;
+  /* Adjust based on the data-print-columns attribute */
+  [data-print-columns="2"] {
+    grid-column: span 2 !important;
+  }
 
-    }
-    .help-text {
-        font-size: 0.85rem;
-        color: #666;
-    }
-    .print-only {
-        display: block;
-    }
-    
+  [data-print-columns="3"] {
+    grid-column: span 3 !important;
+  }
+
+  [data-print-columns="4"] {
+    grid-column: span 4 !important;
+  }
+
+  .field-container input {
+    display: block; /* Ensure block-level behavior */
+    width: 100%;
+    height: auto; /* Allow height to expand */
+    overflow-wrap: anywhere; /* Break long words */
+    word-break: break-word;
+    white-space: normal; /* Allow wrapping */
+    line-height: 1.2;
+    resize: none; /* Prevent user resizing */
+    overflow: visible; /* Ensure no clipping */
+    padding: 5px; /* Add padding for readability */
+  }
+
+  /* Text styles */
+  h1 {
+    font-size: 18pt;
+    font-weight: bold;
+  }
+  p {
+    font-size: 12pt;
+  }
+
+  .cds--text-input__field-wrapper {
+    font-size: 14px; /* Adjust font size for print */
+    padding: 2px; /* Reduce padding for more space */
+    word-wrap: break-word;
+    white-space: normal;
+    overflow-wrap: break-word; /* Ensure text wraps */
+    padding: 5px;
+  }
+
+  .cds--text-input {
+    font-size: 16px; /* Adjust font size for print */
+    padding: 2px; /* Reduce padding for more space */
+    word-wrap: break-word;
+    white-space: normal;
+    overflow-wrap: break-word; /* Ensure text wraps */
+    padding: 5px;
+  }
+  .bx--field {
+    width: 100%;
+    display: inline-block;
+    box-sizing: border-box;
+  }
+  .help-text {
+    font-size: 0.85rem;
+    color: #666;
+  }
+  .print-only {
+    display: block;
+  }
 }
-
