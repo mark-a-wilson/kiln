@@ -1,5 +1,9 @@
 /* Ensure styles apply only to printed pages */
 @media print {
+
+    .hidden-on-screen {
+        display: block; /* Show only during printing */
+      }
     
     /* Hide buttons and other unwanted elements */
     button,
@@ -8,7 +12,7 @@
     }
     .fixed-save-buttons {
         display: none !important;
-    }
+    }    
 
     /* Set page size and margins */
     @page {
@@ -24,7 +28,7 @@
             content: none;
         }
         @bottom-left {
-            content: "Form ID: " attr(data-form-id);
+            content:  attr(data-form-id);
           }
           @bottom-center {
             content: "Page " counter(page);
@@ -33,7 +37,7 @@
             content: "Date: " attr(data-date);
           }
         size: A4; /* Options: A4, Letter, etc. */
-        margin: 1in;    
+        margin: 1in 0.25in 1in 0.25in;    
         /* Footer styling */
         
     }
@@ -50,18 +54,10 @@
         bottom: 0;
     } */
 
-    .bx--label {
-        font-weight: bold;
-    }
+    
     
     /* Input styles */  
-    .bx--text-input {
-        word-wrap: break-word;
-        overflow-wrap: break-word;
-        white-space: normal;
-        overflow: visible;
-    }
-
+    
     /* Ensure grid layout and consistent spacing */
     .carbon-grid {
         display: grid;
@@ -94,14 +90,13 @@
     }
 
     .field-container {
-        all: unset; /* Clears competing styles */
-    border: 1px solid #000;
-    padding: 5px;
+        all: unset; /* Clears competing styles */    
+        padding: 5px;
         overflow-wrap: break-word;
         word-wrap: break-word;
         word-break: break-word;
         white-space: normal; /* Allow wrapping */
-        font-size: 6pt; 
+        font-size: 2pt; 
     }
     .field-container input {
         display: block; /* Ensure block-level behavior */
@@ -125,5 +120,36 @@
         font-size: 12pt;
     }
 
+    .cds--text-input__field-wrapper  {
+        font-size: 14px; /* Adjust font size for print */
+        padding: 2px; /* Reduce padding for more space */
+        word-wrap: break-word;
+        white-space: normal;
+        overflow-wrap: break-word; /* Ensure text wraps */
+        padding: 5px;
+    }
+
+    .cds--text-input{
+        font-size: 16px; /* Adjust font size for print */
+        padding: 2px; /* Reduce padding for more space */
+        word-wrap: break-word;
+        white-space: normal;
+        overflow-wrap: break-word; /* Ensure text wraps */
+        padding: 5px;
+    }
+    .bx--field {
+        width: 100%;
+        display: inline-block;
+        box-sizing: border-box;
+
+    }
+    .help-text {
+        font-size: 0.85rem;
+        color: #666;
+    }
+    .print-only {
+        display: block;
+    }
     
 }
+
