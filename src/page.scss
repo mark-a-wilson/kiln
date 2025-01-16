@@ -46,6 +46,17 @@ html, body {
   margin: 20px 0;
   //border-radius: 5px;
 }
+.cds--row {
+  display: grid !important; /* Grid Layout for items */
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 15px !important; 
+}
+
+.group-fields-grid {
+  display: grid !important; /*  Grid Layout for items in Groups */
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 15px !important;
+}
 
 .fixed {
   position: sticky; /* Fix the header at the top */
@@ -225,6 +236,19 @@ margin-bottom: 15px;
     flex-direction: column; /* Stack elements vertically on smaller screens */
     align-items: center; /* Center align on smaller screens */
   }
+  @media not print {
+  .cds--row {
+    display: flex !important; /* Switch to flex layout for mobile */
+    flex-direction: column !important; /* Stack elements vertically on smaller screens */
+    gap: 10px !important; /* Add spacing between items */
+  }
+
+  .group-fields-grid {
+    display: flex !important; /*Switch to flex layout for mobile  */
+    flex-direction: column !important; /* Stack elements vertically on smaller screens */
+    gap: 10px !important; /* Add spacing between items */
+  }
+}
 }
 
 .cds--form__helper-text {

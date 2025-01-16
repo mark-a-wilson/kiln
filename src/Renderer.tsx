@@ -11,7 +11,6 @@ import {
   DatePicker,
   DatePickerInput,
   Row,
-  Column,
   TextArea,
   Button,
   NumberInput,
@@ -72,7 +71,8 @@ interface Item {
     value: string;    
   }[];
   customStyle?: {
-    columns:string;
+    webColumns:string;
+    printColumns:string;
   }
   
 
@@ -534,7 +534,6 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
         return (
           <InputMask
           className="field-container"
-          data-print-columns={item.customStyle?.columns || "1"}              
             mask={item.mask || ''}
             value={
               groupId
@@ -550,7 +549,6 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
           >  
               <Component 
                 className="field-container"
-                data-print-columns={item.customStyle?.columns || "1"}              
                 key={fieldId}
                 id={fieldId}
                 labelText={label}
@@ -923,15 +921,29 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
           <div key={item.id} className="group-container">
             {!item.repeater && (<div className="group-header">{item.label}</div>)}
             {item.groupItems?.map((groupItem, groupIndex) => (
-              <div key={`${item.id}-${groupIndex}`} className="group-item-container" data-print-columns={item.customStyle?.columns || 3}>
+              <div key={`${item.id}-${groupIndex}`} className="group-item-container">
                 {item.repeater && (<div className="group-header">{item.label} {groupIndex+1}</div>)}
+                <div
+                  className="group-fields-grid"
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(4, 1fr)",
+                    gap: "15px",
+                  }}
+                >
                 {groupItem.fields.map((groupField) => (
-                  <Row key={groupField.id} style={{marginBottom:"15px"}} >
-                    <Column>
+                 <div
+                 key={groupField.id}
+                 style={{
+                   gridColumn: `span ${groupField.customStyle?.webColumns || 4}`, 
+                   marginBottom: "15px",
+                 }}
+                 data-print-columns={groupField.customStyle?.printColumns || 4} 
+               >
                       {renderComponent(groupField, item.id, groupIndex)}
-                    </Column>
-                  </Row>
-                ))}
+                    </div>
+                    ))}
+                  </div>
                 {item.groupItems && item.groupItems.length > 1 &&  mode=="edit" && formData.readOnly!= true &&(
                   <Button
                     kind="ghost"
@@ -1287,9 +1299,12 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
       
       <div className="content-wrapper">       
         <FlexGrid>
-        <Row style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1rem" }}>
+        <Row >
           {formData.data.items.map((item, index) => (
-            <div key={item.id} style={{ gridColumn: `span ${item.customStyle?.columns || 4}`, marginBottom:"25px"}}>
+            <div 
+            key={item.id} 
+            style={{ gridColumn: `span ${item.customStyle?.webColumns || 4}`, marginBottom:"25px"}}
+            data-print-columns={item.customStyle?.printColumns || 4}>
                 {renderComponent(
                   item,
                   item.type === "group" ? item.id : null,
