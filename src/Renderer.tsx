@@ -2,7 +2,10 @@ import "./App.css";
 import "./print.css";
 import '@carbon/styles/css/styles.css';
 import "./page.scss";
-import React, { useState, useEffect } from "react";
+//import { Previewer } from "pagedjs";
+//import { PagedPolyfill } from "pagedjs";
+//import { PagedPolyfill, Previewer } from "pagedjs";
+import React, { useState, useEffect ,useRef } from "react";
 import {
   TextInput,
   Dropdown,
@@ -153,6 +156,8 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
   }
 
   //const printRef = useRef<HTMLDivElement>(null);
+  const pdfContainerRef = useRef<HTMLDivElement>(null);
+  
 
   useEffect(() => {
     const initialFormStates: { [key: string]: string } = {};
@@ -167,6 +172,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
       month: "long",
       day: "numeric",
     });
+    
 
     // Set these values as attributes on the <body> tag
     document.documentElement.setAttribute("data-form-id", formId);
@@ -491,17 +497,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
       }));
     }
   };
-
-  /* const getFieldValue = (fieldName :string) => {   
-      return formStates[fieldName] || '';
-    
-  };
-
-  const getGroupFieldValue = (groupId: string , groupIndex: number , fieldName :string) => {
-   
-      return groupStates[groupId]?.[groupIndex]?.[fieldName] || '';
-    
-  }; */
+ 
 
   const renderComponent = (
     item: Item,
@@ -532,8 +528,8 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
     switch (item.type) {
       case "text-input":               
         return (
-          <InputMask
-          className="field-container"
+          <><InputMask
+          className="field-container no-print"
             mask={item.mask || ''}
             value={
               groupId
@@ -543,8 +539,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               handleInputChange(fieldId, e.target.value, groupId, groupIndex)
               
-            }
-            readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists || mode=="view"}
+            }           
             
           >  
               <Component 
@@ -561,6 +556,23 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
                 
               />            
           </InputMask>
+           <div className="hidden-on-screen cds--text-input-wrapper">  
+            <div className="cds--text-input__label-wrapper">         
+              <label className="cds--label" dir="auto"><span>{label}</span> </label>
+            </div>
+            <div className="cds--text-input__field-outer-wrapper">
+              <div className="cds--text-input__field-wrapper">
+              {
+            groupId
+              ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || ""
+              : formStates[fieldId] || ""
+          }
+              </div>
+            </div>
+          
+           <div className="cds--form__helper-text" dir="auto">{item.helperText}</div>
+            </div>
+          </> 
         );
         case "currency-input":               
         return (
@@ -693,8 +705,9 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
         const dateFormat = item.mask || "Y-m-d";
         const internalDateFormat = "yyyy-MM-dd"; // Use this format to store internally
         return (
+          <>
           <Component
-          className="field-container"
+          className="field-container no-print"
             key={fieldId}
             datePickerType="single"
             value={selectedDate ? [selectedDate] : []}
@@ -732,9 +745,27 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
               readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists || mode=="view"}
               invalid={!!error}
               invalidText={error || ""}
+              helperText={item.helperText}
               
             />
           </Component>
+          <div className="hidden-on-screen cds--text-input-wrapper">  
+            <div className="cds--text-input__label-wrapper">         
+              <label className="cds--label" dir="auto"><span>{label}</span> </label>
+            </div>
+            <div className="cds--text-input__field-outer-wrapper">
+              <div className="cds--text-input__field-wrapper">
+              {
+            groupId
+              ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || ""
+              : formStates[fieldId] || ""
+          }
+              </div>
+            </div>
+          
+           <div className="cds--form__helper-text" dir="auto">{item.helperText}</div>
+            </div>
+          </>
         );
       case "text-area":
         return (
@@ -893,11 +924,13 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
       case "select":
         const itemsForSelect = item.listItems || [];
         return (
+          <>
           <Select
-          className="field-container"
+          className="field-container no-print"
             id={fieldId}
             name={fieldId}
             labelText={label}
+            helperText={item.helperText}
             value={
               groupId
                 ? groupStates[groupId]?.[groupIndex!]?.[fieldId]
@@ -915,6 +948,23 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
               />
             ))}
           </Select>
+          <div className="hidden-on-screen cds--text-input-wrapper">  
+          <div className="cds--text-input__label-wrapper">         
+            <label className="cds--label" dir="auto"><span>{label}</span> </label>
+          </div>
+          <div className="cds--text-input__field-outer-wrapper">
+            <div className="cds--text-input__field-wrapper">
+            {
+          groupId
+            ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || ""
+            : formStates[fieldId] || ""
+        }
+            </div>
+          </div>
+        
+         <div className="cds--form__helper-text" dir="auto">{item.helperText}</div>
+          </div>
+          </>
         );
       case "group":
         return (
@@ -944,7 +994,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
                     </div>
                     ))}
                   </div>
-                {item.groupItems && item.groupItems.length > 1 &&  mode=="edit" && formData.readOnly!= true &&(
+                {item.groupItems && item.groupItems.length > 1 &&  (mode=="edit" || goBack) && formData.readOnly!= true &&(
                   <Button
                     kind="ghost"
                     onClick={() => handleRemoveGroupItem(item.id, groupIndex)}
@@ -956,7 +1006,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
                 )}
               </div>
             ))}
-            {item.repeater && mode=="edit" && formData.readOnly!= true &&(
+            {item.repeater && (mode=="edit" || goBack) && formData.readOnly!= true &&(
               <Button
                 kind="ghost"
                 onClick={() => handleAddGroupItem(item.id)}
@@ -1024,30 +1074,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
     return savedData;
   };
 
-  /*const saveDataToApi = async () => {
-    try {
-      const saveDataEndpoint = import.meta.env
-        .VITE_COMM_API_SAVEDATA_ENDPOINT_URL;
-      const response = await fetch(saveDataEndpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(createSavedData()),
-      });
-      if (response.ok) {
-        const result = await response.json();
-        console.log("Result", result);
-        return "success";
-      } else {
-        console.error("Error:", response.statusText);
-        return "failed";
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      return "failed";
-    }
-  };*/
+  
   const saveDataToICMApi = async () => {
     try {
       const saveDataICMEndpoint = import.meta.env
@@ -1191,65 +1218,137 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
   };
 
 
-  const handlePrint = async () => {
+   const handlePrint = async () => {
     try {
-      //const Paged :any = (await import("pagedjs")).default; // Dynamically import Paged.js
-      //console.log("Paged>>",Paged);
-      /* const content = printRef.current;
-  
-      if (content) {
-        const clonedContent = content.cloneNode(true) as HTMLElement;
-        clonedContent.style.maxWidth = "none";
-        clonedContent.style.margin = "0";
-  
-        document.body.appendChild(clonedContent);
-  
-        const previewer =  new Previewer(); // Create a new instance of Previewer
-        await new Promise<void>((resolve) => {
-          previewer.on("rendered", resolve); // Wait for the "rendered" event
-          previewer.preview(clonedContent); // Start previewing
-        });
-  
-        document.body.removeChild(clonedContent); */
-        //new Paged.Previewer().preview();
-
-        //here
-
-       /*  const previewer = new Previewer(); // Create an instance of Previewer
-    const content = document.getElementById('printRef'); // Get the content to paginate
-
-    if (content) {
-      previewer.preview(content).then(() => {
-        console.log('Paged.js content is ready');
-        window.print(); // Trigger printing after the preview is complete
-      });
-
-      previewer.on('page', (page: any) => {
-        console.log(`Page ${page.pageNumber} is ready`);
-      }); */
+      
       const originalTitle = document.title;
       document.title = formData.form_id || 'CustomFormName';
+      // Create metadata elements
+    const metaDescription = document.createElement('meta');
+    metaDescription.name = 'description';
+    metaDescription.content = 'Form PDF.';
+
+    const metaAuthor = document.createElement('meta');
+    metaAuthor.name = 'author';
+    metaAuthor.content = 'KILN';
+
+    const metaLanguage = document.createElement('meta');
+    metaLanguage.httpEquiv = 'Content-Language';
+    metaLanguage.content = 'en';
+
+    // Append metadata to the <head>
+    const head = document.head;
+    head.appendChild(metaDescription);
+    head.appendChild(metaAuthor);
+    head.appendChild(metaLanguage);
+
+      
       window.print();
       document.title = originalTitle; 
-      //window.print();
-    
+      head.removeChild(metaDescription);
+    head.removeChild(metaAuthor);
+    head.removeChild(metaLanguage);
+          
     
       } catch (error) {
       console.error("Error during print:", error);
     }
-  };
+  };  
 
+  /* const handlePrint = async () => {
+      
+        if (pdfContainerRef.current) {
+          const previewer = new Previewer();
+
+            previewer.preview(pdfContainerRef.current).then(() => {
+                // Trigger the print dialog after rendering the content
+                window.print();
+            }).catch((error) => {
+                console.error("Paged.js preview error:", error);
+            });
+      }
+  } */
+
+  /*const handlePDF = async() => {
+    try {
+      const styles = `
+      <link rel="stylesheet" href="https://unpkg.com/@carbon/styles/css/styles.css">
+      <style>
+        ${Array.from(document.styleSheets)
+          .map((sheet) => {
+            try {
+              return Array.from(sheet.cssRules || [])
+                .map((rule) => rule.cssText)
+                .join("\n");
+            } catch (e) {
+              return "";
+            }
+          })
+          .join("\n")}
+      </style>`;
+// Wrap the page content with the necessary structure
+   
+const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Generated PDF</title>
+          ${styles}
+        </head>
+        <body>
+          ${document.documentElement.outerHTML}
+        </body>
+      </html>
+    `;
+      //const htmlContent = '<html><body><p>ABCD</p></body></html>';
+
+      // Send the HTML content to the backend
+      
+
+      const response = await fetch('http://localhost:3000/generatePDF', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ htmlContent }),
+      });
+
+       // Check if the response is successful
+       if (!response.ok) {
+        throw new Error(`Error generating PDF: ${response.statusText}`);
+      }
+
+      const pdfBlob = await response.blob();
+
+      // Create a downloadable PDF file
+
+      console.log("pdfBlob.size",pdfBlob.size);
+      
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+      const link = document.createElement('a');
+      link.href = pdfUrl;
+      link.download = 'page-output.pdf';
+      link.click();
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+    }
+  }*/
+  const ministryLogoPath = `${window.location.origin}/ministries/${formData.ministry_id}.png`;
   
 
   return (
-    <div>
+    
+    <div ref={pdfContainerRef} >
       
       <div className="header-section fixed">  
           <div className="header-image">
                   <div className="header-image-only"> 
+                  
                     {formData.ministry_id && (
                         <img
-                          src={`/ministries/${formData.ministry_id}.png`}
+                          src={ministryLogoPath}
                         width="232px"
                           alt="ministry logo"
                           
@@ -1265,9 +1364,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
               <Button onClick={handleSaveAndClose} kind="secondary" className="no-print">
                 Save And Close
               </Button>              
-              <Button  kind="secondary" className="no-print">
-                Finalize
-              </Button>
+              
               </>
             )}
             {goBack &&(                           
@@ -1288,8 +1385,8 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
       <div className="scrollable-content">
       <div className="header-section">
       <div className="header-title-buttons"> 
-      <div className="header-title-only">        
-                  {formData.title} {goBack &&(<span>(Preview)</span>)}
+      <div className="header-title-only" >        
+                 {formData.title} {goBack &&(<span>(Preview)</span>)}
         </div>
         
       </div>
@@ -1316,7 +1413,13 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
         </FlexGrid>
       </div>
       </div>
+      
+      <div id="footer" style={{display: 'none'}}>
+        Form ID: Form-12345
+      </div>
+      <div className="paged-page" data-footer-text=""></div>
     </div>
+    
   );
 };
 

@@ -59,7 +59,7 @@ html, body {
 }
 
 .fixed {
-  position: sticky; /* Fix the header at the top */
+  //position: sticky; /* Fix the header at the top */
   top: 0; /* Position it at the very top */
   left: 0;
   width: 100%; /* Make it span the entire width */
@@ -70,12 +70,7 @@ html, body {
 }
 
 .scrollable-content {
-  margin-top: 0; /* No need for margin when using sticky headers */
-  //height: calc(100vh - 120px); /* Adjust this based on the height of your header */
-  //overflow-y: auto; /* Enable scrolling only for the content */
-  //padding: 16px;
-  //padding: 16px; /* Add padding for better visuals */
-  //background-color: #f9f9f9; /* Optional: Add background to distinguish sections */
+  margin-top: 0; 
 }
 
 .fixed-save-buttons,
@@ -209,8 +204,7 @@ margin-bottom: 15px;
   // Nested styles for h1
   h1 {
     font-size: 20px;
-    font-weight: 700;
-    //color: $heading-color;
+    font-weight: 700;    
   }
 
   // Nested styles for paragraphs
@@ -257,4 +251,12 @@ margin-bottom: 15px;
 
 .cds--label {
   font-weight: bold;
+}
+
+.print-only {
+  display: hidden;
+}
+
+.hidden-on-screen {
+  display: none; /* Hide on screen */
 }

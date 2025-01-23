@@ -15,46 +15,40 @@
 
   /* Set page size and margins */
   @page {
+    
     @top-left {
-      content: none;
-    }
-
+        content: "";
+      }
     @top-center {
-      content: none;
+    content: "";
     }
-
     @top-right {
       content: none;
     }
     @bottom-left {
       content: attr(data-form-id);
+      font-family: "BC Sans"; /* Change the font */
+      font-size: 12px; 
+      
     }
     @bottom-center {
-      content: "Page " counter(page);
+      content: "Page " counter(page) "/" counter(pages);
+      font-family: "BC Sans"; /* Change the font */
+      font-size: 12px; 
+      
     }
     @bottom-right {
       content: "Date: " attr(data-date);
+      font-family: "BC Sans"; /* Change the font */
+      font-size: 12px; 
+      
     }
     size: A4; /* Options: A4, Letter, etc. */
     margin: 1in 0.25in 1in 0.25in;
     /* Footer styling */
   }
 
-  /* Style headers and footers */
-  /* header, footer {
-        position: fixed;
-        width: 100%;
-    }
-    header {
-        top: 0;
-    }
-    footer {
-        bottom: 0;
-    } */
-
-  /* Input styles */
-
-  /* Ensure grid layout and consistent spacing */
+  
   .carbon-grid {
     display: grid;
     grid-template-columns: 1fr 1fr; /* Adjust as needed */
@@ -69,6 +63,7 @@
     border: 1px solid #ccc;
     padding: 10px;
     page-break-inside: avoid;
+    
   }
 
   /* Dynamic column styling based on JSON */
@@ -146,11 +141,15 @@
 
   .cds--text-input__field-wrapper {
     font-size: 14px; /* Adjust font size for print */
-    padding: 2px; /* Reduce padding for more space */
+    padding:15px;
     word-wrap: break-word;
     white-space: normal;
     overflow-wrap: break-word; /* Ensure text wraps */
-    padding: 5px;
+       
+    text-align: center;
+    vertical-align: middle;      /* Center text horizontally */    
+    border: 1px solid #ccc;
+    min-height: 45px;
   }
 
   .cds--text-input {
@@ -173,4 +172,17 @@
   .print-only {
     display: block;
   }
+    
+    .help-text {
+        font-size: 0.85rem;
+        color: #666;
+    }
+    .print-only {
+        display: block;
+    }
+
+    .hidden-on-screen {
+        display: block !important; /* Show only during printing */
+    }
+    
 }
