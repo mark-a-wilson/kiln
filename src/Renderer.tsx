@@ -21,7 +21,7 @@ import {
   SelectItem,
 } from "carbon-components-react";
 import DynamicTable from "./DynamicTable";
-import { parseISO, format } from "date-fns";
+import { parseISO, format as formatDate,parse } from "date-fns";
 import { FlexGrid } from "@carbon/react";
 import { Add,Subtract } from '@carbon/icons-react';
 import InputMask from "react-input-mask";
@@ -362,9 +362,10 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
             // For non-group fields, evaluate using formStates
             const conditionFunction = new Function(
               "formStates",
+              "groupStates",
               visibilityCondition.value
             );            
-            return conditionFunction(formStates);
+            return conditionFunction(formStates, groupStates);
           }
         } catch (error) {
           console.error("Error evaluating condition script:", error);
@@ -672,7 +673,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
                 handleInputChange(fieldId, "", groupId, groupIndex);
               } else {
                 // Save internal format for storage
-                const internalFormattedDate = format(
+                const internalFormattedDate = formatDate(
                   dates[0],
                   internalDateFormat
                 );
@@ -780,13 +781,16 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
           />
         );
       case "text-info":
-        return (  
+        const textInfo =  item.value || "";
+        return (     
+          
           <Component
           className="text-block"
           key={fieldId}
           id={fieldId}                  
-          dangerouslySetInnerHTML={{ __html: item.value }}
+          dangerouslySetInnerHTML={{ __html: parseDynamicText(textInfo) }}
         />
+        
         );
       case "link":
         return (
@@ -1140,7 +1144,41 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
     }
   };
 
+ 
   
+  const parseDynamicText = (text: string): string => {
+    const regex = /{(formStates\['(.*?)']|groupStates\['(.*?)']\?\.\[(.*?)!?\]\?\.\['(.*?)'])\|?(format:([\w/-]+))?}/g;
+  
+    return text.replace(regex, (_match, _fullMatch, fieldId, groupId, groupIndex, nestedFieldId, _formatMatch, format) => {
+      let value: string | undefined;
+  
+      // Check if it's a formStates match
+      if (fieldId) {
+        value = formStates[fieldId];
+      }
+      // Check if it's a groupStates match
+      else if (groupId && groupIndex && nestedFieldId) {
+        value = groupStates[groupId]?.[groupIndex]?.[nestedFieldId];
+      }
+  
+      // If no value is found, return the default blank line
+      if (!value) return '______________________________';
+  
+      // Handle date formatting if a format is specified
+      if (format && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+        try {
+          const parsedDate = parse(value, 'yyyy-MM-dd', new Date());
+          return formatDate(parsedDate, format);
+        } catch (error) {
+          console.error('Date formatting error:', error);
+          return 'Invalid Date';
+        }
+      }
+  
+      // Return the value as is if no formatting is required
+      return value;
+    });
+  };
 
   return (
     <div>
