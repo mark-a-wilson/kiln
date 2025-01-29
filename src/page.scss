@@ -34,21 +34,22 @@ html, body {
 
 // Styles
 .group-container {
-  border: 1px solid $border-color;
-  padding: 15px;
-  margin: 40px 0;
-  border-radius: 5px;
-}
-
-.group-item-container {
   //border: 1px solid $border-color;
   //padding: 15px;
-  margin: 20px 0;
+  margin: 40px 0;
   //border-radius: 5px;
 }
 
+.group-item-container {
+  border: 1px solid $border-color;
+  padding: 15px;
+  //margin: 20px 0;
+  margin-bottom: 15px;
+  border-radius: 5px;
+}
+
 .fixed {
-  position: sticky; /* Fix the header at the top */
+  //position: sticky; /* Fix the header at the top */
   top: 0; /* Position it at the very top */
   left: 0;
   width: 100%; /* Make it span the entire width */
@@ -180,6 +181,16 @@ gap: 42px;
 .group-header {
   color: #000;
 font-family: $default-font-family;
+font-size: 24px;
+font-style: normal;
+font-weight: 700;
+line-height: normal;
+margin-bottom: 15px;
+}
+
+.group-item-header {
+  color: #000;
+font-family: $default-font-family;
 font-size: 20px;
 font-style: normal;
 font-weight: 700;
@@ -234,3 +245,4 @@ margin-bottom: 15px;
 .cds--label {
   font-weight: bold;
 }
+
