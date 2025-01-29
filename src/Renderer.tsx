@@ -56,6 +56,7 @@ interface Item {
   initialRows?: string;
   initialColumns?: string;
   initialHeaderNames?: string;
+  repeaterItemLabel?:string;
   validation?: {
     type: string;
     value: string | number | boolean;
@@ -509,6 +510,8 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
     switch (item.type) {
       case "text-input":               
         return (
+         
+          
           <InputMask
             mask={item.mask || ''}
             value={
@@ -520,6 +523,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
               handleInputChange(fieldId, e.target.value, groupId, groupIndex)
               
             }
+            
             readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists || mode=="view"}
             
           >  
@@ -530,12 +534,13 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
                 placeholder={item.placeholder}
                 helperText={item.helperText}
                 name={fieldId}
-                style={{ marginBottom: "5px" }}                
+                style={{marginBottom: "5px" }}                
                 invalid={!!error}
                 invalidText={error || ""}
                 
               />            
           </InputMask>
+          
         );
         case "currency-input":               
         return (
@@ -545,13 +550,19 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
                 ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || ""
                 : formStates[fieldId] || ""
             }
-            onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) =>
-              handleInputChange(fieldId, e.target.value, groupId, groupIndex)
+            /* onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) =>{
+              console.log("Input Value:", e.target.value);
+              handleInputChange(fieldId, e.target.value.replace(/^\$/, ''), groupId, groupIndex)
             }
+          } */
+          onChangeValue={(event, originalValue, maskedValue) => {
+            console.log(event, originalValue, maskedValue);
+            handleInputChange(fieldId, originalValue, groupId, groupIndex)
+          }}
             currency="CAD"
             
             locale ="en-CA"
-            autoReset
+            autoReset={false}
             InputElement={
             
               <Component               
@@ -877,6 +888,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
               handleInputChange(fieldId, e.target.value, groupId, groupIndex)
             }
           >
+            <SelectItem value="" text="" />
             {itemsForSelect.map((itemForSelect) => (
               <SelectItem
                 key={itemForSelect.value}
@@ -889,10 +901,10 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
       case "group":
         return (
           <div key={item.id} className="group-container">
-            {!item.repeater && (<div className="group-header">{item.label}</div>)}
+            <div className="group-header">{item.label}</div>
             {item.groupItems?.map((groupItem, groupIndex) => (
               <div key={`${item.id}-${groupIndex}`} className="group-item-container">
-                {item.repeater && (<div className="group-header">{item.label} {groupIndex+1}</div>)}
+                {item.repeater && (<div className="group-item-header">{item.repeaterItemLabel || item.label} {groupIndex+1}</div>)}
                 {groupItem.fields.map((groupField) => (
                   <Row key={groupField.id} style={{marginBottom:"15px"}}>
                     <Column>
@@ -900,7 +912,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
                     </Column>
                   </Row>
                 ))}
-                {item.groupItems && item.groupItems.length > 1 &&  mode=="edit" && formData.readOnly!= true &&(
+                {item.groupItems && item.groupItems.length > 1 &&  (mode=="edit" || goBack) && formData.readOnly!= true &&(
                   <Button
                     kind="ghost"
                     onClick={() => handleRemoveGroupItem(item.id, groupIndex)}
@@ -911,7 +923,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
                 )}
               </div>
             ))}
-            {item.repeater && mode=="edit" && formData.readOnly!= true &&(
+            {item.repeater && (mode=="edit" || goBack) && formData.readOnly!= true &&(
               <Button
                 kind="ghost"
                 onClick={() => handleAddGroupItem(item.id)}
