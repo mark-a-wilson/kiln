@@ -25,7 +25,7 @@ import {
   SelectItem,
 } from "carbon-components-react";
 import DynamicTable from "./DynamicTable";
-import { parseISO, format } from "date-fns";
+import { parseISO, format as formatDate,parse } from "date-fns";
 import { FlexGrid } from "@carbon/react";
 import { Add,Subtract } from '@carbon/icons-react';
 import InputMask from "react-input-mask";
@@ -62,6 +62,7 @@ interface Item {
   initialRows?: string;
   initialColumns?: string;
   initialHeaderNames?: string;
+  repeaterItemLabel?:string;
   validation?: {
     type: string;
     value: string | number | boolean;
@@ -118,6 +119,7 @@ const componentMapping: { [key: string]: React.ElementType } = {
   checkbox: Checkbox,
   toggle: Toggle,
   "date-picker": DatePicker,
+  "date": DatePicker,
   "text-area": TextArea,
   button: Button,
   "number-input": NumberInput,
@@ -392,9 +394,10 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
             // For non-group fields, evaluate using formStates
             const conditionFunction = new Function(
               "formStates",
+              "groupStates",
               visibilityCondition.value
             );            
-            return conditionFunction(formStates);
+            return conditionFunction(formStates, groupStates);
           }
         } catch (error) {
           console.error("Error evaluating condition script:", error);
@@ -530,6 +533,9 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
         return (
           <><InputMask
           className="field-container no-print"
+         
+          
+          
             mask={item.mask || ''}
             value={
               groupId
@@ -539,7 +545,9 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               handleInputChange(fieldId, e.target.value, groupId, groupIndex)
               
-            }           
+            }
+            
+            readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists || mode=="view"}
             
           >  
               <Component 
@@ -550,7 +558,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
                 placeholder={item.placeholder}
                 helperText={item.helperText}
                 name={fieldId}
-                style={{ marginBottom: "5px"}}                
+                style={{marginBottom: "5px" }}                
                 invalid={!!error}
                 invalidText={error || ""}
                 
@@ -582,13 +590,19 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
                 ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || ""
                 : formStates[fieldId] || ""
             }
-            onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) =>
-              handleInputChange(fieldId, e.target.value, groupId, groupIndex)
+            /* onChangeValue={(e: React.ChangeEvent<HTMLInputElement>) =>{
+              console.log("Input Value:", e.target.value);
+              handleInputChange(fieldId, e.target.value.replace(/^\$/, ''), groupId, groupIndex)
             }
+          } */
+          onChangeValue={(event, originalValue, maskedValue) => {
+            console.log(event, originalValue, maskedValue);
+            handleInputChange(fieldId, originalValue, groupId, groupIndex)
+          }}
             currency="CAD"
             
             locale ="en-CA"
-            autoReset
+            autoReset={false}
             InputElement={
             
               <Component 
@@ -606,7 +620,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
           </CurrencyInput>
         );  
       case "dropdown":
-        const items =
+         const items =
           item.listItems?.map(({ value, text }) => ({ value, label: text })) ||
           [];
         const itemToString = (item: any) => (item ? item.label : "");
@@ -645,7 +659,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
             invalidText={error || ""}
             
           />
-        );
+        ); 
       case "checkbox":
         return (
           <div style={{ marginBottom: "5px" }}>
@@ -654,15 +668,21 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
               key={fieldId}
               id={fieldId}
               labelText={item.label}
-              name={fieldId}
+              
               checked={
                 groupId
-                  ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || false
-                  : formStates[fieldId] || false
+                  ? groupStates[groupId]?.[groupIndex!]?.[fieldId] ?? false
+                  : formStates[fieldId] ?? false
               }              
-              onChange={({ checked }: { checked: boolean }) =>
+              /* onChange={(checked: boolean) => {
+                console.log("checked",checked);
                 handleInputChange(fieldId, String(checked), groupId, groupIndex)
               }
+            } */
+            onChange={(event: { checked: boolean }) =>{
+              console.log("checked",event.checked);
+               handleInputChange(fieldId, String(event?.checked ?? false), groupId, groupIndex)} 
+            }
               readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists || mode=="view"}
               invalid={!!error}
               invalidText={error || ""}
@@ -671,14 +691,14 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
         );
       case "toggle":
         return (
-          <div key={fieldId} style={{ marginBottom: "5px" }}>
+          <div key={fieldId} style={{ marginBottom: "25px" }}>
             
             <Component
             className="field-container"
               id={fieldId}
               labelText={item.label}   
-              labelA={item.offText}
-              labelB={item.onText}
+              labelA={item.offText || "No"}
+              labelB={item.onText || "Yes"}
               size={item.size}
               toggled={
                 groupId
@@ -694,6 +714,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
             />
           </div>
         );
+      case "date":  
       case "date-picker":
         const selectedDate = groupId
           ? groupStates[groupId]?.[groupIndex!]?.[fieldId]
@@ -716,7 +737,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
                 handleInputChange(fieldId, "", groupId, groupIndex);
               } else {
                 // Save internal format for storage
-                const internalFormattedDate = format(
+                const internalFormattedDate = formatDate(
                   dates[0],
                   internalDateFormat
                 );
@@ -843,13 +864,16 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
           />
         );
       case "text-info":
-        return (  
+        const textInfo =  item.value || "";
+        return (     
+          
           <Component
           className="text-block field-container"
           key={fieldId}
           id={fieldId}                  
-          dangerouslySetInnerHTML={{ __html: item.value }}
+          dangerouslySetInnerHTML={{ __html: parseDynamicText(textInfo) }}
         />
+        
         );
       case "link":
         return (
@@ -921,6 +945,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
             ))}
           </Component></div>
         );
+      
       case "select":
         const itemsForSelect = item.listItems || [];
         return (
@@ -939,7 +964,11 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
               handleInputChange(fieldId, e.target.value, groupId, groupIndex)
             }
+            
+            invalid={!!error}
+            invalidText={error || ""}
           >
+            <SelectItem value="" text="" />
             {itemsForSelect.map((itemForSelect) => (
               <SelectItem
                 key={itemForSelect.value}
@@ -969,10 +998,10 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
       case "group":
         return (
           <div key={item.id} className="group-container">
-            {!item.repeater && (<div className="group-header">{item.label}</div>)}
+            <div className="group-header">{item.label}</div>
             {item.groupItems?.map((groupItem, groupIndex) => (
               <div key={`${item.id}-${groupIndex}`} className="group-item-container">
-                {item.repeater && (<div className="group-header">{item.label} {groupIndex+1}</div>)}
+                {item.repeater && (<div className="group-item-header">{item.repeaterItemLabel || item.label} {groupIndex+1}</div>)}
                 <div
                   className="group-fields-grid"
                   style={{
@@ -1337,6 +1366,39 @@ const htmlContent = `
   }*/
   const ministryLogoPath = `${window.location.origin}/ministries/${formData.ministry_id}.png`;
   
+  const parseDynamicText = (text: string): string => {
+    const regex = /{(formStates\['(.*?)']|groupStates\['(.*?)']\?\.\[(.*?)!?\]\?\.\['(.*?)'])\|?(format:([\w/-]+))?}/g;
+  
+    return text.replace(regex, (_match, _fullMatch, fieldId, groupId, groupIndex, nestedFieldId, _formatMatch, format) => {
+      let value: string | undefined;
+  
+      // Check if it's a formStates match
+      if (fieldId) {
+        value = formStates[fieldId];
+      }
+      // Check if it's a groupStates match
+      else if (groupId && groupIndex && nestedFieldId) {
+        value = groupStates[groupId]?.[groupIndex]?.[nestedFieldId];
+      }
+  
+      // If no value is found, return the default blank line
+      if (!value) return '______________________________';
+  
+      // Handle date formatting if a format is specified
+      if (format && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+        try {
+          const parsedDate = parse(value, 'yyyy-MM-dd', new Date());
+          return formatDate(parsedDate, format);
+        } catch (error) {
+          console.error('Date formatting error:', error);
+          return 'Invalid Date';
+        }
+      }
+  
+      // Return the value as is if no formatting is required
+      return value;
+    });
+  };
 
   return (
     

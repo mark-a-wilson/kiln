@@ -34,16 +34,9 @@ html, body {
 
 // Styles
 .group-container {
-  border: 1px solid $border-color;
-  padding: 15px;
-  margin: 40px 0;
-  border-radius: 5px;
-}
-
-.group-item-container {
   //border: 1px solid $border-color;
   //padding: 15px;
-  margin: 20px 0;
+  margin: 40px 0;
   //border-radius: 5px;
 }
 .cds--row {
@@ -56,6 +49,14 @@ html, body {
   display: grid !important; /*  Grid Layout for items in Groups */
   grid-template-columns: repeat(4, 1fr) !important;
   gap: 15px !important;
+}
+
+.group-item-container {
+  border: 1px solid $border-color;
+  padding: 15px;
+  //margin: 20px 0;
+  margin-bottom: 15px;
+  border-radius: 5px;
 }
 
 .fixed {
@@ -186,6 +187,16 @@ gap: 42px;
 .group-header {
   color: #000;
 font-family: $default-font-family;
+font-size: 24px;
+font-style: normal;
+font-weight: 700;
+line-height: normal;
+margin-bottom: 15px;
+}
+
+.group-item-header {
+  color: #000;
+font-family: $default-font-family;
 font-size: 20px;
 font-style: normal;
 font-weight: 700;
@@ -259,4 +270,12 @@ margin-bottom: 15px;
 
 .hidden-on-screen {
   display: none; /* Hide on screen */
+}
+.cds--toggle__label-text {
+  padding: 10px 0px;
+  font: initial;
+  font-weight: normal;
+  font-family: $default-font-family;
+  font-size: $default-font-size;
+  color: #000; 
 }
