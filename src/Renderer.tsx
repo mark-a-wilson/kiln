@@ -107,6 +107,7 @@ const componentMapping: { [key: string]: React.ElementType } = {
   checkbox: Checkbox,
   toggle: Toggle,
   "date-picker": DatePicker,
+  "date": DatePicker,
   "text-area": TextArea,
   button: Button,
   "number-input": NumberInput,
@@ -579,7 +580,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
           </CurrencyInput>
         );  
       case "dropdown":
-        const items =
+         const items =
           item.listItems?.map(({ value, text }) => ({ value, label: text })) ||
           [];
         const itemToString = (item: any) => (item ? item.label : "");
@@ -617,7 +618,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
             invalidText={error || ""}
             
           />
-        );
+        ); 
       case "checkbox":
         return (
           <div style={{ marginBottom: "5px" }}>
@@ -642,13 +643,13 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
         );
       case "toggle":
         return (
-          <div key={fieldId} style={{ marginBottom: "5px" }}>
+          <div key={fieldId} style={{ marginBottom: "25px" }}>
             
             <Component
               id={fieldId}
               labelText={item.label}   
-              labelA={item.offText}
-              labelB={item.onText}
+              labelA={item.offText || "No"}
+              labelB={item.onText || "Yes"}
               size={item.size}
               toggled={
                 groupId
@@ -664,6 +665,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
             />
           </div>
         );
+      case "date":  
       case "date-picker":
         const selectedDate = groupId
           ? groupStates[groupId]?.[groupIndex!]?.[fieldId]
@@ -872,13 +874,14 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
             ))}
           </Component></div>
         );
+      
       case "select":
         const itemsForSelect = item.listItems || [];
         return (
           <Select
             id={fieldId}
             name={fieldId}
-            labelText={label}
+            labelText={label}            
             value={
               groupId
                 ? groupStates[groupId]?.[groupIndex!]?.[fieldId]
@@ -887,6 +890,9 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
               handleInputChange(fieldId, e.target.value, groupId, groupIndex)
             }
+            
+            invalid={!!error}
+            invalidText={error || ""}
           >
             <SelectItem value="" text="" />
             {itemsForSelect.map((itemForSelect) => (
