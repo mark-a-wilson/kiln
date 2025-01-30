@@ -623,18 +623,24 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
         return (
           <div style={{ marginBottom: "5px" }}>
             <Component
-              key={fieldId}
+              
               id={fieldId}
               labelText={item.label}
-              name={fieldId}
+              
               checked={
                 groupId
-                  ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || false
-                  : formStates[fieldId] || false
+                  ? groupStates[groupId]?.[groupIndex!]?.[fieldId] ?? false
+                  : formStates[fieldId] ?? false
               }              
-              onChange={({ checked }: { checked: boolean }) =>
+              /* onChange={(checked: boolean) => {
+                console.log("checked",checked);
                 handleInputChange(fieldId, String(checked), groupId, groupIndex)
               }
+            } */
+            onChange={(event: { checked: boolean }) =>{
+              console.log("checked",event.checked);
+               handleInputChange(fieldId, String(event?.checked ?? false), groupId, groupIndex)} 
+            }
               readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists || mode=="view"}
               invalid={!!error}
               invalidText={error || ""}
