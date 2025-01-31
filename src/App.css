@@ -1,0 +1,18 @@
+@page {
+  margin: 20mm;
+  @top-center {
+      content: element(print-header);
+  }
+  @bottom-center {
+      content: element(print-footer);
+  }
+  button {
+    display: none;
+    }
+}
+
+.print-header, .print-footer {
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  text-align: center;
+}

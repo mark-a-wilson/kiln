@@ -39,6 +39,17 @@ html, body {
   margin: 40px 0;
   //border-radius: 5px;
 }
+.cds--row {
+  display: grid !important; /* Grid Layout for items */
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 15px !important; 
+}
+
+.group-fields-grid {
+  display: grid !important; /*  Grid Layout for items in Groups */
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 15px !important;
+}
 
 .group-item-container {
   border: 1px solid $border-color;
@@ -60,12 +71,7 @@ html, body {
 }
 
 .scrollable-content {
-  margin-top: 0; /* No need for margin when using sticky headers */
-  //height: calc(100vh - 120px); /* Adjust this based on the height of your header */
-  //overflow-y: auto; /* Enable scrolling only for the content */
-  //padding: 16px;
-  //padding: 16px; /* Add padding for better visuals */
-  //background-color: #f9f9f9; /* Optional: Add background to distinguish sections */
+  margin-top: 0; 
 }
 
 .fixed-save-buttons,
@@ -209,8 +215,7 @@ margin-bottom: 15px;
   // Nested styles for h1
   h1 {
     font-size: 20px;
-    font-weight: 700;
-    //color: $heading-color;
+    font-weight: 700;    
   }
 
   // Nested styles for paragraphs
@@ -236,6 +241,19 @@ margin-bottom: 15px;
     flex-direction: column; /* Stack elements vertically on smaller screens */
     align-items: center; /* Center align on smaller screens */
   }
+  @media not print {
+  .cds--row {
+    display: flex !important; /* Switch to flex layout for mobile */
+    flex-direction: column !important; /* Stack elements vertically on smaller screens */
+    gap: 10px !important; /* Add spacing between items */
+  }
+
+  .group-fields-grid {
+    display: flex !important; /*Switch to flex layout for mobile  */
+    flex-direction: column !important; /* Stack elements vertically on smaller screens */
+    gap: 10px !important; /* Add spacing between items */
+  }
+}
 }
 
 .cds--form__helper-text {
@@ -246,6 +264,13 @@ margin-bottom: 15px;
   font-weight: bold;
 }
 
+.print-only {
+  display: hidden;
+}
+
+.hidden-on-screen {
+  display: none; /* Hide on screen */
+}
 .cds--toggle__label-text {
   padding: 10px 0px;
   font: initial;

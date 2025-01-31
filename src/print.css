@@ -1,0 +1,193 @@
+/* Ensure styles apply only to printed pages */
+@media print {
+  .hidden-on-screen {
+    display: block; /* Show only during printing */
+  }
+
+  /* Hide buttons and other unwanted elements */
+  button,
+  .no-print {
+    display: none !important;
+  }
+  .fixed-save-buttons {
+    display: none !important;
+  }
+
+  /* Set page size and margins */
+  @page {
+    
+    @top-left {
+        content: "";
+      }
+    @top-center {
+    content: "";
+    }
+    @top-right {
+      content: none;
+    }
+    @bottom-left {
+      content: attr(data-form-id);
+      font-family: "BC Sans"; /* Change the font */
+      font-size: 12px; 
+      font-weight: bold;
+      
+    }
+    @bottom-center {
+      content: "";
+      
+    }
+    @bottom-right {
+      content: "Page " counter(page) " of " counter(pages);
+      font-family: "BC Sans"; /* Change the font */
+      font-size: 12px;
+      
+    }
+    size: A4; /* Options: A4, Letter, etc. */
+    margin: 1in 0.25in 1in 0.25in;
+    /* Footer styling */
+  }
+
+  
+  .carbon-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Adjust as needed */
+    gap: 1rem;
+  }
+
+  /* Keep grouped fields together */
+
+  .group-container {
+    display: grid;
+    gap: 10px;
+    
+    padding: 10px;
+    page-break-inside: avoid;
+    
+  }
+
+  .group-item-container {
+    page-break-inside: avoid;
+  }
+
+  /* Dynamic column styling based on JSON */
+  .group-container[data-print-columns="1"] {
+    grid-column: span 1 !important;
+  }
+
+  .group-container[data-print-columns="2"] {
+    grid-column: span 2 !important;
+  }
+
+  .group-container[data-print-columns="3"] {
+    grid-column: span 3 !important;
+  }
+
+  .field-container {
+    display: flex;
+    flex-direction: column;
+    all: unset; /* Clears competing styles */
+    padding: 5px;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+    white-space: normal; /* Allow wrapping */
+    font-size: 2pt;
+    grid-column: span 4;
+  }
+
+  /* Adjust based on the data-print-columns attribute */
+  [data-print-columns="1"] {
+    grid-column: span 1 !important;
+  }
+
+  [data-print-columns="2"] {
+    grid-column: span 2 !important;
+  }
+
+  [data-print-columns="3"] {
+    grid-column: span 3 !important;
+  }
+
+  .field-container input {
+    display: block; /* Ensure block-level behavior */
+    width: 100%;
+    height: auto; /* Allow height to expand */
+    overflow-wrap: anywhere; /* Break long words */
+    word-break: break-word;
+    white-space: normal; /* Allow wrapping */
+    line-height: 1.2;
+    resize: none; /* Prevent user resizing */
+    overflow: visible; /* Ensure no clipping */
+    padding: 5px; /* Add padding for readability */
+  }
+
+  .cds--row {
+    display: grid !important; /* Revert to grid for print */
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 15px !important; /* Adjust gap for print */
+  }
+
+  .group-fields-grid {
+    display: grid !important; /* Revert to grid for print */
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 15px !important;
+  }
+
+  /* Text styles */
+  h1 {
+    font-size: 18pt;
+    font-weight: bold;
+  }
+  p {
+    font-size: 12pt;
+  }
+
+  .cds--text-input__field-wrapper {
+    font-size: 14px; /* Adjust font size for print */
+    padding:15px;
+    word-wrap: break-word;
+    white-space: normal;
+    overflow-wrap: break-word; /* Ensure text wraps */
+       
+    text-align: center;
+    vertical-align: middle;      /* Center text horizontally */    
+    border: 1px solid #ccc;
+    min-height: 45px;
+  }
+
+  .cds--text-input {
+    font-size: 16px; /* Adjust font size for print */
+    padding: 2px; /* Reduce padding for more space */
+    word-wrap: break-word;
+    white-space: normal;
+    overflow-wrap: break-word; /* Ensure text wraps */
+    padding: 5px;
+  }
+  .bx--field {
+    width: 100%;
+    display: inline-block;
+    box-sizing: border-box;
+  }
+  .help-text {
+    font-size: 0.85rem;
+    color: #666;
+  }
+  .print-only {
+    display: block;
+  }
+    
+    .help-text {
+        font-size: 0.85rem;
+        color: #666;
+    }
+    .print-only {
+        display: block;
+    }
+
+    .hidden-on-screen {
+        display: block !important; /* Show only during printing */
+        page-break-inside: avoid;
+
+    }
+    
+}

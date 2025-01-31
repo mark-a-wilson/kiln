@@ -1,6 +1,11 @@
+import "./App.css";
+import "./print.css";
 import '@carbon/styles/css/styles.css';
 import "./page.scss";
-import React, { useState, useEffect } from "react";
+//import { Previewer } from "pagedjs";
+//import { PagedPolyfill } from "pagedjs";
+//import { PagedPolyfill, Previewer } from "pagedjs";
+import React, { useState, useEffect ,useRef } from "react";
 import {
   TextInput,
   Dropdown,
@@ -9,7 +14,6 @@ import {
   DatePicker,
   DatePickerInput,
   Row,
-  Column,
   TextArea,
   Button,
   NumberInput,
@@ -33,6 +37,8 @@ import {
   isFieldRequired, 
  
 } from "./utils/helpers"; // Import from the helpers file
+//import Paged from 'pagedjs';
+//import  { Previewer } from 'pagedjs';
 interface Item {
   type: string;
   label?: string;
@@ -68,6 +74,11 @@ interface Item {
     type: string;
     value: string;    
   }[];
+  customStyle?: {
+    webColumns:string;
+    printColumns:string;
+  }
+  
 
 }
 
@@ -78,6 +89,7 @@ interface Template {
   lastModified: string;
   title: string;
   readOnly?:boolean;
+  form_id:string;
   data: {
     items: Item[];
   };
@@ -145,10 +157,28 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
     return <div>Invalid Form</div>;
   }
 
+  //const printRef = useRef<HTMLDivElement>(null);
+  const pdfContainerRef = useRef<HTMLDivElement>(null);
+  
+
   useEffect(() => {
     const initialFormStates: { [key: string]: string } = {};
     const initialGroupStates: { [key: string]: GroupState } = {}; // Changed type here
+    
 
+    const formId = formData.form_id || "Unknown Form ID";
+
+    // Generate the creation date dynamically
+    const creationDate = new Date().toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+    
+
+    // Set these values as attributes on the <body> tag
+    document.documentElement.setAttribute("data-form-id", formId);
+    document.documentElement.setAttribute("data-date", creationDate);
     formData?.data?.items.forEach((item) => {
       if (item.type === "group") {
         initialGroupStates[item.id] =
@@ -470,17 +500,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
       }));
     }
   };
-
-  /* const getFieldValue = (fieldName :string) => {   
-      return formStates[fieldName] || '';
-    
-  };
-
-  const getGroupFieldValue = (groupId: string , groupIndex: number , fieldName :string) => {
-   
-      return groupStates[groupId]?.[groupIndex]?.[fieldName] || '';
-    
-  }; */
+ 
 
   const renderComponent = (
     item: Item,
@@ -511,9 +531,11 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
     switch (item.type) {
       case "text-input":               
         return (
+          <><InputMask
+          className="field-container no-print"
          
           
-          <InputMask
+          
             mask={item.mask || ''}
             value={
               groupId
@@ -528,7 +550,8 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
             readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists || mode=="view"}
             
           >  
-              <Component               
+              <Component 
+                className="field-container"
                 key={fieldId}
                 id={fieldId}
                 labelText={label}
@@ -541,7 +564,23 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
                 
               />            
           </InputMask>
+           <div className="hidden-on-screen cds--text-input-wrapper">  
+            <div className="cds--text-input__label-wrapper">         
+              <label className="cds--label" dir="auto"><span>{label}</span> </label>
+            </div>
+            <div className="cds--text-input__field-outer-wrapper">
+              <div className="cds--text-input__field-wrapper">
+              {
+            groupId
+              ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || ""
+              : formStates[fieldId] || ""
+          }
+              </div>
+            </div>
           
+           <div className="cds--form__helper-text" dir="auto">{item.helperText}</div>
+            </div>
+          </> 
         );
         case "currency-input":               
         return (
@@ -566,7 +605,8 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
             autoReset={false}
             InputElement={
             
-              <Component               
+              <Component 
+              className="field-container"              
                 key={fieldId}
                 id={fieldId}
                 labelText={label}
@@ -596,10 +636,12 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
         );
 
         return (
+          <>
           <Component
             key={fieldId}
             id={fieldId}
             titleText={label}
+            className="field-container no-print"
             label={item.placeholder}
             items={items}
             itemToString={itemToString}
@@ -618,12 +660,28 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
             invalidText={error || ""}
             
           />
+          <div className="hidden-on-screen cds--text-input-wrapper">  
+          <div className="cds--text-input__label-wrapper">         
+            <label className="cds--label" dir="auto"><span>{label}</span> </label>
+          </div>
+          <div className="cds--text-input__field-outer-wrapper">
+            <div className="cds--text-input__field-wrapper">
+            {
+          selectedItem?.label
+        }
+            </div>
+          </div>
+        
+         <div className="cds--form__helper-text" dir="auto">{item.helperText}</div>
+          </div>
+          </>
         ); 
       case "checkbox":
         return (
           <div style={{ marginBottom: "5px" }}>
             <Component
-              
+            className="field-container"
+              key={fieldId}
               id={fieldId}
               labelText={item.label}
               
@@ -652,6 +710,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
           <div key={fieldId} style={{ marginBottom: "25px" }}>
             
             <Component
+            className="field-container"
               id={fieldId}
               labelText={item.label}   
               labelA={item.offText || "No"}
@@ -683,7 +742,9 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
         const dateFormat = item.mask || "Y-m-d";
         const internalDateFormat = "yyyy-MM-dd"; // Use this format to store internally
         return (
+          <>
           <Component
+          className="field-container no-print"
             key={fieldId}
             datePickerType="single"
             value={selectedDate ? [selectedDate] : []}
@@ -721,14 +782,33 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
               readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists || mode=="view"}
               invalid={!!error}
               invalidText={error || ""}
+              helperText={item.helperText}
               
             />
           </Component>
+          <div className="hidden-on-screen cds--text-input-wrapper">  
+            <div className="cds--text-input__label-wrapper">         
+              <label className="cds--label" dir="auto"><span>{label}</span> </label>
+            </div>
+            <div className="cds--text-input__field-outer-wrapper">
+              <div className="cds--text-input__field-wrapper">
+              {
+            groupId
+              ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || ""
+              : formStates[fieldId] || ""
+          }
+              </div>
+            </div>
+          
+           <div className="cds--form__helper-text" dir="auto">{item.helperText}</div>
+            </div>
+          </>
         );
       case "text-area":
         return (
           <Component
             key={fieldId}
+            className="field-container"
             id={fieldId}
             labelText={label}
             placeholder={item.placeholder}
@@ -804,7 +884,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
         return (     
           
           <Component
-          className="text-block"
+          className="text-block field-container"
           key={fieldId}
           id={fieldId}                  
           dangerouslySetInnerHTML={{ __html: parseDynamicText(textInfo) }}
@@ -855,6 +935,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
         return (
           <div key={fieldId} style={{ marginBottom: "5px" }}>
           <Component
+          className="field-container"
             legendText={label}
             id={fieldId}
             name={fieldId}
@@ -884,10 +965,13 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
       case "select":
         const itemsForSelect = item.listItems || [];
         return (
+          <>
           <Select
+          className="field-container no-print"
             id={fieldId}
             name={fieldId}
-            labelText={label}            
+            labelText={label}
+            helperText={item.helperText}
             value={
               groupId
                 ? groupStates[groupId]?.[groupIndex!]?.[fieldId]
@@ -909,6 +993,23 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
               />
             ))}
           </Select>
+          <div className="hidden-on-screen cds--text-input-wrapper">  
+          <div className="cds--text-input__label-wrapper">         
+            <label className="cds--label" dir="auto"><span>{label}</span> </label>
+          </div>
+          <div className="cds--text-input__field-outer-wrapper">
+            <div className="cds--text-input__field-wrapper">
+            {
+          groupId
+            ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || ""
+            : formStates[fieldId] || ""
+        }
+            </div>
+          </div>
+        
+         <div className="cds--form__helper-text" dir="auto">{item.helperText}</div>
+          </div>
+          </>
         );
       case "group":
         return (
@@ -917,18 +1018,33 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
             {item.groupItems?.map((groupItem, groupIndex) => (
               <div key={`${item.id}-${groupIndex}`} className="group-item-container">
                 {item.repeater && (<div className="group-item-header">{item.repeaterItemLabel || item.label} {groupIndex+1}</div>)}
+                <div
+                  className="group-fields-grid"
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(4, 1fr)",
+                    gap: "15px",
+                  }}
+                >
                 {groupItem.fields.map((groupField) => (
-                  <Row key={groupField.id} style={{marginBottom:"15px"}}>
-                    <Column>
+                 <div
+                 key={groupField.id}
+                 style={{
+                   gridColumn: `span ${groupField.customStyle?.webColumns || 4}`, 
+                   marginBottom: "5px",
+                 }}
+                 data-print-columns={groupField.customStyle?.printColumns || 4} 
+               >
                       {renderComponent(groupField, item.id, groupIndex)}
-                    </Column>
-                  </Row>
-                ))}
+                    </div>
+                    ))}
+                  </div>
                 {item.groupItems && item.groupItems.length > 1 &&  (mode=="edit" || goBack) && formData.readOnly!= true &&(
                   <Button
                     kind="ghost"
                     onClick={() => handleRemoveGroupItem(item.id, groupIndex)}
                     renderIcon={Subtract}
+                    className="no-print"
                   >
                     Remove {item.label} {groupIndex+1}
                   </Button>
@@ -940,6 +1056,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
                 kind="ghost"
                 onClick={() => handleAddGroupItem(item.id)}
                 renderIcon={Add}
+                className="no-print"
               >
                 Add {item.label} 
               </Button>
@@ -1002,30 +1119,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
     return savedData;
   };
 
-  /*const saveDataToApi = async () => {
-    try {
-      const saveDataEndpoint = import.meta.env
-        .VITE_COMM_API_SAVEDATA_ENDPOINT_URL;
-      const response = await fetch(saveDataEndpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(createSavedData()),
-      });
-      if (response.ok) {
-        const result = await response.json();
-        console.log("Result", result);
-        return "success";
-      } else {
-        console.error("Error:", response.statusText);
-        return "failed";
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      return "failed";
-    }
-  };*/
+  
   const saveDataToICMApi = async () => {
     try {
       const saveDataICMEndpoint = import.meta.env
@@ -1168,7 +1262,125 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
     }
   };
 
- 
+
+   const handlePrint = async () => {
+    try {
+      
+      const originalTitle = document.title;
+      document.title = formData.form_id || 'CustomFormName';
+      // Create metadata elements
+    const metaDescription = document.createElement('meta');
+    metaDescription.name = 'description';
+    metaDescription.content = 'Form PDF.';
+
+    const metaAuthor = document.createElement('meta');
+    metaAuthor.name = 'author';
+    metaAuthor.content = 'KILN';
+
+    const metaLanguage = document.createElement('meta');
+    metaLanguage.httpEquiv = 'Content-Language';
+    metaLanguage.content = 'en';
+
+    // Append metadata to the <head>
+    const head = document.head;
+    head.appendChild(metaDescription);
+    head.appendChild(metaAuthor);
+    head.appendChild(metaLanguage);
+
+      
+      window.print();
+      document.title = originalTitle; 
+      head.removeChild(metaDescription);
+    head.removeChild(metaAuthor);
+    head.removeChild(metaLanguage);
+          
+    
+      } catch (error) {
+      console.error("Error during print:", error);
+    }
+  };  
+
+  /* const handlePrint = async () => {
+      
+        if (pdfContainerRef.current) {
+          const previewer = new Previewer();
+
+            previewer.preview(pdfContainerRef.current).then(() => {
+                // Trigger the print dialog after rendering the content
+                window.print();
+            }).catch((error) => {
+                console.error("Paged.js preview error:", error);
+            });
+      }
+  } */
+
+  /*const handlePDF = async() => {
+    try {
+      const styles = `
+      <link rel="stylesheet" href="https://unpkg.com/@carbon/styles/css/styles.css">
+      <style>
+        ${Array.from(document.styleSheets)
+          .map((sheet) => {
+            try {
+              return Array.from(sheet.cssRules || [])
+                .map((rule) => rule.cssText)
+                .join("\n");
+            } catch (e) {
+              return "";
+            }
+          })
+          .join("\n")}
+      </style>`;
+// Wrap the page content with the necessary structure
+   
+const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Generated PDF</title>
+          ${styles}
+        </head>
+        <body>
+          ${document.documentElement.outerHTML}
+        </body>
+      </html>
+    `;
+      //const htmlContent = '<html><body><p>ABCD</p></body></html>';
+
+      // Send the HTML content to the backend
+      
+
+      const response = await fetch('http://localhost:3000/generatePDF', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ htmlContent }),
+      });
+
+       // Check if the response is successful
+       if (!response.ok) {
+        throw new Error(`Error generating PDF: ${response.statusText}`);
+      }
+
+      const pdfBlob = await response.blob();
+
+      // Create a downloadable PDF file
+
+      console.log("pdfBlob.size",pdfBlob.size);
+      
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+      const link = document.createElement('a');
+      link.href = pdfUrl;
+      link.download = 'page-output.pdf';
+      link.click();
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+    }
+  }*/
+  const ministryLogoPath = `${window.location.origin}/ministries/${formData.ministry_id}.png`;
   
   const parseDynamicText = (text: string): string => {
     const regex = /{(formStates\['(.*?)']|groupStates\['(.*?)']\?\.\[(.*?)!?\]\?\.\['(.*?)'])\|?(format:([\w/-]+))?}/g;
@@ -1205,14 +1417,16 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
   };
 
   return (
-    <div>
+    
+    <div ref={pdfContainerRef} >
       
       <div className="header-section fixed">  
           <div className="header-image">
                   <div className="header-image-only"> 
+                  
                     {formData.ministry_id && (
                         <img
-                          src={`/ministries/${formData.ministry_id}.png`}
+                          src={ministryLogoPath}
                         width="232px"
                           alt="ministry logo"
                           
@@ -1222,23 +1436,21 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
         <div className="header-buttons-only">        
           {mode=="edit" &&formData.readOnly!= true &&(
            <>
-              <Button onClick={handleSave} kind="secondary">
+              <Button onClick={handleSave} kind="secondary" className="no-print">
                 Save
               </Button>
-              <Button onClick={handleSaveAndClose} kind="secondary">
+              <Button onClick={handleSaveAndClose} kind="secondary" className="no-print">
                 Save And Close
               </Button>              
-              <Button  kind="secondary">
-                Finalize
-              </Button>
+              
               </>
             )}
             {goBack &&(                           
-                <Button onClick={goBack} kind="secondary">
+                <Button onClick={goBack} kind="secondary" className="no-print">
                   Back
                 </Button>    
             )}
-              <Button  kind="secondary">
+              <Button  kind="secondary" onClick={handlePrint} className="no-print">
                   Print
                 </Button>
             </div>
@@ -1251,8 +1463,8 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
       <div className="scrollable-content">
       <div className="header-section">
       <div className="header-title-buttons"> 
-      <div className="header-title-only">        
-                  {formData.title} {goBack &&(<span>(Preview)</span>)}
+      <div className="header-title-only" >        
+                 {formData.title} {goBack &&(<span>(Preview)</span>)}
         </div>
         
       </div>
@@ -1262,21 +1474,30 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
       
       <div className="content-wrapper">       
         <FlexGrid>
+        <Row >
           {formData.data.items.map((item, index) => (
-            <Row key={item.id} style={{ marginBottom:"25px"}}>
-              <Column>
+            <div 
+            key={item.id} 
+            style={{ gridColumn: `span ${item.customStyle?.webColumns || 4}`, marginBottom:"5px"}}
+            data-print-columns={item.customStyle?.printColumns || 4}>
                 {renderComponent(
                   item,
                   item.type === "group" ? item.id : null,
                   index
                 )}
-              </Column>
-            </Row>
+            </div>
           ))}
+          </Row>
         </FlexGrid>
       </div>
       </div>
+      
+      <div id="footer" style={{display: 'none'}}>
+        Form ID: Form-12345
+      </div>
+      <div className="paged-page" data-footer-text=""></div>
     </div>
+    
   );
 };
 
