@@ -189,5 +189,10 @@
         page-break-inside: avoid;
 
     }
+
+    .page-break {
+      break-before: page; /* Modern browsers */
+      page-break-before: always; /* Fallback for older browsers */
+    }
     
 }
