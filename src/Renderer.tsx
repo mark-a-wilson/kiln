@@ -636,11 +636,12 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
         );
 
         return (
+          <>
           <Component
             key={fieldId}
             id={fieldId}
             titleText={label}
-            className="field-container"
+            className="field-container no-print"
             label={item.placeholder}
             items={items}
             itemToString={itemToString}
@@ -659,6 +660,21 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
             invalidText={error || ""}
             
           />
+          <div className="hidden-on-screen cds--text-input-wrapper">  
+          <div className="cds--text-input__label-wrapper">         
+            <label className="cds--label" dir="auto"><span>{label}</span> </label>
+          </div>
+          <div className="cds--text-input__field-outer-wrapper">
+            <div className="cds--text-input__field-wrapper">
+            {
+          selectedItem?.label
+        }
+            </div>
+          </div>
+        
+         <div className="cds--form__helper-text" dir="auto">{item.helperText}</div>
+          </div>
+          </>
         ); 
       case "checkbox":
         return (
@@ -1015,7 +1031,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
                  key={groupField.id}
                  style={{
                    gridColumn: `span ${groupField.customStyle?.webColumns || 4}`, 
-                   marginBottom: "15px",
+                   marginBottom: "5px",
                  }}
                  data-print-columns={groupField.customStyle?.printColumns || 4} 
                >
@@ -1462,7 +1478,7 @@ const htmlContent = `
           {formData.data.items.map((item, index) => (
             <div 
             key={item.id} 
-            style={{ gridColumn: `span ${item.customStyle?.webColumns || 4}`, marginBottom:"25px"}}
+            style={{ gridColumn: `span ${item.customStyle?.webColumns || 4}`, marginBottom:"5px"}}
             data-print-columns={item.customStyle?.printColumns || 4}>
                 {renderComponent(
                   item,

@@ -29,18 +29,17 @@
       content: attr(data-form-id);
       font-family: "BC Sans"; /* Change the font */
       font-size: 12px; 
+      font-weight: bold;
       
     }
     @bottom-center {
-      content: "Page " counter(page) "/" counter(pages);
-      font-family: "BC Sans"; /* Change the font */
-      font-size: 12px; 
+      content: "";
       
     }
     @bottom-right {
-      content: "Date: " attr(data-date);
+      content: "Page " counter(page) " of " counter(pages);
       font-family: "BC Sans"; /* Change the font */
-      font-size: 12px; 
+      font-size: 12px;
       
     }
     size: A4; /* Options: A4, Letter, etc. */
@@ -60,10 +59,14 @@
   .group-container {
     display: grid;
     gap: 10px;
-    border: 1px solid #ccc;
+    
     padding: 10px;
     page-break-inside: avoid;
     
+  }
+
+  .group-item-container {
+    page-break-inside: avoid;
   }
 
   /* Dynamic column styling based on JSON */
@@ -183,6 +186,8 @@
 
     .hidden-on-screen {
         display: block !important; /* Show only during printing */
+        page-break-inside: avoid;
+
     }
     
 }
