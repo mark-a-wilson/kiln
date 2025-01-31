@@ -77,6 +77,7 @@ interface Item {
   customStyle?: {
     webColumns:string;
     printColumns:string;
+    pageBreak:string;
   }
   
 
@@ -156,8 +157,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
   if (!data.form_definition) {
     return <div>Invalid Form</div>;
   }
-
-  //const printRef = useRef<HTMLDivElement>(null);
+  
   const pdfContainerRef = useRef<HTMLDivElement>(null);
   
 
@@ -1300,86 +1300,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
     }
   };  
 
-  /* const handlePrint = async () => {
-      
-        if (pdfContainerRef.current) {
-          const previewer = new Previewer();
-
-            previewer.preview(pdfContainerRef.current).then(() => {
-                // Trigger the print dialog after rendering the content
-                window.print();
-            }).catch((error) => {
-                console.error("Paged.js preview error:", error);
-            });
-      }
-  } */
-
-  /*const handlePDF = async() => {
-    try {
-      const styles = `
-      <link rel="stylesheet" href="https://unpkg.com/@carbon/styles/css/styles.css">
-      <style>
-        ${Array.from(document.styleSheets)
-          .map((sheet) => {
-            try {
-              return Array.from(sheet.cssRules || [])
-                .map((rule) => rule.cssText)
-                .join("\n");
-            } catch (e) {
-              return "";
-            }
-          })
-          .join("\n")}
-      </style>`;
-// Wrap the page content with the necessary structure
-   
-const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Generated PDF</title>
-          ${styles}
-        </head>
-        <body>
-          ${document.documentElement.outerHTML}
-        </body>
-      </html>
-    `;
-      //const htmlContent = '<html><body><p>ABCD</p></body></html>';
-
-      // Send the HTML content to the backend
-      
-
-      const response = await fetch('http://localhost:3000/generatePDF', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ htmlContent }),
-      });
-
-       // Check if the response is successful
-       if (!response.ok) {
-        throw new Error(`Error generating PDF: ${response.statusText}`);
-      }
-
-      const pdfBlob = await response.blob();
-
-      // Create a downloadable PDF file
-
-      console.log("pdfBlob.size",pdfBlob.size);
-      
-      const pdfUrl = URL.createObjectURL(pdfBlob);
-      const link = document.createElement('a');
-      link.href = pdfUrl;
-      link.download = 'page-output.pdf';
-      link.click();
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-    }
-  }*/
+  
   const ministryLogoPath = `${window.location.origin}/ministries/${formData.ministry_id}.png`;
   
   const parseDynamicText = (text: string): string => {
@@ -1478,7 +1399,7 @@ const htmlContent = `
           {formData.data.items.map((item, index) => (
             <div 
             key={item.id} 
-            style={{ gridColumn: `span ${item.customStyle?.webColumns || 4}`, marginBottom:"5px"}}
+            style={{ gridColumn: `span ${item.customStyle?.webColumns || 4}`, marginBottom:"5px",breakBefore: item.customStyle?.pageBreak as React.CSSProperties["breakBefore"] || "auto"}}
             data-print-columns={item.customStyle?.printColumns || 4}>
                 {renderComponent(
                   item,
