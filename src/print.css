@@ -208,14 +208,14 @@
     .content-wrapper {     
     display: flex;
     width: 100%;
-    padding: 0px;
+    padding: 0px !important;
     flex-direction: column;    
     gap: 42px;
     }
     .header-section {      
       display: flex;
       width: 100%;
-      padding: 0px;  
+      padding: 0px !important;  
       display: flex;
       flex-wrap: wrap;
       align-items: flex-start;
