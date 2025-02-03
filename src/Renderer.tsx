@@ -1031,7 +1031,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
                  key={groupField.id}
                  style={{
                    gridColumn: `span ${groupField.customStyle?.webColumns || 4}`, 
-                   marginBottom: "5px",
+                   
                  }}
                  data-print-columns={groupField.customStyle?.printColumns || 4} 
                >
@@ -1354,7 +1354,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
                         />
                       )}
                   </div>
-        <div className="header-buttons-only">        
+        <div className="header-buttons-only no-print">        
           {mode=="edit" &&formData.readOnly!= true &&(
            <>
               <Button onClick={handleSave} kind="secondary" className="no-print">
@@ -1376,7 +1376,9 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
                 </Button>
             </div>
             
-           
+            <div className="header-title-print hidden-on-screen" >        
+                 {formData.title} {goBack &&(<span>(Preview)</span>)}
+            </div>
             
                
           </div>
@@ -1384,7 +1386,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
       <div className="scrollable-content">
       <div className="header-section">
       <div className="header-title-buttons"> 
-      <div className="header-title-only" >        
+      <div className="header-title-only no-print" >        
                  {formData.title} {goBack &&(<span>(Preview)</span>)}
         </div>
         
