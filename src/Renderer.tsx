@@ -5,7 +5,8 @@ import "./page.scss";
 //import { Previewer } from "pagedjs";
 //import { PagedPolyfill } from "pagedjs";
 //import { PagedPolyfill, Previewer } from "pagedjs";
-import React, { useState, useEffect ,useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
+import { AuthenticationContext } from "./App";
 import {
   TextInput,
   Dropdown,
@@ -25,17 +26,17 @@ import {
   SelectItem,
 } from "carbon-components-react";
 import DynamicTable from "./DynamicTable";
-import { parseISO, format as formatDate,parse } from "date-fns";
+import { parseISO, format as formatDate, parse } from "date-fns";
 import { FlexGrid } from "@carbon/react";
-import { Add,Subtract } from '@carbon/icons-react';
+import { Add, Subtract } from '@carbon/icons-react';
 import InputMask from "react-input-mask";
 import { CurrencyInput } from "react-currency-mask";
-import {  
-  generateUniqueId, 
+import {
+  generateUniqueId,
   handleLinkClick,
   validateField,
-  isFieldRequired, 
- 
+  isFieldRequired,
+
 } from "./utils/helpers"; // Import from the helpers file
 //import Paged from 'pagedjs';
 //import  { Previewer } from 'pagedjs';
@@ -62,7 +63,7 @@ interface Item {
   initialRows?: string;
   initialColumns?: string;
   initialHeaderNames?: string;
-  repeaterItemLabel?:string;
+  repeaterItemLabel?: string;
   validation?: {
     type: string;
     value: string | number | boolean;
@@ -72,14 +73,14 @@ interface Item {
   //readOnly?:boolean;
   conditions?: {
     type: string;
-    value: string;    
+    value: string;
   }[];
   customStyle?: {
-    webColumns:string;
-    printColumns:string;
-    pageBreak:string;
+    webColumns: string;
+    printColumns: string;
+    pageBreak: string;
   }
-  
+
 
 }
 
@@ -89,8 +90,8 @@ interface Template {
   id: string;
   lastModified: string;
   title: string;
-  readOnly?:boolean;
-  form_id:string;
+  readOnly?: boolean;
+  form_id: string;
   data: {
     items: Item[];
   };
@@ -131,7 +132,7 @@ const componentMapping: { [key: string]: React.ElementType } = {
   group: FlexGrid,
   radio: RadioButtonGroup,
   select: Select,
-  "currency-input":TextInput,
+  "currency-input": TextInput,
 };
 
 interface RendererProps {
@@ -142,7 +143,7 @@ interface RendererProps {
 
 
 
-const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
+const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
   const [formStates, setFormStates] = useState<{ [key: string]: string }>({});
   const [groupStates, setGroupStates] = useState<{ [key: string]: GroupState }>(
     {}
@@ -157,14 +158,14 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
   if (!data.form_definition) {
     return <div>Invalid Form</div>;
   }
-  
+
   const pdfContainerRef = useRef<HTMLDivElement>(null);
-  
+  const keycloak = useContext(AuthenticationContext);
 
   useEffect(() => {
     const initialFormStates: { [key: string]: string } = {};
     const initialGroupStates: { [key: string]: GroupState } = {}; // Changed type here
-    
+
 
     const formId = formData.form_id || "Unknown Form ID";
 
@@ -174,7 +175,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
       month: "long",
       day: "numeric",
     });
-    
+
 
     // Set these values as attributes on the <body> tag
     document.documentElement.setAttribute("data-form-id", formId);
@@ -223,7 +224,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
     });
   }, []);
 
-  
+
 
   const handleInputChange = (
     fieldId: string,
@@ -258,7 +259,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
       [fieldId]: validationError,
     }));
   };
- 
+
 
   const handleAddGroupItem = (
     groupId: string,
@@ -356,131 +357,131 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
         [groupId]: reindexedGroup,
       };
     });
-  };  
+  };
 
-  const shouldFieldBeIncludedForSaving = (item: Item ,groupId: string | null = null,
-    groupIndex: number | null = null) : boolean => {
+  const shouldFieldBeIncludedForSaving = (item: Item, groupId: string | null = null,
+    groupIndex: number | null = null): boolean => {
 
-      if (isFieldVisible(item, groupId, groupIndex) || doesFieldHasCondition("saveOnSubmit",item, groupId, groupIndex)) {
-        return true; // Field is not visible based on condition
-      }
+    if (isFieldVisible(item, groupId, groupIndex) || doesFieldHasCondition("saveOnSubmit", item, groupId, groupIndex)) {
+      return true; // Field is not visible based on condition
+    }
 
-      return false;
+    return false;
   }
 
-  const isFieldVisible = (item: Item ,groupId: string | null = null,
-    groupIndex: number | null = null) : boolean => {    
-      
-      if (!item.conditions || item.conditions.length === 0) {
-        return true; // Default to visible if there are no conditions
-      }
-      
-      const visibilityCondition = item.conditions.find(condition => condition.type === 'visibility');
+  const isFieldVisible = (item: Item, groupId: string | null = null,
+    groupIndex: number | null = null): boolean => {
 
-      if (visibilityCondition) {
-        try {
-          // If the field is in a group, pass groupStates and groupIndex
-          if (groupId !== null && groupIndex !== null) {
-            const conditionFunction = new Function(
-              "formStates",            
-              "groupStates",
-              "groupId",
-              "groupIndex",
-              visibilityCondition.value
-            );         
-            
-            return conditionFunction(formStates, groupStates,groupId, groupIndex);
-          } else {
-            // For non-group fields, evaluate using formStates
-            const conditionFunction = new Function(
-              "formStates",
-              "groupStates",
-              visibilityCondition.value
-            );            
-            return conditionFunction(formStates, groupStates);
-          }
-        } catch (error) {
-          console.error("Error evaluating condition script:", error);
-          return true; // Default to visible if the script fails
-        }
-      } else {
-        return true;
-      }
-     
-  }
+    if (!item.conditions || item.conditions.length === 0) {
+      return true; // Default to visible if there are no conditions
+    }
 
-  const executeCalculatedValueAndSetIfExists = (item: Item ,groupId: string | null = null,
-    groupIndex: number | null = null) :boolean  => {         
+    const visibilityCondition = item.conditions.find(condition => condition.type === 'visibility');
 
-      if (!item.conditions || item.conditions.length === 0) {
-        return false; // Default to false if there are no conditions
-      }
-      
-      const calculatedValCondition = item.conditions.find(condition => condition.type === 'calculatedValue');
-
-      if (calculatedValCondition) {
-        try {  
-          let calculatedFieldValue ="";     
-                 
-          const calculationFunction = new Function(
-            "formStates",            
+    if (visibilityCondition) {
+      try {
+        // If the field is in a group, pass groupStates and groupIndex
+        if (groupId !== null && groupIndex !== null) {
+          const conditionFunction = new Function(
+            "formStates",
             "groupStates",
             "groupId",
             "groupIndex",
-            calculatedValCondition.value
-          );         
-            
+            visibilityCondition.value
+          );
 
-          calculatedFieldValue = calculationFunction(formStates, groupStates,groupId, groupIndex);
-        
-          let currentValue ;
-         
-          if (groupId !== null && groupIndex !== null) {
-            currentValue=  groupStates[groupId]?.[groupIndex]?.[item.id];        
-          }else {
-            currentValue = formStates[item.id];
-          }
-          if (calculatedFieldValue !== currentValue) {
-            setFieldValue(item.id, calculatedFieldValue, groupId, groupIndex);
-          
-          }  
-          return true;      
-
-        } catch (error) {
-          
-          return false; // Default to false if the script fails
+          return conditionFunction(formStates, groupStates, groupId, groupIndex);
+        } else {
+          // For non-group fields, evaluate using formStates
+          const conditionFunction = new Function(
+            "formStates",
+            "groupStates",
+            visibilityCondition.value
+          );
+          return conditionFunction(formStates, groupStates);
         }
+      } catch (error) {
+        console.error("Error evaluating condition script:", error);
+        return true; // Default to visible if the script fails
       }
+    } else {
+      return true;
+    }
 
-
-      return false;
   }
 
-  const doesFieldHasCondition = (type:string, item: Item ,groupId: string | null = null,
-    groupIndex: number | null = null ) : boolean => { 
-    
+  const executeCalculatedValueAndSetIfExists = (item: Item, groupId: string | null = null,
+    groupIndex: number | null = null): boolean => {
+
     if (!item.conditions || item.conditions.length === 0) {
       return false; // Default to false if there are no conditions
-    }  
+    }
+
+    const calculatedValCondition = item.conditions.find(condition => condition.type === 'calculatedValue');
+
+    if (calculatedValCondition) {
+      try {
+        let calculatedFieldValue = "";
+
+        const calculationFunction = new Function(
+          "formStates",
+          "groupStates",
+          "groupId",
+          "groupIndex",
+          calculatedValCondition.value
+        );
+
+
+        calculatedFieldValue = calculationFunction(formStates, groupStates, groupId, groupIndex);
+
+        let currentValue;
+
+        if (groupId !== null && groupIndex !== null) {
+          currentValue = groupStates[groupId]?.[groupIndex]?.[item.id];
+        } else {
+          currentValue = formStates[item.id];
+        }
+        if (calculatedFieldValue !== currentValue) {
+          setFieldValue(item.id, calculatedFieldValue, groupId, groupIndex);
+
+        }
+        return true;
+
+      } catch (error) {
+
+        return false; // Default to false if the script fails
+      }
+    }
+
+
+    return false;
+  }
+
+  const doesFieldHasCondition = (type: string, item: Item, groupId: string | null = null,
+    groupIndex: number | null = null): boolean => {
+
+    if (!item.conditions || item.conditions.length === 0) {
+      return false; // Default to false if there are no conditions
+    }
     const typeCondition = item.conditions.find((condition) => condition.type === type);
     if (typeCondition) {
-      try {  
-         
-               
+      try {
+
+
         const typeConditionFunction = new Function(
-          "formStates",            
+          "formStates",
           "groupStates",
           "groupId",
           "groupIndex",
           typeCondition.value
         );
-        return typeConditionFunction(formStates, groupStates,groupId, groupIndex); 
-      } catch (error) {        
+        return typeConditionFunction(formStates, groupStates, groupId, groupIndex);
+      } catch (error) {
         return false; // Default to false if the script fails
       }
     }
     return false;
-  } 
+  }
 
   const setFieldValue = (fieldId: string,
     value: any,
@@ -500,7 +501,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
       }));
     }
   };
- 
+
 
   const renderComponent = (
     item: Item,
@@ -509,13 +510,13 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
   ) => {
     const Component = componentMapping[item.type];
     if (!Component) return null;
-    
-    const calcValExists = executeCalculatedValueAndSetIfExists(item, groupId, groupIndex);  
-    
+
+    const calcValExists = executeCalculatedValueAndSetIfExists(item, groupId, groupIndex);
+
 
     if (!isFieldVisible(item, groupId, groupIndex)) {
       return null; // Field is not visible based on condition
-    }    
+    }
 
     const fieldId = item.id;
     const error = formErrors[fieldId];
@@ -526,16 +527,16 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
         {isRequired && <span className="required-asterisk"> *</span>}
       </span>
     );
-    
-     
+
+
     switch (item.type) {
-      case "text-input":               
+      case "text-input":
         return (
           <><InputMask
-          className="field-container no-print"
-         
-          
-          
+            className="field-container no-print"
+
+
+
             mask={item.mask || ''}
             value={
               groupId
@@ -544,47 +545,47 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
             }
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               handleInputChange(fieldId, e.target.value, groupId, groupIndex)
-              
+
             }
-            
-            readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists || mode=="view"}
-            
-          >  
-              <Component 
-                className="field-container"
-                key={fieldId}
-                id={fieldId}
-                labelText={label}
-                placeholder={item.placeholder}
-                helperText={item.helperText}
-                name={fieldId}
-                style={{marginBottom: "5px" }}                
-                invalid={!!error}
-                invalidText={error || ""}
-                
-              />            
+
+            readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
+
+          >
+            <Component
+              className="field-container"
+              key={fieldId}
+              id={fieldId}
+              labelText={label}
+              placeholder={item.placeholder}
+              helperText={item.helperText}
+              name={fieldId}
+              style={{ marginBottom: "5px" }}
+              invalid={!!error}
+              invalidText={error || ""}
+
+            />
           </InputMask>
-           <div className="hidden-on-screen cds--text-input-wrapper">  
-            <div className="cds--text-input__label-wrapper">         
-              <label className="cds--label" dir="auto"><span>{label}</span> </label>
-            </div>
-            <div className="cds--text-input__field-outer-wrapper">
-              <div className="cds--text-input__field-wrapper">
-              {
-            groupId
-              ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || ""
-              : formStates[fieldId] || ""
-          }
+            <div className="hidden-on-screen cds--text-input-wrapper">
+              <div className="cds--text-input__label-wrapper">
+                <label className="cds--label" dir="auto"><span>{label}</span> </label>
               </div>
+              <div className="cds--text-input__field-outer-wrapper">
+                <div className="cds--text-input__field-wrapper">
+                  {
+                    groupId
+                      ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || ""
+                      : formStates[fieldId] || ""
+                  }
+                </div>
+              </div>
+
+              <div className="cds--form__helper-text" dir="auto">{item.helperText}</div>
             </div>
-          
-           <div className="cds--form__helper-text" dir="auto">{item.helperText}</div>
-            </div>
-          </> 
+          </>
         );
-        case "currency-input":               
+      case "currency-input":
         return (
-          <CurrencyInput           
+          <CurrencyInput
             value={
               groupId
                 ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || ""
@@ -595,18 +596,18 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
               handleInputChange(fieldId, e.target.value.replace(/^\$/, ''), groupId, groupIndex)
             }
           } */
-          onChangeValue={(event, originalValue, maskedValue) => {
-            console.log(event, originalValue, maskedValue);
-            handleInputChange(fieldId, originalValue, groupId, groupIndex)
-          }}
+            onChangeValue={(event, originalValue, maskedValue) => {
+              console.log(event, originalValue, maskedValue);
+              handleInputChange(fieldId, originalValue, groupId, groupIndex)
+            }}
             currency="CAD"
-            
-            locale ="en-CA"
+
+            locale="en-CA"
             autoReset={false}
             InputElement={
-            
-              <Component 
-              className="field-container"              
+
+              <Component
+                className="field-container"
                 key={fieldId}
                 id={fieldId}
                 labelText={label}
@@ -616,11 +617,11 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
                 invalid={!!error}
                 invalidText={error || ""}
               />}
-              >            
+          >
           </CurrencyInput>
-        );  
+        );
       case "dropdown":
-         const items =
+        const items =
           item.listItems?.map(({ value, text }) => ({ value, label: text })) ||
           [];
         const itemToString = (item: any) => (item ? item.label : "");
@@ -637,69 +638,70 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
 
         return (
           <>
-          <Component
-            key={fieldId}
-            id={fieldId}
-            titleText={label}
-            className="field-container no-print"
-            label={item.placeholder}
-            items={items}
-            itemToString={itemToString}
-            selectedItem={selectedItem}
-            onChange={({ selectedItem }: { selectedItem: any }) =>
-              handleInputChange(
-                fieldId,
-                selectedItem.value,
-                groupId,
-                groupIndex
-              )
-            }
-            style={{ marginBottom: "5px" }}
-            readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists || mode=="view"}
-            invalid={!!error}
-            invalidText={error || ""}
-            
-          />
-          <div className="hidden-on-screen cds--text-input-wrapper">  
-          <div className="cds--text-input__label-wrapper">         
-            <label className="cds--label" dir="auto"><span>{label}</span> </label>
-          </div>
-          <div className="cds--text-input__field-outer-wrapper">
-            <div className="cds--text-input__field-wrapper">
-            {
-          selectedItem?.label
-        }
+            <Component
+              key={fieldId}
+              id={fieldId}
+              titleText={label}
+              className="field-container no-print"
+              label={item.placeholder}
+              items={items}
+              itemToString={itemToString}
+              selectedItem={selectedItem}
+              onChange={({ selectedItem }: { selectedItem: any }) =>
+                handleInputChange(
+                  fieldId,
+                  selectedItem.value,
+                  groupId,
+                  groupIndex
+                )
+              }
+              style={{ marginBottom: "5px" }}
+              readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
+              invalid={!!error}
+              invalidText={error || ""}
+
+            />
+            <div className="hidden-on-screen cds--text-input-wrapper">
+              <div className="cds--text-input__label-wrapper">
+                <label className="cds--label" dir="auto"><span>{label}</span> </label>
+              </div>
+              <div className="cds--text-input__field-outer-wrapper">
+                <div className="cds--text-input__field-wrapper">
+                  {
+                    selectedItem?.label
+                  }
+                </div>
+              </div>
+
+              <div className="cds--form__helper-text" dir="auto">{item.helperText}</div>
             </div>
-          </div>
-        
-         <div className="cds--form__helper-text" dir="auto">{item.helperText}</div>
-          </div>
           </>
-        ); 
+        );
       case "checkbox":
         return (
           <div style={{ marginBottom: "5px" }}>
             <Component
-            className="field-container"
+              className="field-container"
               key={fieldId}
               id={fieldId}
               labelText={item.label}
-              
+
               checked={
                 groupId
                   ? groupStates[groupId]?.[groupIndex!]?.[fieldId] ?? false
                   : formStates[fieldId] ?? false
-              }              
+              }
               /* onChange={(checked: boolean) => {
                 console.log("checked",checked);
                 handleInputChange(fieldId, String(checked), groupId, groupIndex)
               }
             } */
-            onChange={(event: { checked: boolean }) =>{
-              console.log("checked",event.checked);
-               handleInputChange(fieldId, String(event?.checked ?? false), groupId, groupIndex)} 
-            }
-              readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists || mode=="view"}
+              onChange={(event: { checked: boolean }) => {
+                console.log("checked", event.checked);
+                handleInputChange(fieldId, String(event?.checked ?? false), groupId, groupIndex)
+              }
+              }
+              readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
               invalid={!!error}
               invalidText={error || ""}
             />
@@ -708,11 +710,11 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
       case "toggle":
         return (
           <div key={fieldId} style={{ marginBottom: "25px" }}>
-            
+
             <Component
-            className="field-container"
+              className="field-container"
               id={fieldId}
-              labelText={item.label}   
+              labelText={item.label}
               labelA={item.offText || "No"}
               labelB={item.onText || "Yes"}
               size={item.size}
@@ -724,83 +726,83 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
               onToggle={(checked: boolean) =>
                 handleInputChange(fieldId, checked, groupId, groupIndex)
               }
-              readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists || mode=="view"}
+              readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
               invalid={!!error}
               invalidText={error || ""}
             />
           </div>
         );
-      case "date":  
+      case "date":
       case "date-picker":
         const selectedDate = groupId
           ? groupStates[groupId]?.[groupIndex!]?.[fieldId]
             ? parseISO(groupStates[groupId][groupIndex!][fieldId])
             : undefined
           : formStates[fieldId]
-          ? parseISO(formStates[fieldId])
-          : undefined;
+            ? parseISO(formStates[fieldId])
+            : undefined;
         const dateFormat = item.mask || "Y-m-d";
         const internalDateFormat = "yyyy-MM-dd"; // Use this format to store internally
         return (
           <>
-          <Component
-          className="field-container no-print"
-            key={fieldId}
-            datePickerType="single"
-            value={selectedDate ? [selectedDate] : []}
-            onChange={(dates: Date[]) => {
-              if (dates.length === 0) {
-                handleInputChange(fieldId, "", groupId, groupIndex);
-              } else {
-                // Save internal format for storage
-                const internalFormattedDate = formatDate(
-                  dates[0],
-                  internalDateFormat
-                );
-                // Save display format for rendering
-                //const displayFormattedDate = format(dates[0], dateFormat);
+            <Component
+              className="field-container no-print"
+              key={fieldId}
+              datePickerType="single"
+              value={selectedDate ? [selectedDate] : []}
+              onChange={(dates: Date[]) => {
+                if (dates.length === 0) {
+                  handleInputChange(fieldId, "", groupId, groupIndex);
+                } else {
+                  // Save internal format for storage
+                  const internalFormattedDate = formatDate(
+                    dates[0],
+                    internalDateFormat
+                  );
+                  // Save display format for rendering
+                  //const displayFormattedDate = format(dates[0], dateFormat);
 
-                handleInputChange(
-                  fieldId,
-                  internalFormattedDate,
-                  groupId,
-                  groupIndex
-                );
-              }
-            }}
-            style={{ marginBottom: "5px" }}
-            dateFormat={dateFormat}
-            readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists || mode=="view"}
-            invalid={!!error}
-            invalidText={error || ""}
-            
-          >
-            <DatePickerInput
-              id={fieldId}
-              placeholder={item.placeholder}
-              labelText={label}
-              readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists || mode=="view"}
+                  handleInputChange(
+                    fieldId,
+                    internalFormattedDate,
+                    groupId,
+                    groupIndex
+                  );
+                }
+              }}
+              style={{ marginBottom: "5px" }}
+              dateFormat={dateFormat}
+              readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
               invalid={!!error}
               invalidText={error || ""}
-              helperText={item.helperText}
-              
-            />
-          </Component>
-          <div className="hidden-on-screen cds--text-input-wrapper">  
-            <div className="cds--text-input__label-wrapper">         
-              <label className="cds--label" dir="auto"><span>{label}</span> </label>
-            </div>
-            <div className="cds--text-input__field-outer-wrapper">
-              <div className="cds--text-input__field-wrapper">
-              {
-            groupId
-              ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || ""
-              : formStates[fieldId] || ""
-          }
+
+            >
+              <DatePickerInput
+                id={fieldId}
+                placeholder={item.placeholder}
+                labelText={label}
+                readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
+                invalid={!!error}
+                invalidText={error || ""}
+                helperText={item.helperText}
+
+              />
+            </Component>
+            <div className="hidden-on-screen cds--text-input-wrapper">
+              <div className="cds--text-input__label-wrapper">
+                <label className="cds--label" dir="auto"><span>{label}</span> </label>
               </div>
-            </div>
-          
-           <div className="cds--form__helper-text" dir="auto">{item.helperText}</div>
+              <div className="cds--text-input__field-outer-wrapper">
+                <div className="cds--text-input__field-wrapper">
+                  {
+                    groupId
+                      ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || ""
+                      : formStates[fieldId] || ""
+                  }
+                </div>
+              </div>
+
+              <div className="cds--form__helper-text" dir="auto">{item.helperText}</div>
             </div>
           </>
         );
@@ -824,7 +826,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
             }
             rows={4}
             style={{ marginBottom: "5px" }}
-            readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists || mode=="view"}
+            readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
             invalid={!!error}
             invalidText={error || ""}
           />
@@ -835,7 +837,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
             key={fieldId}
             id={fieldId}
             name={fieldId}
-            size="md"            
+            size="md"
             onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
               handleInputChange(
                 fieldId,
@@ -880,16 +882,16 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
           />
         );
       case "text-info":
-        const textInfo =  item.value || "";
-        return (     
-          
+        const textInfo = item.value || "";
+        return (
+
           <Component
-          className="text-block field-container"
-          key={fieldId}
-          id={fieldId}                  
-          dangerouslySetInnerHTML={{ __html: parseDynamicText(textInfo) }}
-        />
-        
+            className="text-block field-container"
+            key={fieldId}
+            id={fieldId}
+            dangerouslySetInnerHTML={{ __html: parseDynamicText(textInfo) }}
+          />
+
         );
       case "link":
         return (
@@ -934,81 +936,81 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
           })) || [];
         return (
           <div key={fieldId} style={{ marginBottom: "5px" }}>
-          <Component
-          className="field-container"
-            legendText={label}
-            id={fieldId}
-            name={fieldId}
-            onChange={(value: string) =>
-              handleInputChange(fieldId, value, groupId, groupIndex)
-            }
-            valueSelected={
-              groupId
-                ? groupStates[groupId]?.[groupIndex!]?.[fieldId]
-                : formStates[fieldId]
-            }
-            readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists || mode=="view"}
-            invalid={!!error}
-            invalidText={error || ""}
-          >
-            {radioOptions.map((option, index) => (
-              <RadioButton
-                key={index}
-                labelText={option.label}
-                value={option.value}
-                id={`${fieldId}-${index}`}
-              />
-            ))}
-          </Component></div>
+            <Component
+              className="field-container"
+              legendText={label}
+              id={fieldId}
+              name={fieldId}
+              onChange={(value: string) =>
+                handleInputChange(fieldId, value, groupId, groupIndex)
+              }
+              valueSelected={
+                groupId
+                  ? groupStates[groupId]?.[groupIndex!]?.[fieldId]
+                  : formStates[fieldId]
+              }
+              readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
+              invalid={!!error}
+              invalidText={error || ""}
+            >
+              {radioOptions.map((option, index) => (
+                <RadioButton
+                  key={index}
+                  labelText={option.label}
+                  value={option.value}
+                  id={`${fieldId}-${index}`}
+                />
+              ))}
+            </Component></div>
         );
-      
+
       case "select":
         const itemsForSelect = item.listItems || [];
         return (
           <>
-          <Select
-          className="field-container no-print"
-            id={fieldId}
-            name={fieldId}
-            labelText={label}
-            helperText={item.helperText}
-            value={
-              groupId
-                ? groupStates[groupId]?.[groupIndex!]?.[fieldId]
-                : formStates[fieldId]
-            }
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-              handleInputChange(fieldId, e.target.value, groupId, groupIndex)
-            }
-            
-            invalid={!!error}
-            invalidText={error || ""}
-          >
-            <SelectItem value="" text="" />
-            {itemsForSelect.map((itemForSelect) => (
-              <SelectItem
-                key={itemForSelect.value}
-                value={itemForSelect.value}
-                text={itemForSelect.text}
-              />
-            ))}
-          </Select>
-          <div className="hidden-on-screen cds--text-input-wrapper">  
-          <div className="cds--text-input__label-wrapper">         
-            <label className="cds--label" dir="auto"><span>{label}</span> </label>
-          </div>
-          <div className="cds--text-input__field-outer-wrapper">
-            <div className="cds--text-input__field-wrapper">
-            {
-          groupId
-            ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || ""
-            : formStates[fieldId] || ""
-        }
+            <Select
+              className="field-container no-print"
+              id={fieldId}
+              name={fieldId}
+              labelText={label}
+              helperText={item.helperText}
+              value={
+                groupId
+                  ? groupStates[groupId]?.[groupIndex!]?.[fieldId]
+                  : formStates[fieldId]
+              }
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                handleInputChange(fieldId, e.target.value, groupId, groupIndex)
+              }
+
+              invalid={!!error}
+              invalidText={error || ""}
+            >
+              <SelectItem value="" text="" />
+              {itemsForSelect.map((itemForSelect) => (
+                <SelectItem
+                  key={itemForSelect.value}
+                  value={itemForSelect.value}
+                  text={itemForSelect.text}
+                />
+              ))}
+            </Select>
+            <div className="hidden-on-screen cds--text-input-wrapper">
+              <div className="cds--text-input__label-wrapper">
+                <label className="cds--label" dir="auto"><span>{label}</span> </label>
+              </div>
+              <div className="cds--text-input__field-outer-wrapper">
+                <div className="cds--text-input__field-wrapper">
+                  {
+                    groupId
+                      ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || ""
+                      : formStates[fieldId] || ""
+                  }
+                </div>
+              </div>
+
+              <div className="cds--form__helper-text" dir="auto">{item.helperText}</div>
             </div>
-          </div>
-        
-         <div className="cds--form__helper-text" dir="auto">{item.helperText}</div>
-          </div>
           </>
         );
       case "group":
@@ -1017,7 +1019,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
             <div className="group-header">{item.label}</div>
             {item.groupItems?.map((groupItem, groupIndex) => (
               <div key={`${item.id}-${groupIndex}`} className="group-item-container">
-                {item.repeater && (<div className="group-item-header">{item.repeaterItemLabel || item.label} {groupIndex+1}</div>)}
+                {item.repeater && (<div className="group-item-header">{item.repeaterItemLabel || item.label} {groupIndex + 1}</div>)}
                 <div
                   className="group-fields-grid"
                   style={{
@@ -1026,39 +1028,39 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
                     gap: "15px",
                   }}
                 >
-                {groupItem.fields.map((groupField) => (
-                 <div
-                 key={groupField.id}
-                 style={{
-                   gridColumn: `span ${groupField.customStyle?.webColumns || 4}`, 
-                   marginBottom: "5px",
-                 }}
-                 data-print-columns={groupField.customStyle?.printColumns || 4} 
-               >
+                  {groupItem.fields.map((groupField) => (
+                    <div
+                      key={groupField.id}
+                      style={{
+                        gridColumn: `span ${groupField.customStyle?.webColumns || 4}`,
+                        marginBottom: "5px",
+                      }}
+                      data-print-columns={groupField.customStyle?.printColumns || 4}
+                    >
                       {renderComponent(groupField, item.id, groupIndex)}
                     </div>
-                    ))}
-                  </div>
-                {item.groupItems && item.groupItems.length > 1 &&  (mode=="edit" || goBack) && formData.readOnly!= true &&(
+                  ))}
+                </div>
+                {item.groupItems && item.groupItems.length > 1 && (mode == "edit" || goBack) && formData.readOnly != true && (
                   <Button
                     kind="ghost"
                     onClick={() => handleRemoveGroupItem(item.id, groupIndex)}
                     renderIcon={Subtract}
                     className="no-print"
                   >
-                    Remove {item.label} {groupIndex+1}
+                    Remove {item.label} {groupIndex + 1}
                   </Button>
                 )}
               </div>
             ))}
-            {item.repeater && (mode=="edit" || goBack) && formData.readOnly!= true &&(
+            {item.repeater && (mode == "edit" || goBack) && formData.readOnly != true && (
               <Button
                 kind="ghost"
                 onClick={() => handleAddGroupItem(item.id)}
                 renderIcon={Add}
                 className="no-print"
               >
-                Add {item.label} 
+                Add {item.label}
               </Button>
             )}
           </div>
@@ -1066,46 +1068,46 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
       default:
         return null;
     }
-    
+
   };
 
   const createSavedData = () => {
-   
+
     const saveFieldData: SavedFieldData = {};
     //save date based on visibility
 
-     // For non-group fields
-  formData.data.items.forEach((item) => {
-    if (item.type !== "group" && shouldFieldBeIncludedForSaving(item)) {
-      if (formStates[item.id] !== undefined) {
-        saveFieldData[item.id] = formStates[item.id];
+    // For non-group fields
+    formData.data.items.forEach((item) => {
+      if (item.type !== "group" && shouldFieldBeIncludedForSaving(item)) {
+        if (formStates[item.id] !== undefined) {
+          saveFieldData[item.id] = formStates[item.id];
+        }
       }
-    }
-  });
+    });
 
-  // For group fields
-  formData.data.items.forEach((groupItem) => {
-    if (groupItem.type === "group" && shouldFieldBeIncludedForSaving(groupItem)) {
-      const visibleGroupItems = groupStates[groupItem.id]?.map((groupItemState, groupIndex) => {
-        const filteredGroupItem: { [key: string]: FieldValue } = {};
+    // For group fields
+    formData.data.items.forEach((groupItem) => {
+      if (groupItem.type === "group" && shouldFieldBeIncludedForSaving(groupItem)) {
+        const visibleGroupItems = groupStates[groupItem.id]?.map((groupItemState, groupIndex) => {
+          const filteredGroupItem: { [key: string]: FieldValue } = {};
 
-        groupItem.groupItems?.[groupIndex]?.fields.forEach((field) => {
-          if (shouldFieldBeIncludedForSaving(field, groupItem.id, groupIndex) && groupItemState[field.id] !== undefined) {
-            filteredGroupItem[field.id] = groupItemState[field.id];
-          }
+          groupItem.groupItems?.[groupIndex]?.fields.forEach((field) => {
+            if (shouldFieldBeIncludedForSaving(field, groupItem.id, groupIndex) && groupItemState[field.id] !== undefined) {
+              filteredGroupItem[field.id] = groupItemState[field.id];
+            }
+          });
+
+          return Object.keys(filteredGroupItem).length > 0 ? filteredGroupItem : null;
         });
 
-        return Object.keys(filteredGroupItem).length > 0 ? filteredGroupItem : null;
-      });
+        // Filter out any null values (groups where no fields were visible)
+        const cleanedGroupItems = visibleGroupItems.filter((group) => group !== null);
 
-      // Filter out any null values (groups where no fields were visible)
-      const cleanedGroupItems = visibleGroupItems.filter((group) => group !== null);
-
-      if (cleanedGroupItems.length > 0) {
-        saveFieldData[groupItem.id] = cleanedGroupItems;
+        if (cleanedGroupItems.length > 0) {
+          saveFieldData[groupItem.id] = cleanedGroupItems;
+        }
       }
-    }
-  });
+    });
     //save data based in visibility ends
 
     //SavedData
@@ -1115,24 +1117,26 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
       form_definition: data.form_definition,
       metadata: data.metadata,
     };
-    console.log("Saved Data",JSON.stringify(savedData));
+    console.log("Saved Data", JSON.stringify(savedData));
     return savedData;
   };
 
-  
+
   const saveDataToICMApi = async () => {
     try {
-      const saveDataICMEndpoint = import.meta.env
-        .VITE_COMM_API_SAVEDATA_ICM_ENDPOINT_URL;
+      const saveDataICMEndpoint = import.meta.env.VITE_COMM_API_SAVEDATA_ICM_ENDPOINT_URL;
       const queryParams = new URLSearchParams(window.location.search);
       const params: { [key: string]: string | null } = {};
+      const token = keycloak.token;
       queryParams.forEach((value, key) => {
         params[key] = value;
       });
-      const savedJson={
+      const savedJson = {
         "attachmentId": params["attachmentId"],
         "OfficeName": params["OfficeName"],
-        "savedForm": JSON.stringify(createSavedData())};
+        token,
+        "savedForm": JSON.stringify(createSavedData())
+      };
 
       const response = await fetch(saveDataICMEndpoint, {
         method: "POST",
@@ -1164,7 +1168,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
           item.groupItems.forEach((groupItem, groupIndex) => {
             groupItem.fields.forEach((fieldInGroup) => {
               if (isFieldVisible(fieldInGroup, item.id, groupIndex)) {  // See if the filed in group is visible          
-            
+
                 const fieldIdInGroup = fieldInGroup.id;
                 const fieldValueInGroup =
                   groupStates[item.id][groupIndex][fieldIdInGroup];
@@ -1189,30 +1193,31 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
             errors[fieldId] = validationError;
             isValid = false;
           }
-      }
+        }
       }
     });
 
-    setFormErrors(errors);    
+    setFormErrors(errors);
     return isValid;
   };
   const unlockICMFinalFlags = async () => {
     try {
-      const unlockICMFinalEdpoint = import.meta.env
-        .VITE_COMM_API_UNLOCK_ICM_FORM_URL;
+      const unlockICMFinalEdpoint = import.meta.env.VITE_COMM_API_UNLOCK_ICM_FORM_URL;
       const queryParams = new URLSearchParams(window.location.search);
       const params: { [key: string]: string | null } = {};
+      const token = keycloak.token;
       queryParams.forEach((value, key) => {
         params[key] = value;
       });
-      
+
       const response = await fetch(unlockICMFinalEdpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          ...params
+          ...params,
+          token,
         }),
       });
       if (response.ok) {
@@ -1228,7 +1233,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
       return "failed";
     }
   };
-  
+
   const handleSave = async () => {
     if (validateAllFields()) {
       const returnMessage = saveDataToICMApi();
@@ -1247,13 +1252,12 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
       const returnMessage = saveDataToICMApi();
       if ((await returnMessage) === "success") {
         const unlockMessage = unlockICMFinalFlags();
-        if ((await unlockMessage) == "success")
-        {
+        if ((await unlockMessage) == "success") {
           window.opener = null;
           window.open("", "_self");
           window.close();
         }
-        else {window.alert("Error clearing locked flags. Please try again.");}
+        else { window.alert("Error clearing locked flags. Please try again."); }
       } else {
         window.alert("Error saving form. Please try again !!!");
       }
@@ -1263,52 +1267,52 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
   };
 
 
-   const handlePrint = async () => {
+  const handlePrint = async () => {
     try {
-      
+
       const originalTitle = document.title;
       document.title = formData.form_id || 'CustomFormName';
       // Create metadata elements
-    const metaDescription = document.createElement('meta');
-    metaDescription.name = 'description';
-    metaDescription.content = 'Form PDF.';
+      const metaDescription = document.createElement('meta');
+      metaDescription.name = 'description';
+      metaDescription.content = 'Form PDF.';
 
-    const metaAuthor = document.createElement('meta');
-    metaAuthor.name = 'author';
-    metaAuthor.content = 'KILN';
+      const metaAuthor = document.createElement('meta');
+      metaAuthor.name = 'author';
+      metaAuthor.content = 'KILN';
 
-    const metaLanguage = document.createElement('meta');
-    metaLanguage.httpEquiv = 'Content-Language';
-    metaLanguage.content = 'en';
+      const metaLanguage = document.createElement('meta');
+      metaLanguage.httpEquiv = 'Content-Language';
+      metaLanguage.content = 'en';
 
-    // Append metadata to the <head>
-    const head = document.head;
-    head.appendChild(metaDescription);
-    head.appendChild(metaAuthor);
-    head.appendChild(metaLanguage);
+      // Append metadata to the <head>
+      const head = document.head;
+      head.appendChild(metaDescription);
+      head.appendChild(metaAuthor);
+      head.appendChild(metaLanguage);
 
-      
+
       window.print();
-      document.title = originalTitle; 
+      document.title = originalTitle;
       head.removeChild(metaDescription);
-    head.removeChild(metaAuthor);
-    head.removeChild(metaLanguage);
-          
-    
-      } catch (error) {
+      head.removeChild(metaAuthor);
+      head.removeChild(metaLanguage);
+
+
+    } catch (error) {
       console.error("Error during print:", error);
     }
-  };  
+  };
 
-  
+
   const ministryLogoPath = `${window.location.origin}/ministries/${formData.ministry_id}.png`;
-  
+
   const parseDynamicText = (text: string): string => {
     const regex = /{(formStates\['(.*?)']|groupStates\['(.*?)']\?\.\[(.*?)!?\]\?\.\['(.*?)'])\|?(format:([\w/-]+))?}/g;
-  
+
     return text.replace(regex, (_match, _fullMatch, fieldId, groupId, groupIndex, nestedFieldId, _formatMatch, format) => {
       let value: string | undefined;
-  
+
       // Check if it's a formStates match
       if (fieldId) {
         value = formStates[fieldId];
@@ -1317,10 +1321,10 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
       else if (groupId && groupIndex && nestedFieldId) {
         value = groupStates[groupId]?.[groupIndex]?.[nestedFieldId];
       }
-  
+
       // If no value is found, return the default blank line
       if (!value) return '______________________________';
-  
+
       // Handle date formatting if a format is specified
       if (format && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
         try {
@@ -1331,94 +1335,94 @@ const Renderer: React.FC<RendererProps> = ({ data, mode ,goBack }) => {
           return 'Invalid Date';
         }
       }
-  
+
       // Return the value as is if no formatting is required
       return value;
     });
   };
 
   return (
-    
+
     <div ref={pdfContainerRef} >
-      
-      <div className="header-section fixed">  
-          <div className="header-image">
-                  <div className="header-image-only"> 
-                  
-                    {formData.ministry_id && (
-                        <img
-                          src={ministryLogoPath}
-                        width="232px"
-                          alt="ministry logo"
-                          
-                        />
-                      )}
-                  </div>
-        <div className="header-buttons-only">        
-          {mode=="edit" &&formData.readOnly!= true &&(
-           <>
-              <Button onClick={handleSave} kind="secondary" className="no-print">
-                Save
-              </Button>
-              <Button onClick={handleSaveAndClose} kind="secondary" className="no-print">
-                Save And Close
-              </Button>              
-              
+
+      <div className="header-section fixed">
+        <div className="header-image">
+          <div className="header-image-only">
+
+            {formData.ministry_id && (
+              <img
+                src={ministryLogoPath}
+                width="232px"
+                alt="ministry logo"
+
+              />
+            )}
+          </div>
+          <div className="header-buttons-only">
+            {mode == "edit" && formData.readOnly != true && (
+              <>
+                <Button onClick={handleSave} kind="secondary" className="no-print">
+                  Save
+                </Button>
+                <Button onClick={handleSaveAndClose} kind="secondary" className="no-print">
+                  Save And Close
+                </Button>
+
               </>
             )}
-            {goBack &&(                           
-                <Button onClick={goBack} kind="secondary" className="no-print">
-                  Back
-                </Button>    
+            {goBack && (
+              <Button onClick={goBack} kind="secondary" className="no-print">
+                Back
+              </Button>
             )}
-              <Button  kind="secondary" onClick={handlePrint} className="no-print">
-                  Print
-                </Button>
-            </div>
-            
-           
-            
-               
+            <Button kind="secondary" onClick={handlePrint} className="no-print">
+              Print
+            </Button>
           </div>
+
+
+
+
+        </div>
       </div>
       <div className="scrollable-content">
-      <div className="header-section">
-      <div className="header-title-buttons"> 
-      <div className="header-title-only" >        
-                 {formData.title} {goBack &&(<span>(Preview)</span>)}
-        </div>
-        
-      </div>
-      </div>
-      
-      
-      
-      <div className="content-wrapper">       
-        <FlexGrid>
-        <Row >
-          {formData.data.items.map((item, index) => (
-            <div 
-            key={item.id} 
-            style={{ gridColumn: `span ${item.customStyle?.webColumns || 4}`, marginBottom:"5px",breakBefore: item.customStyle?.pageBreak as React.CSSProperties["breakBefore"] || "auto"}}
-            data-print-columns={item.customStyle?.printColumns || 4}>
-                {renderComponent(
-                  item,
-                  item.type === "group" ? item.id : null,
-                  index
-                )}
+        <div className="header-section">
+          <div className="header-title-buttons">
+            <div className="header-title-only" >
+              {formData.title} {goBack && (<span>(Preview)</span>)}
             </div>
-          ))}
-          </Row>
-        </FlexGrid>
+
+          </div>
+        </div>
+
+
+
+        <div className="content-wrapper">
+          <FlexGrid>
+            <Row >
+              {formData.data.items.map((item, index) => (
+                <div
+                  key={item.id}
+                  style={{ gridColumn: `span ${item.customStyle?.webColumns || 4}`, marginBottom: "5px", breakBefore: item.customStyle?.pageBreak as React.CSSProperties["breakBefore"] || "auto" }}
+                  data-print-columns={item.customStyle?.printColumns || 4}>
+                  {renderComponent(
+                    item,
+                    item.type === "group" ? item.id : null,
+                    index
+                  )}
+                </div>
+              ))}
+            </Row>
+          </FlexGrid>
+        </div>
       </div>
-      </div>
-      
-      <div id="footer" style={{display: 'none'}}>
+
+      <div id="footer" style={{ display: 'none' }}>
         Form ID: Form-12345
       </div>
       <div className="paged-page" data-footer-text=""></div>
     </div>
-    
+
   );
 };
 
