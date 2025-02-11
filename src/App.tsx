@@ -6,7 +6,7 @@ import PreviewFormPage from "./PreviewFormPage";
 import "@carbon/styles/css/styles.css";
 
 import React, { useState, useEffect, createContext } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 
 import { initializeKeycloak } from "./keycloak";
 import { PrivateRoute } from "./PrivateRoute";
@@ -16,21 +16,32 @@ export const AuthenticationContext = createContext<any>(null);
 const App: React.FC = () => {
   const [keycloak, setKeycloak] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const location = useLocation(); // Get the current route
+
+  // Public Routes
+  const publicRoutes = ["/preview"];
 
   useEffect(() => {
-
-    //Initialize Keycloak session
     const initKeycloak = async () => {
-
-      const _keycloak = await initializeKeycloak();
-
-      if (_keycloak?.authenticated) {
-        setKeycloak(_keycloak);
+      try {
+        const _keycloak = await initializeKeycloak();
+        if (_keycloak?.authenticated) {
+          setKeycloak(_keycloak);
+        }
+      } catch (error) {
+        console.error("Keycloak initialization error:", error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
-    initKeycloak();
-  }, []);
+
+    // Initialize Keycloak for protected routes
+    if (!publicRoutes.includes(location.pathname)) {
+      initKeycloak();
+    } else {
+      setLoading(false);
+    }
+  }, [location.pathname]);
 
   //Loading page when waiting for authentication
   if (loading) {
@@ -39,21 +50,23 @@ const App: React.FC = () => {
 
   return (
     <AuthenticationContext.Provider value={keycloak}>
-      <Router>
-        <Routes>
-          {/* Route for new */}
-          <Route path="/new" element={<PrivateRoute><NewFormPage /></PrivateRoute>} />
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/preview" element={<PreviewFormPage />} />
 
-          {/* Renderer page*/}
-          <Route path="/edit" element={<PrivateRoute><EditFormPage /></PrivateRoute>} />
-
-          {/* View-only Renderer page */}
-          <Route path="/view" element={<PrivateRoute><ViewFormPage /></PrivateRoute>} />
-          <Route path="/preview" element={<PrivateRoute><PreviewFormPage /></PrivateRoute>} />
-        </Routes>
-      </Router>
+        {/* Protected Routes */}
+        <Route path="/new" element={<PrivateRoute><NewFormPage /></PrivateRoute>} />
+        <Route path="/edit" element={<PrivateRoute><EditFormPage /></PrivateRoute>} />
+        <Route path="/view" element={<PrivateRoute><ViewFormPage /></PrivateRoute>} />
+      </Routes>
     </AuthenticationContext.Provider>
   );
 };
 
-export default App;
+const WrappedApp = () => (
+  <Router>
+    <App />
+  </Router>
+);
+
+export default WrappedApp;
