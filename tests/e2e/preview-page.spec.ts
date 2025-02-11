@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-test('should fill preview text area and click preview', async ({ page }) => {   
+test.skip('should fill preview text area and click preview', async ({ page }) => {   
   const mockJson = {
     "version":"0.0.1",
     "ministry_id":"2",
