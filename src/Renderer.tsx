@@ -684,24 +684,13 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
               className="field-container"
               key={fieldId}
               id={fieldId}
-              labelText={item.label}
-
-              checked={
-                groupId
-                  ? groupStates[groupId]?.[groupIndex!]?.[fieldId] ?? false
-                  : formStates[fieldId] ?? false
-              }
-              /* onChange={(checked: boolean) => {
-                console.log("checked",checked);
-                handleInputChange(fieldId, String(checked), groupId, groupIndex)
-              }
-            } */
-              onChange={(event: { checked: boolean }) => {
-                console.log("checked", event.checked);
-                handleInputChange(fieldId, String(event?.checked ?? false), groupId, groupIndex)
-              }
-              }
-              readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
+              labelText={item.label}            
+              checked={groupId ? groupStates[groupId]?.[groupIndex!]?.[fieldId] ?? false : formStates[fieldId] ?? false}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                const isChecked = event.target.checked;               
+                handleInputChange(fieldId, isChecked, groupId, groupIndex);
+              }}
+              readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists || mode=="view"}
               invalid={!!error}
               invalidText={error || ""}
             />
@@ -1028,15 +1017,15 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                     gap: "15px",
                   }}
                 >
-                  {groupItem.fields.map((groupField) => (
-                    <div
-                      key={groupField.id}
-                      style={{
-                        gridColumn: `span ${groupField.customStyle?.webColumns || 4}`,
-                        marginBottom: "5px",
-                      }}
-                      data-print-columns={groupField.customStyle?.printColumns || 4}
-                    >
+                {groupItem.fields.map((groupField) => (
+                 <div
+                 key={groupField.id}
+                 style={{
+                   gridColumn: `span ${groupField.customStyle?.webColumns || 4}`, 
+                   
+                 }}
+                 data-print-columns={groupField.customStyle?.printColumns || 4} 
+               >
                       {renderComponent(groupField, item.id, groupIndex)}
                     </div>
                   ))}
@@ -1343,31 +1332,29 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
 
   return (
 
-    <div ref={pdfContainerRef} >
-
-      <div className="header-section fixed">
-        <div className="header-image">
-          <div className="header-image-only">
-
-            {formData.ministry_id && (
-              <img
-                src={ministryLogoPath}
-                width="232px"
-                alt="ministry logo"
-
-              />
-            )}
-          </div>
-          <div className="header-buttons-only">
-            {mode == "edit" && formData.readOnly != true && (
-              <>
-                <Button onClick={handleSave} kind="secondary" className="no-print">
-                  Save
-                </Button>
-                <Button onClick={handleSaveAndClose} kind="secondary" className="no-print">
-                  Save And Close
-                </Button>
-
+    <div ref={pdfContainerRef} >      
+      <div className="header-section fixed">  
+          <div className="header-image">
+                  <div className="header-image-only"> 
+                  
+                    {formData.ministry_id && (
+                        <img
+                          src={ministryLogoPath}
+                        width="232px"
+                          alt="ministry logo"
+                          
+                        />
+                      )}
+                  </div>
+        <div className="header-buttons-only no-print">        
+          {mode=="edit" &&formData.readOnly!= true &&(
+           <>
+              <Button onClick={handleSave} kind="secondary" className="no-print">
+                Save
+              </Button>
+              <Button onClick={handleSaveAndClose} kind="secondary" className="no-print">
+                Save And Close
+              </Button>                        
               </>
             )}
             {goBack && (
@@ -1375,14 +1362,23 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                 Back
               </Button>
             )}
-            <Button kind="secondary" onClick={handlePrint} className="no-print">
-              Print
-            </Button>
+              <Button  kind="secondary" onClick={handlePrint} className="no-print">
+                  Print
+                </Button>
+            </div>
+            
+            <div className="header-title-print hidden-on-screen" >        
+                 {formData.title} {goBack &&(<span>(Preview)</span>)}
+            </div>
+            
+               
           </div>
-
-
-
-
+      </div>
+      <div className="scrollable-content">
+      <div className="header-section">
+      <div className="header-title-buttons"> 
+      <div className="header-title-only no-print" >        
+                 {formData.title} {goBack &&(<span>(Preview)</span>)}
         </div>
       </div>
       <div className="scrollable-content">
