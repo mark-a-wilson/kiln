@@ -684,13 +684,13 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
               className="field-container"
               key={fieldId}
               id={fieldId}
-              labelText={item.label}            
+              labelText={item.label}
               checked={groupId ? groupStates[groupId]?.[groupIndex!]?.[fieldId] ?? false : formStates[fieldId] ?? false}
               onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                const isChecked = event.target.checked;               
+                const isChecked = event.target.checked;
                 handleInputChange(fieldId, isChecked, groupId, groupIndex);
               }}
-              readOnly={formData.readOnly || doesFieldHasCondition("readOnly",item, groupId, groupIndex) || calcValExists || mode=="view"}
+              readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
               invalid={!!error}
               invalidText={error || ""}
             />
@@ -1017,15 +1017,15 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                     gap: "15px",
                   }}
                 >
-                {groupItem.fields.map((groupField) => (
-                 <div
-                 key={groupField.id}
-                 style={{
-                   gridColumn: `span ${groupField.customStyle?.webColumns || 4}`, 
-                   
-                 }}
-                 data-print-columns={groupField.customStyle?.printColumns || 4} 
-               >
+                  {groupItem.fields.map((groupField) => (
+                    <div
+                      key={groupField.id}
+                      style={{
+                        gridColumn: `span ${groupField.customStyle?.webColumns || 4}`,
+
+                      }}
+                      data-print-columns={groupField.customStyle?.printColumns || 4}
+                    >
                       {renderComponent(groupField, item.id, groupIndex)}
                     </div>
                   ))}
@@ -1113,7 +1113,8 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
 
   const saveDataToICMApi = async () => {
     try {
-      const saveDataICMEndpoint = import.meta.env.VITE_COMM_API_SAVEDATA_ICM_ENDPOINT_URL;
+      const saveDataICMEndpoint = import.meta.env
+        .VITE_COMM_API_SAVEDATA_ICM_ENDPOINT_URL;
       const queryParams = new URLSearchParams(window.location.search);
       const params: { [key: string]: string | null } = {};
       const token = keycloak.token;
@@ -1191,7 +1192,8 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
   };
   const unlockICMFinalFlags = async () => {
     try {
-      const unlockICMFinalEdpoint = import.meta.env.VITE_COMM_API_UNLOCK_ICM_FORM_URL;
+      const unlockICMFinalEdpoint = import.meta.env
+        .VITE_COMM_API_UNLOCK_ICM_FORM_URL;
       const queryParams = new URLSearchParams(window.location.search);
       const params: { [key: string]: string | null } = {};
       const token = keycloak.token;
@@ -1332,29 +1334,31 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
 
   return (
 
-    <div ref={pdfContainerRef} >      
-      <div className="header-section fixed">  
-          <div className="header-image">
-                  <div className="header-image-only"> 
-                  
-                    {formData.ministry_id && (
-                        <img
-                          src={ministryLogoPath}
-                        width="232px"
-                          alt="ministry logo"
-                          
-                        />
-                      )}
-                  </div>
-        <div className="header-buttons-only no-print">        
-          {mode=="edit" &&formData.readOnly!= true &&(
-           <>
-              <Button onClick={handleSave} kind="secondary" className="no-print">
-                Save
-              </Button>
-              <Button onClick={handleSaveAndClose} kind="secondary" className="no-print">
-                Save And Close
-              </Button>                        
+    <div ref={pdfContainerRef} >
+
+      <div className="header-section fixed">
+        <div className="header-image">
+          <div className="header-image-only">
+
+            {formData.ministry_id && (
+              <img
+                src={ministryLogoPath}
+                width="232px"
+                alt="ministry logo"
+
+              />
+            )}
+          </div>
+          <div className="header-buttons-only no-print">
+            {mode == "edit" && formData.readOnly != true && (
+              <>
+                <Button onClick={handleSave} kind="secondary" className="no-print">
+                  Save
+                </Button>
+                <Button onClick={handleSaveAndClose} kind="secondary" className="no-print">
+                  Save And Close
+                </Button>
+
               </>
             )}
             {goBack && (
@@ -1362,29 +1366,22 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                 Back
               </Button>
             )}
-              <Button  kind="secondary" onClick={handlePrint} className="no-print">
-                  Print
-                </Button>
-            </div>
-            
-            <div className="header-title-print hidden-on-screen" >        
-                 {formData.title} {goBack &&(<span>(Preview)</span>)}
-            </div>
-            
-               
+            <Button kind="secondary" onClick={handlePrint} className="no-print">
+              Print
+            </Button>
           </div>
-      </div>
-      <div className="scrollable-content">
-      <div className="header-section">
-      <div className="header-title-buttons"> 
-      <div className="header-title-only no-print" >        
-                 {formData.title} {goBack &&(<span>(Preview)</span>)}
+
+          <div className="header-title-print hidden-on-screen" >
+            {formData.title} {goBack && (<span>(Preview)</span>)}
+          </div>
+
+
         </div>
       </div>
       <div className="scrollable-content">
         <div className="header-section">
           <div className="header-title-buttons">
-            <div className="header-title-only" >
+            <div className="header-title-only no-print" >
               {formData.title} {goBack && (<span>(Preview)</span>)}
             </div>
 
