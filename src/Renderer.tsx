@@ -1008,7 +1008,10 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
             <div className="group-header">{item.label}</div>
             {item.groupItems?.map((groupItem, groupIndex) => (
               <div key={`${item.id}-${groupIndex}`} className="group-item-container">
-                {item.repeater && (<div className="group-item-header">{item.repeaterItemLabel || item.label} {groupIndex + 1}</div>)}
+                {item.repeater && (<div className="group-item-header">                 
+                  {item.repeaterItemLabel || item.label}
+                    {(item.repeaterItemLabel || item.label) && ` ${groupIndex + 1}`}
+                  </div>)}
                 <div
                   className="group-fields-grid"
                   style={{
@@ -1037,7 +1040,8 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                     renderIcon={Subtract}
                     className="no-print"
                   >
-                    Remove {item.label} {groupIndex + 1}
+                    Remove {item.repeaterItemLabel || item.label}
+                    {(item.repeaterItemLabel || item.label) && ` ${groupIndex + 1}`}
                   </Button>
                 )}
               </div>
@@ -1049,7 +1053,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                 renderIcon={Add}
                 className="no-print"
               >
-                Add {item.label}
+                Add {item.repeaterItemLabel || item.label} 
               </Button>
             )}
           </div>
