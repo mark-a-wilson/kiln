@@ -6,12 +6,6 @@ export default defineConfig({
   testDir: "./tests/e2e",
   fullyParallel: true,
   reporter: [["html", { open: "never" }]],
-  webServer: {
-    command: "npm run dev", 
-    port: 5173,
-    timeout: 30000, 
-    reuseExistingServer: !process.env.CI, 
-  },
   use: {
     baseURL,
     launchOptions: {
