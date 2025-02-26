@@ -54,7 +54,6 @@ interface Item {
   listItems?: { value: string; text: string }[];
   groupItems?: { fields: Item[] }[];
   repeater?: boolean;
-  style?: { marginBottom?: string; fontSize?: string };
   labelText: string;
   helperText?: string;
   value?: string;
@@ -164,7 +163,6 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
     return {
       ...(isPrinting ? item.pdfStyles : item.webStyles),
       gridColumn: `span ${item.webStyles?.webColumns || 4}`,
-      marginBottom: "5px",
       breakBefore: item.pdfStyles?.pageBreak as React.CSSProperties["breakBefore"] || "auto",
     };
   };
