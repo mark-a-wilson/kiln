@@ -54,7 +54,6 @@ interface Item {
   listItems?: { value: string; text: string }[];
   groupItems?: { fields: Item[] }[];
   repeater?: boolean;
-  style?: { marginBottom?: string; fontSize?: string };
   labelText: string;
   helperText?: string;
   value?: string;
@@ -75,13 +74,13 @@ interface Item {
     type: string;
     value: string;
   }[];
-  customStyle?: {
-    webColumns: string;
-    printColumns: string;
-    pageBreak: string;
+  webStyles?: {
+    [key: string]: string | number;
+  };
+
+  pdfStyles?: {
+    [key: string]: string | number;
   }
-
-
 }
 
 interface Template {
@@ -159,8 +158,35 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
     return <div>Invalid Form</div>;
   }
 
+  //Apply CSS styles to item
+  const applyStyles = (item: Item): React.CSSProperties => {
+    return {
+      ...(isPrinting ? item.pdfStyles : item.webStyles),
+      gridColumn: `span ${item.webStyles?.webColumns || 4}`,
+      breakBefore: item.pdfStyles?.pageBreak as React.CSSProperties["breakBefore"] || "auto",
+    };
+  };
+
   const pdfContainerRef = useRef<HTMLDivElement>(null);
   const keycloak = useContext(AuthenticationContext);
+  const [isPrinting, setIsPrinting] = useState(false);
+
+  //Switches between web and pdf CSS based on mode
+  useEffect(() => {
+    const mediaQueryList = window.matchMedia("print");
+
+    const handlePrint = (e: MediaQueryListEvent) => {
+      if (e.matches) {
+        setIsPrinting(true);
+        document.body.offsetHeight; // Force reflow
+      } else {
+        setIsPrinting(false);
+      }
+    };
+
+    mediaQueryList.addEventListener("change", handlePrint);
+    return () => mediaQueryList.removeEventListener("change", handlePrint);
+  }, []);
 
   useEffect(() => {
     const initialFormStates: { [key: string]: string } = {};
@@ -376,6 +402,11 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
       return true; // Default to visible if there are no conditions
     }
 
+    //Hide field based on CSS "display" value
+    if (item.webStyles?.display === 'none' || item.pdfStyles?.display === 'none') {
+      return false;
+    }
+
     const visibilityCondition = item.conditions.find(condition => condition.type === 'visibility');
 
     if (visibilityCondition) {
@@ -562,7 +593,6 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
               style={{ marginBottom: "5px" }}
               invalid={!!error}
               invalidText={error || ""}
-
             />
           </InputMask>
             <div className="hidden-on-screen cds--text-input-wrapper">
@@ -1008,10 +1038,10 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
             <div className="group-header">{item.label}</div>
             {item.groupItems?.map((groupItem, groupIndex) => (
               <div key={`${item.id}-${groupIndex}`} className="group-item-container">
-                {item.repeater && (<div className="group-item-header">                 
+                {item.repeater && (<div className="group-item-header">
                   {item.repeaterItemLabel || item.label}
-                    {(item.repeaterItemLabel || item.label) && ` ${groupIndex + 1}`}
-                  </div>)}
+                  {(item.repeaterItemLabel || item.label) && ` ${groupIndex + 1}`}
+                </div>)}
                 <div
                   className="group-fields-grid"
                   style={{
@@ -1023,11 +1053,8 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                   {groupItem.fields.map((groupField) => (
                     <div
                       key={groupField.id}
-                      style={{
-                        gridColumn: `span ${groupField.customStyle?.webColumns || 4}`,
-
-                      }}
-                      data-print-columns={groupField.customStyle?.printColumns || 4}
+                      style={applyStyles(groupField)}
+                      data-print-columns={groupField.pdfStyles?.printColumns || 4}
                     >
                       {renderComponent(groupField, item.id, groupIndex)}
                     </div>
@@ -1053,7 +1080,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                 renderIcon={Add}
                 className="no-print"
               >
-                Add {item.repeaterItemLabel || item.label} 
+                Add {item.repeaterItemLabel || item.label}
               </Button>
             )}
           </div>
@@ -1286,8 +1313,16 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
       head.appendChild(metaAuthor);
       head.appendChild(metaLanguage);
 
+      setIsPrinting(true); // Force printing mode
+      document.body.offsetHeight; // Force reflow
 
-      window.print();
+      setTimeout(() => {
+        window.print();
+      }, 150); // Ensure styles are applied before printing
+      setTimeout(() => {
+        setIsPrinting(false); // Reset after print
+      }, 150);
+
       document.title = originalTitle;
       head.removeChild(metaDescription);
       head.removeChild(metaAuthor);
@@ -1400,8 +1435,8 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
               {formData.data.items.map((item, index) => (
                 <div
                   key={item.id}
-                  style={{ gridColumn: `span ${item.customStyle?.webColumns || 4}`, marginBottom: "5px", breakBefore: item.customStyle?.pageBreak as React.CSSProperties["breakBefore"] || "auto" }}
-                  data-print-columns={item.customStyle?.printColumns || 4}>
+                  style={applyStyles(item)}
+                  data-print-columns={item.pdfStyles?.printColumns || 4}>
                   {renderComponent(
                     item,
                     item.type === "group" ? item.id : null,
@@ -1418,7 +1453,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
         Form ID: Form-12345
       </div>
       <div className="paged-page" data-footer-text=""></div>
-    </div>
+    </div >
 
   );
 };
