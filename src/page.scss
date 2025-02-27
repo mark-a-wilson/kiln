@@ -1,13 +1,29 @@
-// Variables
-$border-color: #ccc;
-$fixed-bg-color: #fff;
-$box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-$z-index-top: 1000;
-$dark-red: #b30000;
-$default-font-family: "BC Sans";
-$default-font-size: 16px;
-$outer-padding:0px 60px;
+:root {
+  --border-color: #ccc;
+  --fixed-bg-color: #fff;
+  --box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --z-index-top: 1000;
+  --dark-red: #b30000;
+  --default-font-family: "BC Sans", sans-serif;
+  --default-font-size: 16px;
+  --outer-padding: 0px 60px;
+  --label-font-size: 12px;
+  --label-font-weight: bold;
+  --label-font-style: normal;
+}
 
+// Use CSS variables in SCSS
+$border-color: var(--border-color);
+$fixed-bg-color: var(--fixed-bg-color);
+$box-shadow: var(--box-shadow);
+$z-index-top: var(--z-index-top);
+$dark-red: var(--dark-red);
+$default-font-family: var(--default-font-family);
+$default-font-size: var(--default-font-size);
+$outer-padding: var(--outer-padding);
+$label-font-size: var(--label-font-size);
+$label-font-weight:var(--label-font-weight);
+$label-font-style: var(--label-font-style);
 
 // Mixins
 @mixin button-style($bg-color, $border-color, $text-color) {
@@ -261,7 +277,9 @@ margin-bottom: 15px;
 }
 
 .cds--label {
-  font-weight: bold;
+  font-weight: $label-font-weight;
+  font-size: $label-font-size;
+  font-style: $label-font-style;
 }
 
 .print-only {
