@@ -7,4 +7,9 @@ export default defineConfig({
   build: {
     target: 'esnext',  // Use "esnext" or "es2022" for modern environments
   },
+  
+  server: {
+    host: '0.0.0.0',   // Allows access from any network interface
+    
+  },
 })
