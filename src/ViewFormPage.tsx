@@ -3,10 +3,14 @@ import "./App.css";
 import Presenter from "./Presenter";
 import "@carbon/styles/css/styles.css";
 import { AuthenticationContext } from "./App";
+import { useNavigate } from 'react-router-dom';
+
 
 const ViewFormPage: React.FC = () => {
   const [jsonContent, setJsonContent] = useState<object>({});
   const keycloak = useContext(AuthenticationContext);
+  const navigate = useNavigate();
+
 
   useEffect(() => {
 
@@ -54,6 +58,7 @@ const ViewFormPage: React.FC = () => {
       setJsonContent(result);
 
     } catch (error) {
+      navigate('/unauthorized');
       console.error("Failed to generate template:", error);
     }
   };
