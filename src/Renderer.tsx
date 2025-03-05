@@ -40,6 +40,7 @@ import {
 } from "./utils/helpers"; // Import from the helpers file
 //import Paged from 'pagedjs';
 //import  { Previewer } from 'pagedjs';
+import { useNavigate } from 'react-router-dom';
 interface Item {
   type: string;
   label?: string;
@@ -170,6 +171,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
   const pdfContainerRef = useRef<HTMLDivElement>(null);
   const keycloak = useContext(AuthenticationContext);
   const [isPrinting, setIsPrinting] = useState(false);
+  const navigate = useNavigate();
 
   //Switches between web and pdf CSS based on mode
   useEffect(() => {
@@ -1175,6 +1177,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
         return "failed";
       }
     } catch (error) {
+      navigate('/unauthorized');
       console.error("Error:", error);
       return "failed";
     }
@@ -1251,6 +1254,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
         return "failed";
       }
     } catch (error) {
+      navigate('/unauthorized');
       console.error("Error:", error);
       return "failed";
     }
