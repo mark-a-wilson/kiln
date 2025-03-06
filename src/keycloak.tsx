@@ -29,12 +29,14 @@ export const initializeKeycloak = async (): Promise<KeycloakInstance | void> => 
 
         const initOptions: KeycloakInitOptions = {
             pkceMethod: 'S256',
-            checkLoginIframe: false,
+            checkLoginIframe: true,
             onLoad: 'check-sso',
             silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html`
         };
 
+        console.log("Initializing Keycloak...");
         const auth: boolean = await _kc.init(initOptions);
+        console.log("Authentication status:", auth); // Debugging step
 
         if (auth) {
             return _kc;
