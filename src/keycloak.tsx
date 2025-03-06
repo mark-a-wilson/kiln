@@ -1,15 +1,15 @@
 import Keycloak, {
     KeycloakInstance,
-    KeycloakInitOptions,
-    KeycloakLoginOptions,
+    KeycloakInitOptions
+    //KeycloakLoginOptions,
 } from 'keycloak-js';
 
-const redirectUri = window.location.href || (import.meta.env.VITE_SSO_REDIRECT_URI as string);
+//const redirectUri = window.location.href || (import.meta.env.VITE_SSO_REDIRECT_URI as string);
 
-const loginOptions: KeycloakLoginOptions = {
+/*const loginOptions: KeycloakLoginOptions = {
     redirectUri,
     idpHint: '',
-};
+};*/
 
 // Keycloak instance using environment variables
 const _kc: KeycloakInstance = new Keycloak({
