@@ -82,6 +82,7 @@ interface Item {
   pdfStyles?: {
     [key: string]: string | number;
   }
+  containerItems?: Item[];
 }
 
 interface Template {
@@ -133,6 +134,7 @@ const componentMapping: { [key: string]: React.ElementType } = {
   radio: RadioButtonGroup,
   select: Select,
   "currency-input": TextInput,
+  "container":"div",
 };
 
 interface RendererProps {
@@ -207,23 +209,33 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
 
     // Set these values as attributes on the <body> tag
     document.documentElement.setAttribute("data-form-id", formId);
-    document.documentElement.setAttribute("data-date", creationDate);
-    formData?.data?.items.forEach((item) => {
-      if (item.type === "group") {
-        initialGroupStates[item.id] =
-          item.groupItems?.map((groupItem, groupIndex) => {
-            const groupState: { [key: string]: string } = {};
-            groupItem.fields.forEach((field) => {
-              const fieldId = generateUniqueId(item.id, groupIndex, field.id);
-              field.id = fieldId;
-              groupState[field.id] = "";
-            });
-            return groupState;
-          }) || [];
-      } else {
-        initialFormStates[item.id] = "";
-      }
-    });
+    document.documentElement.setAttribute("data-date", creationDate);     
+
+    const processItemsInitially = (items: Item[]) => {
+      items.forEach((item) => {
+        if (item.type === "container" && item.containerItems) {
+          processItemsInitially(item.containerItems);
+        }
+        else if (item.type === "group") {
+          initialGroupStates[item.id] =
+            item.groupItems?.map((groupItem, groupIndex) => {
+              const groupState: { [key: string]: string } = {};
+              groupItem.fields.forEach((field) => {
+                const fieldId = generateUniqueId(item.id, groupIndex, field.id);
+                field.id = fieldId;
+                groupState[field.id] = "";
+              });
+              return groupState;
+            }) || [];
+        } else {
+          initialFormStates[item.id] = "";
+        }
+      });
+    }
+
+    if (formData?.data?.items) {
+      processItemsInitially(formData.data.items);
+    }
     setFormStates(initialFormStates);
     setGroupStates(initialGroupStates);
 
@@ -288,6 +300,18 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
     }));
   };
 
+  const findGroup = (items: Item[], groupId: string): Item | undefined => {
+    for (const item of items) {
+      if (item.id === groupId && item.type === "group") {
+        return item; // Found the group
+      }
+      if (item.type === "container" && item.containerItems) {
+        const foundGroup = findGroup(item.containerItems, groupId);
+        if (foundGroup) return foundGroup;
+      }
+    }
+    return undefined;
+  };
 
   const handleAddGroupItem = (
     groupId: string,
@@ -295,7 +319,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
   ) => {
     setFormData((prevState) => {
       const newFormData = { ...prevState };
-      const group = newFormData?.data.items.find((item) => item.id === groupId);
+      const group = newFormData?.data?.items? findGroup(newFormData.data.items, groupId) : undefined;
 
       if (group && group.groupItems) {
         const groupIndex = group.groupItems.length;
@@ -343,10 +367,11 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
   const handleRemoveGroupItem = (groupId: string, groupItemIndex: number) => {
     setFormData((prevState) => {
       const newFormData = { ...prevState };
-      const group = newFormData?.data.items.find((item) => item.id === groupId);
+      //const group = newFormData?.data.items.find((item) => item.id === groupId);
+      const group = newFormData?.data?.items? findGroup(newFormData.data.items, groupId) : undefined;
 
+      if (group && group.groupItems){
       group?.groupItems?.splice(groupItemIndex, 1);
-
       // Update IDs for remaining group items
       group?.groupItems?.forEach((groupItem, newIndex) => {
         groupItem.fields.forEach((field: Item) => {
@@ -358,6 +383,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
         });
       });
 
+    }
       return newFormData;
     });
 
@@ -541,6 +567,10 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
     groupId: string | null = null,
     groupIndex: number | null = null
   ) => {
+    console.log("item id>>",item.id);
+    console.log("item type>>",item.type);
+    console.log("item groupId>>",groupId);
+    console.log("item groupIndex>>",groupIndex);
     const Component = componentMapping[item.type];
     if (!Component) return null;
 
@@ -1087,6 +1117,25 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
             )}
           </div>
         );
+        case "container":
+          
+          return (
+            <>            
+              <div key={item.id} className="common-container">
+              <div className="group-header">{item.label}</div>
+                  {item.containerItems?.map((containerItem) => (                 
+                    <div
+                      key={containerItem.id}
+                      style={applyStyles(containerItem)}
+                      data-print-columns={containerItem.pdfStyles?.printColumns || 4}
+                    >
+                      {renderComponent(containerItem, containerItem.type === "group" ? containerItem.id : null, null)}
+                      
+                    </div>           
+                  ))}            
+              </div>              
+              </>
+          );  
       default:
         return null;
     }

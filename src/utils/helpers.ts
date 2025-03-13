@@ -11,8 +11,9 @@ export  const handleLinkClick = (event: React.MouseEvent<HTMLAnchorElement>) => 
   
   
 export const validateField = (field: any, fieldValue: any) => {
+  console.log("validateField>>",field);
     
-    const validations = field.validation;
+    const validations = field?.validation;
 
     if (validations) {
       for (const validation of validations) {
