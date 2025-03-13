@@ -1,15 +1,15 @@
 import Keycloak, {
     KeycloakInstance,
-    KeycloakInitOptions
-    //KeycloakLoginOptions,
+    KeycloakInitOptions,
+    KeycloakLoginOptions,
 } from 'keycloak-js';
 
-//const redirectUri = window.location.href || (import.meta.env.VITE_SSO_REDIRECT_URI as string);
+const redirectUri = window.location.href || (import.meta.env.VITE_SSO_REDIRECT_URI as string);
 
-/*const loginOptions: KeycloakLoginOptions = {
+const loginOptions: KeycloakLoginOptions = {
     redirectUri,
     idpHint: '',
-};*/
+};
 
 // Keycloak instance using environment variables
 const _kc: KeycloakInstance = new Keycloak({
@@ -30,7 +30,7 @@ export const initializeKeycloak = async (): Promise<KeycloakInstance | void> => 
         const initOptions: KeycloakInitOptions = {
             pkceMethod: 'S256',
             checkLoginIframe: false,
-            onLoad: 'check-sso'
+            onLoad: 'check-sso',
         };
 
         console.log("Initializing Keycloak...");
@@ -40,24 +40,23 @@ export const initializeKeycloak = async (): Promise<KeycloakInstance | void> => 
         if (auth) {
             return _kc;
         } else {
-            await silentLogin();
-            //_kc.login(loginOptions);
+            _kc.login(loginOptions);
         }
     } catch (err) {
         console.error(err);
     }
 };
 
-const silentLogin = async () => {
-    try {
-        await _kc.login({
-            prompt: 'none',  // Silent authentication (no UI)
-            redirectUri: window.location.href, // Ensure the redirect goes back to the same page
-        });
-    } catch (err) {
-        console.error("Silent authentication failed:", err);
-    }
-};
+// const silentLogin = async () => {
+//     try {
+//         await _kc.login({
+//             prompt: 'none',  // Silent authentication (no UI)
+//             redirectUri: window.location.href, // Ensure the redirect goes back to the same page
+//         });
+//     } catch (err) {
+//         console.error("Silent authentication failed:", err);
+//     }
+// };
 
 // Custom logout function to trigger logout via Siteminder.
 export const logout = (): void => {
