@@ -1,14 +1,12 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
 import Presenter from "./Presenter";
 import "@carbon/styles/css/styles.css";
-import { AuthenticationContext } from "./App";
-import { useNavigate } from 'react-router-dom';
 
-const NewFormPage: React.FC = () => {
+
+const PrintFormPage: React.FC = () => {
   const [jsonContent, setJsonContent] = useState<object>({});
-  const keycloak = useContext(AuthenticationContext);
-  const navigate = useNavigate();
+ 
 
   useEffect(() => {
 
@@ -22,28 +20,26 @@ const NewFormPage: React.FC = () => {
 
     if (params) {
 
-      handleGenerateTemplate(params);
+      handleLoadSavedJson(params);
     }
 
 
   }, []);
 
-  const handleGenerateTemplate = async (params: { [key: string]: string | null }) => {
+  const handleLoadSavedJson = async (params: { [key: string]: string | null }) => {
 
     try {
-      const generateDataEndpoint = import.meta.env.VITE_COMM_API_GENERATE_ENDPOINT_URL;
-      console.log(generateDataEndpoint);
+      const loadSavedJsonEndpoint = import.meta.env.VITE_COMM_API_LOADSAVEDJSON_ENDPOINT_URL;
+      console.log(loadSavedJsonEndpoint);
 
-      const token = keycloak.token;
-
-      const response = await fetch(generateDataEndpoint, {
+      const response = await fetch(loadSavedJsonEndpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          ...params,
-          token,
+          ...params
+          
         }),
       });
 
@@ -52,15 +48,15 @@ const NewFormPage: React.FC = () => {
       }
 
       const result = await response.json();
-      setJsonContent(result.save_data);
+      console.log(result);
+      setJsonContent(result);
 
     } catch (error) {
-      navigate('/unauthorized');
       console.error("Failed to generate template:", error);
     }
   };
 
-  return <Presenter data={jsonContent} mode="edit" />;
+  return <Presenter data={jsonContent} mode="preview" />;
 };
 
-export default NewFormPage;
+export default PrintFormPage;

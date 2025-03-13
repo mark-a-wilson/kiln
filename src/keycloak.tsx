@@ -1,15 +1,15 @@
 import Keycloak, {
     KeycloakInstance,
-    KeycloakInitOptions,
-    KeycloakLoginOptions,
+    KeycloakInitOptions
+    //KeycloakLoginOptions,
 } from 'keycloak-js';
 
-const redirectUri = window.location.href || (import.meta.env.VITE_SSO_REDIRECT_URI as string);
+//const redirectUri = window.location.href || (import.meta.env.VITE_SSO_REDIRECT_URI as string);
 
-const loginOptions: KeycloakLoginOptions = {
+/*const loginOptions: KeycloakLoginOptions = {
     redirectUri,
     idpHint: '',
-};
+};*/
 
 // Keycloak instance using environment variables
 const _kc: KeycloakInstance = new Keycloak({
@@ -33,15 +33,29 @@ export const initializeKeycloak = async (): Promise<KeycloakInstance | void> => 
             onLoad: 'check-sso'
         };
 
+        console.log("Initializing Keycloak...");
         const auth: boolean = await _kc.init(initOptions);
+        console.log("Authentication status:", auth); // Debugging step
 
         if (auth) {
             return _kc;
         } else {
-            _kc.login(loginOptions);
+            await silentLogin();
+            //_kc.login(loginOptions);
         }
     } catch (err) {
         console.error(err);
+    }
+};
+
+const silentLogin = async () => {
+    try {
+        await _kc.login({
+            prompt: 'none',  // Silent authentication (no UI)
+            redirectUri: window.location.href, // Ensure the redirect goes back to the same page
+        });
+    } catch (err) {
+        console.error("Silent authentication failed:", err);
     }
 };
 
