@@ -35,6 +35,7 @@ const NewFormPage: React.FC = () => {
       console.log(generateDataEndpoint);
 
       const token = keycloak.token;
+      console.log("KEYCLOAK", keycloak);
 
       const response = await fetch(generateDataEndpoint, {
         method: "POST",
