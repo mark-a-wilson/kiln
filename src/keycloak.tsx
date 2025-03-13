@@ -21,16 +21,20 @@ const _kc: KeycloakInstance = new Keycloak({
 // Initialize Keycloak and return the instance if authenticated.
 export const initializeKeycloak = async (): Promise<KeycloakInstance | void> => {
     try {
-        // Set the token expiration handler.
-        _kc.onTokenExpired = () => {
-            // Optionally, specify a minimum validity (in seconds) to refresh.
-            _kc.updateToken(5).catch((err) => console.error('Failed to update token:', err));
+        _kc.onTokenExpired = async () => {
+            try {
+                console.log('Token expired. Refreshing...');
+                await _kc.updateToken(30);
+            } catch (err) {
+                console.error('Failed to refresh token:', err);
+            }
         };
 
         const initOptions: KeycloakInitOptions = {
             pkceMethod: 'S256',
             checkLoginIframe: false,
             onLoad: 'check-sso',
+            silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
         };
 
         console.log("Initializing Keycloak...");
@@ -65,7 +69,6 @@ export const logout = (): void => {
     const ssoRedirectUri = import.meta.env.VITE_SSO_REDIRECT_URI as string;
     const ssoClientId = import.meta.env.VITE_SSO_CLIENT_ID as string;
 
-    const retUrl = `${ssoAuthServer}/realms/${ssoRealm} /protocol/openid - connect / logout ? post_logout_redirect_uri = ${ssoRedirectUri}& client_id=${ssoClientId} `;
-
+    const retUrl = `${ssoAuthServer}/realms/${ssoRealm}/protocol/openid-connect/logout?post_logout_redirect_uri=${encodeURIComponent(ssoRedirectUri)}&client_id=${ssoClientId}`;
     window.location.href = `https://logon7.gov.bc.ca/clp-cgi/logoff.cgi?retnow=1&returl=${encodeURIComponent(retUrl)}`;
 };
