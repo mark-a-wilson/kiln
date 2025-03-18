@@ -21,7 +21,7 @@ const App: React.FC = () => {
   const location = useLocation(); // Get the current route
 
   // Public Routes
-  const publicRoutes = ["/preview", "/unauthorized","/printToPDF"];
+  const publicRoutes = ["/preview", "/unauthorized", "/printToPDF"];
 
   useEffect(() => {
     const initKeycloak = async () => {
