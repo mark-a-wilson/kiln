@@ -2,9 +2,6 @@ import "./App.css";
 import "./print.css";
 import '@carbon/styles/css/styles.css';
 import "./page.scss";
-//import { Previewer } from "pagedjs";
-//import { PagedPolyfill } from "pagedjs";
-//import { PagedPolyfill, Previewer } from "pagedjs";
 import React, { useState, useEffect, useRef, useContext } from "react";
 import { AuthenticationContext } from "./App";
 import {
@@ -38,9 +35,12 @@ import {
   isFieldRequired,
 
 } from "./utils/helpers"; // Import from the helpers file
-//import Paged from 'pagedjs';
-//import  { Previewer } from 'pagedjs';
 import { useNavigate } from 'react-router-dom';
+
+/*creating the structure of object Item. 
+All the form elements coming in the json will of the format type Item.
+Optional attributes are denied with ?
+Typescript requires the type  to be defined*/
 interface Item {
   type: string;
   label?: string;
@@ -85,6 +85,12 @@ interface Item {
   containerItems?: Item[];
 }
 
+/*
+creating the structure of object Template. 
+Template object is the form definition part of the json.
+Items will be like a subset that is used to represnt the elements or form fields in the form.
+*/
+
 interface Template {
   version: string;
   ministry_id: string;
@@ -116,6 +122,11 @@ interface SavedData {
 
 type GroupState = { [key: string]: string }[]; // New type definition
 
+/*
+Each type of fields should be defined in th component mapping
+to map to its corresponding Carbon element to be rendered on screen
+The key should match the 'type' attribute in  Item
+*/
 const componentMapping: { [key: string]: React.ElementType } = {
   "text-input": TextInput,
   dropdown: Dropdown,
@@ -137,6 +148,9 @@ const componentMapping: { [key: string]: React.ElementType } = {
   "container":"div",
 };
 
+/*
+The object for the props passed from other pages
+*/
 interface RendererProps {
   data: any,
   mode: string;
@@ -146,6 +160,11 @@ interface RendererProps {
 
 
 const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
+
+  /*
+  the states of the field ouside of the group will be saved in formStates
+  the states of the group and the fields in the group will be saved in groupStates
+  */
   const [formStates, setFormStates] = useState<{ [key: string]: string }>({});
   const [groupStates, setGroupStates] = useState<{ [key: string]: GroupState }>(
     {}
@@ -192,11 +211,18 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
     return () => mediaQueryList.removeEventListener("change", handlePrint);
   }, []);
 
+  /*
+  Initilaization on page load
+  The states need to be initialised with ids of the elements that appera on screen on loading.
+  Some attributes need to be set for paging for PDF generation
+  */
+
   useEffect(() => {
     const initialFormStates: { [key: string]: string } = {};
     const initialGroupStates: { [key: string]: GroupState } = {}; // Changed type here
-
-
+  /*
+    the data needed for loading the pdf version paging starts here.
+  */
     const formId = formData.form_id || "Unknown Form ID";
 
     // Generate the creation date dynamically
@@ -210,6 +236,15 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
     // Set these values as attributes on the <body> tag
     document.documentElement.setAttribute("data-form-id", formId);
     document.documentElement.setAttribute("data-date", creationDate);     
+
+    /*
+    the data needed for loading the pdf version paging ends here.
+  */
+
+    /*
+    recursive anonymous helper function to process the items in the form json initially.
+    It will create states for the ids to be rendered.
+    */
 
     const processItemsInitially = (items: Item[]) => {
       items.forEach((item) => {
@@ -239,6 +274,10 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
     setFormStates(initialFormStates);
     setGroupStates(initialGroupStates);
 
+    /*
+    After the ids are set in state , iterate through the data section (databinding) of the 
+    form and set the value for the ids in state varaible if any. 
+    */
     // Populate values from dataBindings
     Object.keys(data.data).forEach((key: string) => {
       const value = data.data[key];
@@ -265,20 +304,22 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
   }, []);
 
 
-
+/*
+The following function is used to handle if any input value is change
+It will first validate the value based on the validations on the Item that came along 
+with the form. If valid , state is updated. 
+This is triggered when any value is cahnged on the element
+*/
   const handleInputChange = (
     fieldId: string,
     value: any,
     groupId: string | null = null,
-    groupIndex: number | null = null
+    groupIndex: number | null = null,
+    field: Item
   ) => {
     let validationError: string | null = null;
 
-    if (groupId !== null && groupIndex !== null) {
-      const groupItem = formData?.data?.items.find(
-        (item) => item.id === groupId
-      )?.groupItems?.[groupIndex];
-      const field = groupItem?.fields.find((field) => field.id === fieldId);
+    if (groupId !== null && groupIndex !== null) {     
       validationError = validateField(field, value);
       setGroupStates((prevState) => ({
         ...prevState,
@@ -286,8 +327,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
           index === groupIndex ? { ...item, [fieldId]: value } : item
         ),
       }));
-    } else {
-      const field = formData?.data?.items.find((item) => item.id === fieldId);
+    } else {      
       validationError = validateField(field, value);
       setFormStates((prevState) => ({
         ...prevState,
@@ -300,6 +340,9 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
     }));
   };
 
+  /*
+  Helper function to find the group passing the groupId
+  */
   const findGroup = (items: Item[], groupId: string): Item | undefined => {
     for (const item of items) {
       if (item.id === groupId && item.type === "group") {
@@ -313,6 +356,12 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
     return undefined;
   };
 
+  /*
+  Function called when an item is added to a group which is a repeater.
+  This is called when clicking the Add button
+  This will create one more set of states for the group with incresed index 
+  so that the new ones will appear on the screen
+  */
   const handleAddGroupItem = (
     groupId: string,
     initialData: { [key: string]: any } | null = null
@@ -364,6 +413,12 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
     });
   };
 
+  /*
+  Function to remove a group item from a group. Triggered on Remove button.
+  This method will update the group states by removing the states of the fields 
+  and the groupItem based on the index passed. Also updates the index for the rest of the groupItems
+  if the removed groupItem is in between indexes
+  */
   const handleRemoveGroupItem = (groupId: string, groupItemIndex: number) => {
     setFormData((prevState) => {
       const newFormData = { ...prevState };
@@ -413,6 +468,12 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
     });
   };
 
+  /*
+  Function to verify whether the state of the element should be included in savedJson or not.
+  We check whether the field is visible . If not we check whether saveOnSubmit condition is 
+  set to be true for the element . If the field is not visible (hidden) and if the
+  saveOnSubmit condition is set to be true , it means that it need to be saved.
+  */
   const shouldFieldBeIncludedForSaving = (item: Item, groupId: string | null = null,
     groupIndex: number | null = null): boolean => {
 
@@ -561,16 +622,21 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
     }
   };
 
+  /*
+  Function which renders the elements on the webpage based on the items coming in from the json
+  First this will check for thr component mapping to match the Carbon element
+  Check if there is any calculated value, if so set the field to readOnly
+  Check for visibility. If not visible , do not render
+  Check if field is required . If yes, render asterisk for the field.
+  Each switch statement has its component on screen and its equivalent rendering (mostly a div) on the PDF 
+  */
 
   const renderComponent = (
     item: Item,
     groupId: string | null = null,
     groupIndex: number | null = null
   ) => {
-    console.log("item id>>",item.id);
-    console.log("item type>>",item.type);
-    console.log("item groupId>>",groupId);
-    console.log("item groupIndex>>",groupIndex);
+ 
     const Component = componentMapping[item.type];
     if (!Component) return null;
 
@@ -598,8 +664,6 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
           <><InputMask
             className="field-container no-print"
 
-
-
             mask={item.mask || ''}
             value={
               groupId
@@ -607,10 +671,8 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                 : formStates[fieldId] || ""
             }
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              handleInputChange(fieldId, e.target.value, groupId, groupIndex)
-
+              handleInputChange(fieldId, e.target.value, groupId, groupIndex,item)
             }
-
             readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
 
           >
@@ -659,8 +721,8 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
             }
           } */
             onChangeValue={(event, originalValue, maskedValue) => {
-              console.log(event, originalValue, maskedValue);
-              handleInputChange(fieldId, originalValue, groupId, groupIndex)
+             console.log(event, originalValue, maskedValue);
+              handleInputChange(fieldId, originalValue, groupId, groupIndex,item)
             }}
             currency="CAD"
 
@@ -714,7 +776,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                   fieldId,
                   selectedItem.value,
                   groupId,
-                  groupIndex
+                  groupIndex,item
                 )
               }
               style={{ marginBottom: "5px" }}
@@ -750,7 +812,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
               checked={groupId ? groupStates[groupId]?.[groupIndex!]?.[fieldId] ?? false : formStates[fieldId] ?? false}
               onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                 const isChecked = event.target.checked;
-                handleInputChange(fieldId, isChecked, groupId, groupIndex);
+                handleInputChange(fieldId, isChecked, groupId, groupIndex,item);
               }}
               readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
               invalid={!!error}
@@ -775,7 +837,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                   : formStates[fieldId] || false
               }
               onToggle={(checked: boolean) =>
-                handleInputChange(fieldId, checked, groupId, groupIndex)
+                handleInputChange(fieldId, checked, groupId, groupIndex,item)
               }
               readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
               invalid={!!error}
@@ -783,6 +845,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
             />
           </div>
         );
+        //The date comes in json as either date or date-picker. So logic is used so that both can be used
       case "date":
       case "date-picker":
         const selectedDate = groupId
@@ -803,7 +866,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
               value={selectedDate ? [selectedDate] : []}
               onChange={(dates: Date[]) => {
                 if (dates.length === 0) {
-                  handleInputChange(fieldId, "", groupId, groupIndex);
+                  handleInputChange(fieldId, "", groupId, groupIndex,item);
                 } else {
                   // Save internal format for storage
                   const internalFormattedDate = formatDate(
@@ -817,7 +880,8 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                     fieldId,
                     internalFormattedDate,
                     groupId,
-                    groupIndex
+                    groupIndex,
+                    item
                   );
                 }
               }}
@@ -873,7 +937,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                 : formStates[fieldId] || ""
             }
             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-              handleInputChange(fieldId, e.target.value, groupId, groupIndex)
+              handleInputChange(fieldId, e.target.value, groupId, groupIndex,item)
             }
             rows={4}
             style={{ marginBottom: "5px" }}
@@ -894,7 +958,8 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                 fieldId,
                 e.currentTarget.value,
                 groupId,
-                groupIndex
+                groupIndex,
+                item
               )
             }
             style={{ marginBottom: "5px" }}
@@ -918,14 +983,15 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                 : formStates[fieldId] || 0
             }
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              handleInputChange(fieldId, e.target.value, groupId, groupIndex)
+              handleInputChange(fieldId, e.target.value, groupId, groupIndex,item)
             }
             onClick={(e: React.MouseEvent<HTMLInputElement>) =>
               handleInputChange(
                 fieldId,
                 e.currentTarget.value,
                 groupId,
-                groupIndex
+                groupIndex,
+                item
               )
             }
             invalid={!!error}
@@ -993,7 +1059,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
               id={fieldId}
               name={fieldId}
               onChange={(value: string) =>
-                handleInputChange(fieldId, value, groupId, groupIndex)
+                handleInputChange(fieldId, value, groupId, groupIndex,item)
               }
               valueSelected={
                 groupId
@@ -1031,7 +1097,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                   : formStates[fieldId]
               }
               onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                handleInputChange(fieldId, e.target.value, groupId, groupIndex)
+                handleInputChange(fieldId, e.target.value, groupId, groupIndex,item)
               }
 
               invalid={!!error}
@@ -1141,58 +1207,71 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
     }
 
   };
-
+  /*
+  create savedJson data from the states of the elements
+  */
   const createSavedData = () => {
-
     const saveFieldData: SavedFieldData = {};
-    //save date based on visibility
-
-    // For non-group fields
-    formData.data.items.forEach((item) => {
-      if (item.type !== "group" && shouldFieldBeIncludedForSaving(item)) {
-        if (formStates[item.id] !== undefined) {
-          saveFieldData[item.id] = formStates[item.id];
-        }
-      }
-    });
-
-    // For group fields
-    formData.data.items.forEach((groupItem) => {
-      if (groupItem.type === "group" && shouldFieldBeIncludedForSaving(groupItem)) {
-        const visibleGroupItems = groupStates[groupItem.id]?.map((groupItemState, groupIndex) => {
-          const filteredGroupItem: { [key: string]: FieldValue } = {};
-
-          groupItem.groupItems?.[groupIndex]?.fields.forEach((field) => {
-            if (shouldFieldBeIncludedForSaving(field, groupItem.id, groupIndex) && groupItemState[field.id] !== undefined) {
-              filteredGroupItem[field.id] = groupItemState[field.id];
-            }
+  
+    const processItems = (items: Item[]) => {
+      items.forEach((item) => {       
+  
+        if (item.type === "container" && shouldFieldBeIncludedForSaving(item) && item.containerItems) {
+          // Recursively process container items
+          processItems(item.containerItems);
+        } else if (item.type !== "group" && shouldFieldBeIncludedForSaving(item)) {
+          if (formStates[item.id] !== undefined) {
+            saveFieldData[item.id] = formStates[item.id];
+          }
+        } else if (item.type === "group" && shouldFieldBeIncludedForSaving(item)) {
+          const visibleGroupItems = groupStates[item.id]?.map((groupItemState, groupIndex) => {
+            const filteredGroupItem: { [key: string]: FieldValue } = {};
+  
+            item.groupItems?.[groupIndex]?.fields.forEach((field) => {
+              if (
+                shouldFieldBeIncludedForSaving(field, item.id, groupIndex) &&
+                groupItemState[field.id] !== undefined
+              ) {
+                filteredGroupItem[field.id] = groupItemState[field.id];
+              }
+            });
+  
+            return Object.keys(filteredGroupItem).length > 0 ? filteredGroupItem : null;
           });
-
-          return Object.keys(filteredGroupItem).length > 0 ? filteredGroupItem : null;
-        });
-
-        // Filter out any null values (groups where no fields were visible)
-        const cleanedGroupItems = visibleGroupItems.filter((group) => group !== null);
-
-        if (cleanedGroupItems.length > 0) {
-          saveFieldData[groupItem.id] = cleanedGroupItems;
+  
+          // Filter out any null values (groups where no fields were visible)
+          const cleanedGroupItems = visibleGroupItems.filter((group) => group !== null);
+  
+          if (cleanedGroupItems.length > 0) {
+            saveFieldData[item.id] = cleanedGroupItems;
+          }
         }
-      }
-    });
-    //save data based in visibility ends
-
-    //SavedData
+      });
+    };
+  
+    // Start processing from the root items
+    if (formData?.data?.items) {
+      processItems(formData.data.items);
+    }
+  
+    // Update metadata
     data.metadata.updated_date = new Date().toLocaleDateString() + "";
     const savedData: SavedData = {
       data: saveFieldData,
       form_definition: data.form_definition,
       metadata: data.metadata,
     };
+  
     console.log("Saved Data", JSON.stringify(savedData));
     return savedData;
   };
+  
 
-
+  /*
+  Endpoint for 'Save' and 'Save and Close'
+  Called from handleSave and handleSaveandClose
+  This will create a savedJson formatted json and call the end point for saving
+  */
   const saveDataToICMApi = async () => {
     try {
       const saveDataICMEndpoint = import.meta.env
@@ -1231,48 +1310,68 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
       return "failed";
     }
   };
+
+
+  /*
+  Function for validating all fields before saving . This function will iterate through
+  all the elements and run the validation on each field calling validateField function.
+  */
   const validateAllFields = (): boolean => {
     const errors: { [key: string]: string | null } = {};
     let isValid = true;
 
-    formData?.data?.items.forEach((item) => {
-      if (item.type === "group" && item.groupItems) {
-        if (isFieldVisible(item, null, null)) { // See if group is visible
-          item.groupItems.forEach((groupItem, groupIndex) => {
-            groupItem.fields.forEach((fieldInGroup) => {
-              if (isFieldVisible(fieldInGroup, item.id, groupIndex)) {  // See if the filed in group is visible          
+    const processItems = (items: Item[]) => {
+      items.forEach((item) => {   
 
-                const fieldIdInGroup = fieldInGroup.id;
-                const fieldValueInGroup =
-                  groupStates[item.id][groupIndex][fieldIdInGroup];
-                const validationError = validateField(
-                  fieldInGroup,
-                  fieldValueInGroup
-                );
-                if (validationError) {
-                  errors[fieldIdInGroup] = validationError;
-                  isValid = false;
+        if (item.type === "container" && item.containerItems) {
+          if (isFieldVisible(item, null, null)) {
+            // Recursively process container items
+            processItems(item.containerItems);
+          }
+        } else if (item.type === "group" && item.groupItems) {
+          if (isFieldVisible(item, null, null)) { // Check if group is visible
+            item.groupItems.forEach((groupItem, groupIndex) => {
+              groupItem.fields.forEach((fieldInGroup) => {
+                if (isFieldVisible(fieldInGroup, item.id, groupIndex)) { // Check if field in group is visible
+                  const fieldIdInGroup = fieldInGroup.id;
+                  const fieldValueInGroup =
+                    groupStates[item.id]?.[groupIndex]?.[fieldIdInGroup];
+
+                  const validationError = validateField(fieldInGroup, fieldValueInGroup);
+                  if (validationError) {
+                    errors[fieldIdInGroup] = validationError;
+                    isValid = false;
+                  }
                 }
-              }
+              });
             });
-          });
-        }
-      } else {
-        const fieldId = item.id;
-        const value = formStates[fieldId] || "";
-        if (isFieldVisible(item, null, null)) {  // See if fields not in group is visible
-          const validationError = validateField(item, value);
-          if (validationError) {
-            errors[fieldId] = validationError;
-            isValid = false;
+          }
+        } else {
+          const fieldId = item.id;
+          const value = formStates[fieldId] || "";
+          if (isFieldVisible(item, null, null)) { // Check if non-group field is visible
+            const validationError = validateField(item, value);
+            if (validationError) {
+              errors[fieldId] = validationError;
+              isValid = false;
+            }
           }
         }
-      }
-    });
+      });
+    };
+
+    // Start processing from the root items
+    if (formData?.data?.items) {
+      processItems(formData.data.items);
+    }
 
     setFormErrors(errors);
     return isValid;
   };
+
+   /*
+   Call to end point for unlock flags in ICM
+   */
   const unlockICMFinalFlags = async () => {
     try {
       const unlockICMFinalEdpoint = import.meta.env
@@ -1309,6 +1408,11 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
     }
   };
 
+  /*
+  Function when Save is clicked
+  It will validate all the fields. If no errors , proceed to  
+  saveDataToICMApi for creating json and calling the end point for saving
+  */
   const handleSave = async () => {
     if (validateAllFields()) {
       const returnMessage = saveDataToICMApi();
@@ -1322,6 +1426,12 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
     }
   };
 
+  /*
+  Function when Save is clicked
+  It will validate all the fields. If no errors , proceed to  
+  saveDataToICMApi for creating json and calling the end point for saving.
+  In addition , this function will close the current browser too
+  */
   const handleSaveAndClose = async () => {
     if (validateAllFields()) {
       const returnMessage = saveDataToICMApi();
@@ -1341,6 +1451,10 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
     }
   };
 
+  /*
+  function for Print button. It uses pagedJs and browser's print functionality
+  for printing PDF. Sets the title of document to formId
+  */
 
   const handlePrint = async () => {
     try {
@@ -1390,6 +1504,9 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
 
   const ministryLogoPath = `${window.location.origin}/ministries/${formData.ministry_id}.png`;
 
+  /*
+  Function for parsing the dynamic fields' value (data binding) in text-info component
+  */
   const parseDynamicText = (text: string): string => {
     const regex = /{(formStates\['(.*?)']|groupStates\['(.*?)']\?\.\[(.*?)!?\]\?\.\['(.*?)'])\|?(format:([\w/-]+))?}/g;
 

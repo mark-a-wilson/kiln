@@ -1,3 +1,6 @@
+/*
+Construct unique id for an element in a group
+*/
 export const generateUniqueId = (
     groupId: string | number,
     groupIndex: number,
@@ -10,11 +13,11 @@ export  const handleLinkClick = (event: React.MouseEvent<HTMLAnchorElement>) => 
   };
   
   
-export const validateField = (field: any, fieldValue: any) => {
-  console.log("validateField>>",field);
-    
+/*
+validate passed field iterating through the validation array in the item
+*/
+export const validateField = (field: any, fieldValue: any) => {    
     const validations = field?.validation;
-
     if (validations) {
       for (const validation of validations) {
         switch (validation.type) {
@@ -120,6 +123,9 @@ export const validateField = (field: any, fieldValue: any) => {
     return "";   
   };
 
+  /*
+  Check to see if validation 'required' is set
+  */
 export const isFieldRequired = (validations: Array<any>): boolean => {
     return validations.some((validation) => validation.type === "required");
   };  
