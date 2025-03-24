@@ -78,7 +78,7 @@ jobs:
       
       - name: Export secrets based on environment
         run: |
-          if [[ "$ENVIRONMENT" == "PROD" ]]; then
+          if [[ "${GITHUB_REF##*/}" == "main" ]]; then
             echo "VITE_COMM_API_SAVEDATA_ENDPOINT_URL=${{ secrets.VITE_COMM_API_SAVEDATA_ENDPOINT_URL_PROD }}" >> $GITHUB_ENV
             echo "VITE_COMM_API_GENERATE_ENDPOINT_URL=${{ secrets.VITE_COMM_API_GENERATE_ENDPOINT_URL_PROD }}" >> $GITHUB_ENV
             echo "VITE_COMM_API_EDIT_ENDPOINT_URL=${{ secrets.VITE_COMM_API_EDIT_ENDPOINT_URL_PROD }}" >> $GITHUB_ENV
@@ -93,7 +93,7 @@ jobs:
             echo "VITE_SSO_CLIENT_ID=${{ secrets.VITE_SSO_CLIENT_ID_PROD }}" >> $GITHUB_ENV
             echo "VITE_COMM_API_LOADSAVEDJSON_ENDPOINT_URL=${{ secrets.VITE_COMM_API_LOADSAVEDJSON_ENDPOINT_URL_PROD }}" >> $GITHUB_ENV
 
-          elif [[ "$ENVIRONMENT" == "TEST" ]]; then
+          elif [[ "${GITHUB_REF##*/}" == "test" ]]; then
             echo "VITE_COMM_API_SAVEDATA_ENDPOINT_URL=${{ secrets.VITE_COMM_API_SAVEDATA_ENDPOINT_URL_TEST }}" >> $GITHUB_ENV
             echo "VITE_COMM_API_GENERATE_ENDPOINT_URL=${{ secrets.VITE_COMM_API_GENERATE_ENDPOINT_URL_TEST }}" >> $GITHUB_ENV
             echo "VITE_COMM_API_EDIT_ENDPOINT_URL=${{ secrets.VITE_COMM_API_EDIT_ENDPOINT_URL_TEST }}" >> $GITHUB_ENV
@@ -123,7 +123,7 @@ jobs:
             echo "VITE_SSO_CLIENT_ID=${{ secrets.VITE_SSO_CLIENT_ID_DEV }}" >> $GITHUB_ENV
             echo "VITE_COMM_API_LOADSAVEDJSON_ENDPOINT_URL=${{ secrets.VITE_COMM_API_LOADSAVEDJSON_ENDPOINT_URL_DEV }}" >> $GITHUB_ENV
           fi
-          
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
