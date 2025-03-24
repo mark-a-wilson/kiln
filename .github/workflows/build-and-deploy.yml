@@ -4,8 +4,8 @@ on:
   push:
     branches:
       - main
-      - dev
       - test
+      - dev
 
 env:
   REGISTRY: ghcr.io
@@ -76,15 +76,52 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
       
-      - name: Set environment variables based on branch
+      - name: Export secrets based on environment
         run: |
-          if [[ "${GITHUB_REF##*/}" == "main" ]]; then
-            echo "ENVIRONMENT=PROD" >> $GITHUB_ENV
-          elif [[ "${GITHUB_REF##*/}" == "dev" ]]; then
-            echo "ENVIRONMENT=DEV" >> $GITHUB_ENV
+          if [[ "$ENVIRONMENT" == "PROD" ]]; then
+            echo "VITE_COMM_API_SAVEDATA_ENDPOINT_URL=${{ secrets.VITE_COMM_API_SAVEDATA_ENDPOINT_URL_PROD }}" >> $GITHUB_ENV
+            echo "VITE_COMM_API_GENERATE_ENDPOINT_URL=${{ secrets.VITE_COMM_API_GENERATE_ENDPOINT_URL_PROD }}" >> $GITHUB_ENV
+            echo "VITE_COMM_API_EDIT_ENDPOINT_URL=${{ secrets.VITE_COMM_API_EDIT_ENDPOINT_URL_PROD }}" >> $GITHUB_ENV
+            echo "VITE_COMM_API_SAVEDATA_ICM_ENDPOINT_URL=${{ secrets.VITE_COMM_API_SAVEDATA_ICM_ENDPOINT_URL_PROD }}" >> $GITHUB_ENV
+            echo "VITE_COMM_API_LOADDATA_ICM_ENDPOINT_URL=${{ secrets.VITE_COMM_API_LOADDATA_ICM_ENDPOINT_URL_PROD }}" >> $GITHUB_ENV
+            echo "VITE_COMM_API_UNLOCK_ICM_FORM_URL=${{ secrets.VITE_COMM_API_UNLOCK_ICM_FORM_URL_PROD }}" >> $GITHUB_ENV
+            echo "VITE_TEMPLATE_REPO_URL=${{ secrets.VITE_TEMPLATE_REPO_URL_PROD }}" >> $GITHUB_ENV
+            echo "VITE_KLAMM_URL=${{ secrets.VITE_KLAMM_URL_PROD }}" >> $GITHUB_ENV
+            echo "VITE_SSO_REDIRECT_URI=${{ secrets.VITE_SSO_REDIRECT_URI_PROD }}" >> $GITHUB_ENV
+            echo "VITE_SSO_AUTH_SERVER_URL=${{ secrets.VITE_SSO_AUTH_SERVER_URL_PROD }}" >> $GITHUB_ENV
+            echo "VITE_SSO_REALM=${{ secrets.VITE_SSO_REALM_PROD }}" >> $GITHUB_ENV
+            echo "VITE_SSO_CLIENT_ID=${{ secrets.VITE_SSO_CLIENT_ID_PROD }}" >> $GITHUB_ENV
+            echo "VITE_COMM_API_LOADSAVEDJSON_ENDPOINT_URL=${{ secrets.VITE_COMM_API_LOADSAVEDJSON_ENDPOINT_URL_PROD }}" >> $GITHUB_ENV
+
+          elif [[ "$ENVIRONMENT" == "TEST" ]]; then
+            echo "VITE_COMM_API_SAVEDATA_ENDPOINT_URL=${{ secrets.VITE_COMM_API_SAVEDATA_ENDPOINT_URL_TEST }}" >> $GITHUB_ENV
+            echo "VITE_COMM_API_GENERATE_ENDPOINT_URL=${{ secrets.VITE_COMM_API_GENERATE_ENDPOINT_URL_TEST }}" >> $GITHUB_ENV
+            echo "VITE_COMM_API_EDIT_ENDPOINT_URL=${{ secrets.VITE_COMM_API_EDIT_ENDPOINT_URL_TEST }}" >> $GITHUB_ENV
+            echo "VITE_COMM_API_SAVEDATA_ICM_ENDPOINT_URL=${{ secrets.VITE_COMM_API_SAVEDATA_ICM_ENDPOINT_URL_TEST }}" >> $GITHUB_ENV
+            echo "VITE_COMM_API_LOADDATA_ICM_ENDPOINT_URL=${{ secrets.VITE_COMM_API_LOADDATA_ICM_ENDPOINT_URL_TEST }}" >> $GITHUB_ENV
+            echo "VITE_COMM_API_UNLOCK_ICM_FORM_URL=${{ secrets.VITE_COMM_API_UNLOCK_ICM_FORM_URL_TEST }}" >> $GITHUB_ENV
+            echo "VITE_TEMPLATE_REPO_URL=${{ secrets.VITE_TEMPLATE_REPO_URL_TEST }}" >> $GITHUB_ENV
+            echo "VITE_KLAMM_URL=${{ secrets.VITE_KLAMM_URL_TEST }}" >> $GITHUB_ENV
+            echo "VITE_SSO_REDIRECT_URI=${{ secrets.VITE_SSO_REDIRECT_URI_TEST }}" >> $GITHUB_ENV
+            echo "VITE_SSO_AUTH_SERVER_URL=${{ secrets.VITE_SSO_AUTH_SERVER_URL_TEST }}" >> $GITHUB_ENV
+            echo "VITE_SSO_REALM=${{ secrets.VITE_SSO_REALM_TEST }}" >> $GITHUB_ENV
+            echo "VITE_SSO_CLIENT_ID=${{ secrets.VITE_SSO_CLIENT_ID_TEST }}" >> $GITHUB_ENV
+            echo "VITE_COMM_API_LOADSAVEDJSON_ENDPOINT_URL=${{ secrets.VITE_COMM_API_LOADSAVEDJSON_ENDPOINT_URL_TEST }}" >> $GITHUB_ENV
+
           else
-            echo "ENVIRONMENT=TEST" >> $GITHUB_ENV
-          fi
+            echo "VITE_COMM_API_SAVEDATA_ENDPOINT_URL=${{ secrets.VITE_COMM_API_SAVEDATA_ENDPOINT_URL_DEV }}" >> $GITHUB_ENV
+            echo "VITE_COMM_API_GENERATE_ENDPOINT_URL=${{ secrets.VITE_COMM_API_GENERATE_ENDPOINT_URL_DEV }}" >> $GITHUB_ENV
+            echo "VITE_COMM_API_EDIT_ENDPOINT_URL=${{ secrets.VITE_COMM_API_EDIT_ENDPOINT_URL_DEV }}" >> $GITHUB_ENV
+            echo "VITE_COMM_API_SAVEDATA_ICM_ENDPOINT_URL=${{ secrets.VITE_COMM_API_SAVEDATA_ICM_ENDPOINT_URL_DEV }}" >> $GITHUB_ENV
+            echo "VITE_COMM_API_LOADDATA_ICM_ENDPOINT_URL=${{ secrets.VITE_COMM_API_LOADDATA_ICM_ENDPOINT_URL_DEV }}" >> $GITHUB_ENV
+            echo "VITE_COMM_API_UNLOCK_ICM_FORM_URL=${{ secrets.VITE_COMM_API_UNLOCK_ICM_FORM_URL_DEV }}" >> $GITHUB_ENV
+            echo "VITE_TEMPLATE_REPO_URL=${{ secrets.VITE_TEMPLATE_REPO_URL_DEV }}" >> $GITHUB_ENV
+            echo "VITE_KLAMM_URL=${{ secrets.VITE_KLAMM_URL_DEV }}" >> $GITHUB_ENV
+            echo "VITE_SSO_REDIRECT_URI=${{ secrets.VITE_SSO_REDIRECT_URI_DEV }}" >> $GITHUB_ENV
+            echo "VITE_SSO_AUTH_SERVER_URL=${{ secrets.VITE_SSO_AUTH_SERVER_URL_DEV }}" >> $GITHUB_ENV
+            echo "VITE_SSO_REALM=${{ secrets.VITE_SSO_REALM_DEV }}" >> $GITHUB_ENV
+            echo "VITE_SSO_CLIENT_ID=${{ secrets.VITE_SSO_CLIENT_ID_DEV }}" >> $GITHUB_ENV
+            echo "VITE_COMM_API_LOADSAVEDJSON_ENDPOINT_URL=${{ secrets.VITE_COMM_API_LOADSAVEDJSON_ENDPOINT_URL_DEV }}" >> $GITHUB_ENV
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
@@ -94,19 +131,19 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            VITE_COMM_API_SAVEDATA_ENDPOINT_URL=${{ secrets['VITE_COMM_API_SAVEDATA_ENDPOINT_URL_' + env.ENVIRONMENT] }}
-            VITE_COMM_API_GENERATE_ENDPOINT_URL=${{ secrets['VITE_COMM_API_GENERATE_ENDPOINT_URL_' + env.ENVIRONMENT] }}
-            VITE_COMM_API_EDIT_ENDPOINT_URL=${{ secrets['VITE_COMM_API_EDIT_ENDPOINT_URL_' + env.ENVIRONMENT] }}
-            VITE_COMM_API_SAVEDATA_ICM_ENDPOINT_URL=${{ secrets['VITE_COMM_API_SAVEDATA_ICM_ENDPOINT_URL_' + env.ENVIRONMENT] }}
-            VITE_COMM_API_LOADDATA_ICM_ENDPOINT_URL=${{ secrets['VITE_COMM_API_LOADDATA_ICM_ENDPOINT_URL_' + env.ENVIRONMENT] }}
-            VITE_COMM_API_UNLOCK_ICM_FORM_URL=${{ secrets['VITE_COMM_API_UNLOCK_ICM_FORM_URL_' + env.ENVIRONMENT] }}
-            VITE_TEMPLATE_REPO_URL=${{ secrets['VITE_TEMPLATE_REPO_URL_' + env.ENVIRONMENT] }}
-            VITE_KLAMM_URL=${{ secrets['VITE_KLAMM_URL_' + env.ENVIRONMENT] }}
-            VITE_SSO_REDIRECT_URI=${{ secrets['VITE_SSO_REDIRECT_URI_' + env.ENVIRONMENT] }}
-            VITE_SSO_AUTH_SERVER_URL=${{ secrets['VITE_SSO_AUTH_SERVER_URL_' + env.ENVIRONMENT] }}
-            VITE_SSO_REALM=${{ secrets.VITE_SSO_REALM }}
-            VITE_SSO_CLIENT_ID={{ secrets.VITE_SSO_CLIENT_ID }}
-            VITE_COMM_API_LOADSAVEDJSON_ENDPOINT_URL=${{ secrets['VITE_COMM_API_LOADSAVEDJSON_ENDPOINT_URL_' + env.ENVIRONMENT] }}
+            VITE_COMM_API_SAVEDATA_ENDPOINT_URL=${{ env.VITE_COMM_API_SAVEDATA_ENDPOINT_URL }}
+            VITE_COMM_API_GENERATE_ENDPOINT_URL=${{ env.VITE_COMM_API_GENERATE_ENDPOINT_URL }}
+            VITE_COMM_API_EDIT_ENDPOINT_URL=${{ env.VITE_COMM_API_EDIT_ENDPOINT_URL }}
+            VITE_COMM_API_SAVEDATA_ICM_ENDPOINT_URL=${{ env.VITE_COMM_API_SAVEDATA_ICM_ENDPOINT_URL }}
+            VITE_COMM_API_LOADDATA_ICM_ENDPOINT_URL=${{ env.VITE_COMM_API_LOADDATA_ICM_ENDPOINT_URL }}
+            VITE_COMM_API_UNLOCK_ICM_FORM_URL=${{ env.VITE_COMM_API_UNLOCK_ICM_FORM_URL }}
+            VITE_TEMPLATE_REPO_URL=${{ env.VITE_TEMPLATE_REPO_URL }}
+            VITE_KLAMM_URL=${{ env.VITE_KLAMM_URL }}
+            VITE_SSO_REDIRECT_URI=${{ env.VITE_SSO_REDIRECT_URI }}
+            VITE_SSO_AUTH_SERVER_URL=${{ env.VITE_SSO_AUTH_SERVER_URL }}
+            VITE_SSO_REALM=${{ env.VITE_SSO_REALM }}
+            VITE_SSO_CLIENT_ID=${{ env.VITE_SSO_CLIENT_ID }}
+            VITE_COMM_API_LOADSAVEDJSON_ENDPOINT_URL=${{ env.VITE_COMM_API_LOADSAVEDJSON_ENDPOINT_URL }}
 
 
     outputs:
