@@ -58,7 +58,7 @@ const ViewFormPage: React.FC = () => {
       setJsonContent(result);
 
     } catch (error) {
-      navigate('/unauthorized');
+      navigate('/error');
       console.error("Failed to generate template:", error);
     }
   };
