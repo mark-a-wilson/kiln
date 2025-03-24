@@ -76,7 +76,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
       
-       - name: Set environment variables based on branch
+      - name: Set environment variables based on branch
         run: |
           if [[ "${GITHUB_REF##*/}" == "main" ]]; then
             echo "ENVIRONMENT=PROD" >> $GITHUB_ENV
