@@ -222,5 +222,11 @@
       gap: 10px;  
     } 
       
+  .common-container {          
     
+  break-inside: avoid; /* Modern property to prevent page breaks */
+  page-break-inside: avoid; /* Legacy property for compatibility */  
+  
+      
+    }    
 }
