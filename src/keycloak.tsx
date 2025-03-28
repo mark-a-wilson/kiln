@@ -8,7 +8,7 @@ const redirectUri = window.location.href || (import.meta.env.VITE_SSO_REDIRECT_U
 
 const loginOptions: KeycloakLoginOptions = {
     redirectUri,
-    idpHint: '',
+    idpHint: 'idir',
 };
 
 // Keycloak instance using environment variables
@@ -29,9 +29,9 @@ export const initializeKeycloak = async (): Promise<KeycloakInstance | void> => 
 
         const initOptions: KeycloakInitOptions = {
             pkceMethod: 'S256',
-            checkLoginIframe: false,
-            onLoad: 'login-required'
-            //silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html`
+            checkLoginIframe: true,
+            onLoad: 'check-sso',
+            silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html`
         };
 
         console.log("Initializing Keycloak...");
