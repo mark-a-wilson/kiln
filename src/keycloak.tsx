@@ -57,7 +57,7 @@ const silentLogin = async () => {
         await _kc.login({
             prompt: 'none',
             idpHint: 'idir',
-            redirectUri: window.location.href,
+            redirectUri,
         });
     } catch (err) {
         console.error("Silent login failed. Falling back to normal login:", err);
