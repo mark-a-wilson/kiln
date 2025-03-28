@@ -31,6 +31,7 @@ export const initializeKeycloak = async (): Promise<KeycloakInstance | void> => 
             pkceMethod: 'S256',
             checkLoginIframe: false,
             onLoad: 'check-sso',
+            silentCheckSsoFallback: false,
             silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html`
         };
 
