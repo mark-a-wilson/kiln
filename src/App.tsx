@@ -43,7 +43,7 @@ const App: React.FC = () => {
     } else {
       setLoading(false);
     }
-  }, [location.pathname]);
+  },);
 
   //Loading page when waiting for authentication
   if (loading) {

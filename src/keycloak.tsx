@@ -40,6 +40,7 @@ export const initializeKeycloak = async (): Promise<KeycloakInstance | void> => 
         console.log("Authentication status:", auth); // Debugging step
 
         if (auth) {
+            console.log("Keycloak already authenticated.");
             return _kc;
         } else {
             //await silentLogin();
