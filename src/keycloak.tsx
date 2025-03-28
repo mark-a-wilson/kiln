@@ -30,9 +30,9 @@ export const initializeKeycloak = async (): Promise<KeycloakInstance | void> => 
         const initOptions: KeycloakInitOptions = {
             pkceMethod: 'S256',
             checkLoginIframe: false,
-            onLoad: 'check-sso',
-            silentCheckSsoFallback: false,
-            silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html`
+            onLoad: 'login-required'
+            //silentCheckSsoFallback: false,
+            //silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html`
         };
 
         console.log("Initializing Keycloak...");
