@@ -44,23 +44,26 @@ export const initializeKeycloak = async (): Promise<KeycloakInstance | void> => 
             return _kc;
         } else {
             //await silentLogin();
-            _kc.login(loginOptions);
+            await silentLogin();
         }
     } catch (err) {
         console.error(err);
     }
 };
 
-/*const silentLogin = async () => {
+// Attempt silent login without triggering UI
+const silentLogin = async () => {
     try {
         await _kc.login({
-            prompt: 'none',  // Silent authentication (no UI)
-            redirectUri: window.location.href, // Ensure the redirect goes back to the same page
+            prompt: 'none',
+            idpHint: 'idir',
+            redirectUri: window.location.href,
         });
     } catch (err) {
-        console.error("Silent authentication failed:", err);
+        console.error("Silent login failed. Falling back to normal login:", err);
+        _kc.login(loginOptions); // fallback if silent login fails
     }
-};*/
+};
 
 // Custom logout function to trigger logout via Siteminder.
 export const logout = (): void => {
