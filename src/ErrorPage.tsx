@@ -1,8 +1,11 @@
 import React from "react";
 import "./App.css";
 import "@carbon/styles/css/styles.css";
+import { useLocation } from "react-router-dom";
 
 const ErrorPage: React.FC = () => {
+    const location = useLocation();
+    const errorMessage = location.state?.message || "Something went wrong.Please try again later";
     return (
         <div style={{
             display: "flex",
@@ -11,9 +14,10 @@ const ErrorPage: React.FC = () => {
             alignItems: "center",
             height: "100vh",
             textAlign: "center",
-        }}>
-            <h1>500 - Server Error</h1>
-            <p>Something went wrong. Please try again later.</p>
+        }}>    
+            <h2>Error : </h2>
+                     
+            <p style={{ color: "red", fontWeight: "bold" }}>{errorMessage}</p>
         </div>
     );
 };

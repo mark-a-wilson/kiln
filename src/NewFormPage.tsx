@@ -4,11 +4,13 @@ import Presenter from "./Presenter";
 import "@carbon/styles/css/styles.css";
 import { AuthenticationContext } from "./App";
 import { useNavigate } from 'react-router-dom';
+import LoadingOverlay from "./common/LoadingOverlay"; 
 
 const NewFormPage: React.FC = () => {
   const [jsonContent, setJsonContent] = useState<object>({});
   const keycloak = useContext(AuthenticationContext);
   const navigate = useNavigate();
+  const [isNewPageLoading, setIsNewPageLoading] = useState(false);
 
   useEffect(() => {
 
@@ -29,6 +31,7 @@ const NewFormPage: React.FC = () => {
   }, []);
 
   const handleGenerateTemplate = async (params: { [key: string]: string | null }) => {
+    setIsNewPageLoading(true);
 
     try {
       const generateDataEndpoint = import.meta.env.VITE_COMM_API_GENERATE_ENDPOINT_URL;
@@ -49,19 +52,29 @@ const NewFormPage: React.FC = () => {
       });
 
       if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
+        const errorData = await response.json(); // Parse error response        
+        throw new Error(errorData.error || "Something went wrong");
+        
+      } else {
+        const result = await response.json();
+        setJsonContent(result.save_data);
       }
 
-      const result = await response.json();
-      setJsonContent(result.save_data);
-
-    } catch (error) {
-      navigate('/error');
+    } catch (error) {      
+      navigate("/error", { state: { message:  error instanceof Error ? error.message : String(error) } }); // Pass error
       console.error("Failed to generate template:", error);
+    }
+    finally {
+      setIsNewPageLoading(false);
     }
   };
 
-  return <Presenter data={jsonContent} mode="edit" />;
+  return (
+    <>    
+    <LoadingOverlay isLoading={isNewPageLoading} message="Please wait while the form is being loaded." />
+    <Presenter data={jsonContent} mode="edit" />
+    </>
+);
 };
 
 export default NewFormPage;

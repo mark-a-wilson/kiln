@@ -6,6 +6,8 @@ import "./page.scss";
 //import { PagedPolyfill } from "pagedjs";
 //import { PagedPolyfill, Previewer } from "pagedjs";
 import React, { useState, useEffect, useRef, useContext } from "react";
+import CustomModal from "./common/CustomModal"; // Import the modal component
+import LoadingOverlay from "./common/LoadingOverlay"; 
 import { AuthenticationContext } from "./App";
 import {
   TextInput,
@@ -154,6 +156,11 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
   const [formErrors, setFormErrors] = useState<{
     [key: string]: string | null;
   }>({});
+  
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalTitle, setModalTitle] = useState("");
+  const [modalMessage, setModalMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   if (!data.form_definition) {
     return <div>Invalid Form</div>;
@@ -1176,8 +1183,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
         console.error("Error:", response.statusText);
         return "failed";
       }
-    } catch (error) {
-      navigate('/unauthorized');
+    } catch (error) {      
       console.error("Error:", error);
       return "failed";
     }
@@ -1253,27 +1259,46 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
         console.error("Error:", response.statusText);
         return "failed";
       }
-    } catch (error) {
-      navigate('/unauthorized');
+    } catch (error) {      
       console.error("Error:", error);
       return "failed";
     }
   };
 
   const handleSave = async () => {
-    if (validateAllFields()) {
-      const returnMessage = saveDataToICMApi();
-      if ((await returnMessage) === "success") {
-        window.alert("Form Saved Successfully!!!");
-      } else {
-        window.alert("Error saving form. Please try again !!!");
+    setIsLoading(true); // Show loading overlay
+    setModalOpen(false); // Ensure modal is closed when a new request starts
+    try{
+      if (validateAllFields()) {
+        const returnMessage = saveDataToICMApi();
+       if ((await returnMessage) === "success") {        
+          setModalTitle("Success ✅");
+          setModalMessage("Form Saved Successfully.");
+        } else {        
+          setModalTitle("Error ❌ ");
+          setModalMessage("Error saving form. Please try again.");
+        }
+        setModalOpen(true);
+      } else {      
+        setModalTitle("Validation Error ❌ ");
+        setModalMessage("Error saving form. Please clear the errors in the form before saving.");
+        setModalOpen(true);
       }
-    } else {
-      window.alert("Please clear the errors in the form before saving !!!");
+    } catch(error) {
+      setModalTitle("Error ❌ ");
+      setModalMessage("Error saving form. Please try again.");
+      setModalOpen(true);
     }
+    finally {
+      setIsLoading(false); // Hide loading overlay once request completes
+    }
+    
   };
 
   const handleSaveAndClose = async () => {
+    setIsLoading(true); // Show loading overlay
+    setModalOpen(false); // Ensure modal is closed when a new request starts
+    try{
     if (validateAllFields()) {
       const returnMessage = saveDataToICMApi();
       if ((await returnMessage) === "success") {
@@ -1283,13 +1308,29 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
           window.open("", "_self");
           window.close();
         }
-        else { window.alert("Error clearing locked flags. Please try again."); }
-      } else {
-        window.alert("Error saving form. Please try again !!!");
+        else {          
+          setModalTitle("Error ❌");
+          setModalMessage("Error clearing locked flags. Please try again.");
+          setModalOpen(true);
+          }
+      } else {       
+        setModalTitle("Error ❌");
+        setModalMessage("Error saving form. Please try again.");
+        setModalOpen(true);
       }
     } else {
-      window.alert("Please clear the errors in the form before saving !!!");
+      setModalTitle("Validation Error ❌");
+      setModalMessage("Error saving form. Please clear the errors in the form before saving.");
+      setModalOpen(true);
     }
+  } catch(error) {
+    setModalTitle("Error ❌");
+    setModalMessage("Error saving form. Please try again.");
+    setModalOpen(true);
+  }
+  finally{
+    setIsLoading(false);
+  }
   };
 
 
@@ -1434,6 +1475,15 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
 
 
         <div className="content-wrapper">
+
+        <CustomModal
+        title={modalTitle}
+        message={modalMessage}
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+      />
+          {/* Loading overlay when API call is in progress */}
+          <LoadingOverlay isLoading={isLoading} message="Please wait while the form is being saved." />
           <FlexGrid>
             <Row >
               {formData.data.items.map((item, index) => (
