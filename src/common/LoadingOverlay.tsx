@@ -12,7 +12,7 @@ const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ isLoading, message = "L
   return (
     <div className="loading-overlay">
       <div className="loading-content">
-        <Loading active small={false} withOverlay={false} /> 
+        <div ><Loading active small={false} withOverlay={false} /> </div>
         <p className="loading-message">{message}</p>
       </div>
     </div>
