@@ -30,8 +30,8 @@ export const initializeKeycloak = async (): Promise<KeycloakInstance | void> => 
         const initOptions: KeycloakInitOptions = {
             pkceMethod: 'S256',
             checkLoginIframe: false,
-            onLoad: 'login-required'
-            //silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html`
+            onLoad: 'check-sso',
+            silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html`
         };
 
         console.log("Initializing Keycloak...");
@@ -52,7 +52,7 @@ export const initializeKeycloak = async (): Promise<KeycloakInstance | void> => 
 const silentLogin = async () => {
     try {
         await _kc.login({
-            prompt: 'none',  // Silent authentication (no UI)
+            prompt: 'idir',  // Silent authentication (no UI)
             redirectUri: window.location.href, // Ensure the redirect goes back to the same page
         });
     } catch (err) {
