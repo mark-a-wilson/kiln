@@ -52,7 +52,7 @@ export const initializeKeycloak = async (): Promise<KeycloakInstance | void> => 
 const silentLogin = async () => {
     try {
         await _kc.login({
-            prompt: 'idir',  // Silent authentication (no UI)
+            prompt: 'none',  // Silent authentication (no UI)
             redirectUri: window.location.href, // Ensure the redirect goes back to the same page
         });
     } catch (err) {
