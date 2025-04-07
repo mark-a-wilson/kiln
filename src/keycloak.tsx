@@ -1,15 +1,15 @@
 import Keycloak, {
     KeycloakInstance,
-    KeycloakInitOptions
-    //KeycloakLoginOptions,
+    KeycloakInitOptions,
+    KeycloakLoginOptions
 } from 'keycloak-js';
 
-//const redirectUri = window.location.href || (import.meta.env.VITE_SSO_REDIRECT_URI as string);
+const redirectUri = window.location.href || (import.meta.env.VITE_SSO_REDIRECT_URI as string);
 
-/*const loginOptions: KeycloakLoginOptions = {
+const loginOptions: KeycloakLoginOptions = {
     redirectUri,
-    idpHint: '',
-};*/
+    idpHint: 'idir',
+};
 
 // Keycloak instance using environment variables
 const _kc: KeycloakInstance = new Keycloak({
@@ -30,8 +30,8 @@ export const initializeKeycloak = async (): Promise<KeycloakInstance | void> => 
         const initOptions: KeycloakInitOptions = {
             pkceMethod: 'S256',
             checkLoginIframe: false,
-            onLoad: 'check-sso',
-            silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html`
+            onLoad: 'check-sso'
+            //silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html`
         };
 
         console.log("Initializing Keycloak...");
@@ -41,22 +41,12 @@ export const initializeKeycloak = async (): Promise<KeycloakInstance | void> => 
         if (auth) {
             return _kc;
         } else {
-            await silentLogin();
-            //_kc.login(loginOptions);
+            console.warn("No active session found. Triggering login with options.");
+            await _kc.login(loginOptions);
         }
     } catch (err) {
-        console.error(err);
-    }
-};
-
-const silentLogin = async () => {
-    try {
-        await _kc.login({
-            prompt: 'none',  // Silent authentication (no UI)
-            redirectUri: window.location.href, // Ensure the redirect goes back to the same page
-        });
-    } catch (err) {
-        console.error("Silent authentication failed:", err);
+        console.error("Keycloak init failed:", err);
+        await _kc.login(loginOptions);
     }
 };
 
