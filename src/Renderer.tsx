@@ -960,6 +960,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
             <Component
               className="field-container"
               legendText={label}
+              orientation="vertical"
               id={fieldId}
               name={fieldId}
               onChange={(value: string) =>
@@ -1421,6 +1422,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
 
         </div>
       </div>
+      <div className="header-form-id">{formData.form_id}</div>
       <div className="scrollable-content">
         <div className="header-section">
           <div className="header-title-buttons">

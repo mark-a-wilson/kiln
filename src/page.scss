@@ -8,7 +8,7 @@
   --default-font-family: "BC Sans", sans-serif;
   --default-font-size: 16px;
   --outer-padding: 0px 60px;
-  --label-font-size: 12px;
+  --label-font-size: 16px;
   --label-font-weight: bold;
   --label-font-style: normal;
 }
@@ -31,7 +31,7 @@ $label-font-style: var(--label-font-style);
 @mixin button-style($bg-color, $border-color, $text-color) {
   display: flex;
   height: 40px;
-  padding:  8px, 16px;
+  padding:  6px, 12px;
   justify-content: center;
   align-items: center;
   gap:  8px;
@@ -129,6 +129,8 @@ padding: $outer-padding;
 flex-direction: column;
 //align-items: flex-start;
 gap: 42px;
+max-width: 836px;
+margin: auto
 }
 
 .required-asterisk {
@@ -158,18 +160,15 @@ gap: 42px;
   //overflow: hidden; 
   //border-bottom: 1px solid #C8C8C8;    
   //box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
-
+  max-width: 836px;
+  margin: auto;
   .header-image,
   .header-title-buttons {
     display: flex;
     width: 100%;
     justify-content: space-between;
-    align-items: center;  
-
-    
-  }
-
-  
+    align-items: center;   
+  } 
 
   .header-image-only{
     align-items: left;
@@ -200,7 +199,24 @@ gap: 42px;
     font-weight: 700;
     line-height: 54px;
   }
+   
 }
+
+.header-form-id {
+  display: flex;
+  //width: 1440px;
+  padding: 24px 220px 16px 270px;
+  align-items: center;
+  background: #ECEAE8;
+  color: #525252;
+/* Web/Body/Label */
+font-family: "BC Sans";
+font-size: 16px;
+font-style: normal;
+font-weight: 700;
+line-height: 150%; /* 24px */
+letter-spacing: 0.32px;
+} 
 
 .group-header {
   color: #000;
@@ -275,7 +291,8 @@ margin-bottom: 15px;
 }
 
 .cds--form__helper-text {
-  color: #6c757d; /* Bootstrap's default grey shade */
+  color: #525252; /* Bootstrap's default grey shade */
+  font-size:1rem
 }
 
 .cds--label {
@@ -298,4 +315,18 @@ margin-bottom: 15px;
   font-family: $default-font-family;
   font-size: $default-font-size;
   color: #000; 
+}
+
+.cds--text-input,.cds--dropdown ,.cds--date-picker__input,.cds--text-area {
+
+  border:1px solid #8D8D8D;
+  background:none
+
+}
+
+.cds--text-input-wrapper--readonly .cds--text-input,
+.cds--date-picker__input[readonly] ,
+.cds--dropdown--readonly .cds--list-box__field{
+  background:#f4f4f4;
+  border:none
 }
