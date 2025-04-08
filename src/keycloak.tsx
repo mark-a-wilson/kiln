@@ -1,15 +1,15 @@
 import Keycloak, {
     KeycloakInstance,
-    KeycloakInitOptions,
-    KeycloakLoginOptions
+    KeycloakInitOptions
+    //KeycloakLoginOptions
 } from 'keycloak-js';
 
-const redirectUri = window.location.href || (import.meta.env.VITE_SSO_REDIRECT_URI as string);
+//const redirectUri = window.location.href || (import.meta.env.VITE_SSO_REDIRECT_URI as string);
 
-const loginOptions: KeycloakLoginOptions = {
-    redirectUri,
-    idpHint: 'idir',
-};
+// const loginOptions: KeycloakLoginOptions = {
+//     redirectUri,
+//     idpHint: 'idir',
+// };
 
 // Keycloak instance using environment variables
 const _kc: KeycloakInstance = new Keycloak({
@@ -38,15 +38,20 @@ export const initializeKeycloak = async (): Promise<KeycloakInstance | void> => 
         const auth: boolean = await _kc.init(initOptions);
         console.log("Authentication status:", auth); // Debugging step
 
-        if (auth) {
-            return _kc;
-        } else {
-            console.warn("No active session found. Triggering login with options.");
-            await _kc.login(loginOptions);
+        if (window.location.search.includes("code=") || window.location.search.includes("state=")) {
+            window.history.replaceState({}, document.title, window.location.pathname);
         }
-    } catch (err) {
+
+        if (_kc.authenticated) {
+            console.log("Authenticated successfully.");
+        } else {
+            console.warn("Not authenticated. Will handle login via PrivateRoute.");
+        }
+
+        return _kc;
+    } catch (err: any) {
         console.error("Keycloak init failed:", err);
-        await _kc.login(loginOptions);
+        return _kc;
     }
 };
 
