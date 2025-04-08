@@ -28,9 +28,7 @@ const App: React.FC = () => {
     const initKeycloak = async () => {
       try {
         const _keycloak = await initializeKeycloak();
-        if (_keycloak?.authenticated) {
-          setKeycloak(_keycloak);
-        }
+        setKeycloak(_keycloak);
       } catch (error) {
         console.error("Keycloak initialization error:", error);
       } finally {
@@ -44,7 +42,7 @@ const App: React.FC = () => {
     } else {
       setLoading(false);
     }
-  }, [location.pathname]);
+  }, []);
 
   //Loading page when waiting for authentication
   if (loading) {

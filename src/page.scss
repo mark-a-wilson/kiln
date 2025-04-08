@@ -57,6 +57,13 @@ html, body {
   margin: 0px 0;
   //border-radius: 5px;
 }
+
+.common-container {
+  border: 1px solid $border-color;
+  padding: 15px;
+  margin: 0px 0;
+  border-radius: 5px;
+}
 .cds--row {
   display: grid !important; /* Grid Layout for items */
   grid-template-columns: repeat(4, 1fr) !important;

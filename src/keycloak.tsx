@@ -1,15 +1,15 @@
 import Keycloak, {
     KeycloakInstance,
     KeycloakInitOptions
-    //KeycloakLoginOptions,
+    //KeycloakLoginOptions
 } from 'keycloak-js';
 
 //const redirectUri = window.location.href || (import.meta.env.VITE_SSO_REDIRECT_URI as string);
 
-/*const loginOptions: KeycloakLoginOptions = {
-    redirectUri,
-    idpHint: '',
-};*/
+// const loginOptions: KeycloakLoginOptions = {
+//     redirectUri,
+//     idpHint: 'idir',
+// };
 
 // Keycloak instance using environment variables
 const _kc: KeycloakInstance = new Keycloak({
@@ -30,7 +30,7 @@ export const initializeKeycloak = async (): Promise<KeycloakInstance | void> => 
         const initOptions: KeycloakInitOptions = {
             pkceMethod: 'S256',
             checkLoginIframe: false,
-            onLoad: 'login-required'
+            onLoad: 'check-sso'
             //silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html`
         };
 
@@ -38,25 +38,20 @@ export const initializeKeycloak = async (): Promise<KeycloakInstance | void> => 
         const auth: boolean = await _kc.init(initOptions);
         console.log("Authentication status:", auth); // Debugging step
 
-        if (auth) {
-            return _kc;
-        } else {
-            await silentLogin();
-            //_kc.login(loginOptions);
+        if (window.location.search.includes("code=") || window.location.search.includes("state=")) {
+            window.history.replaceState({}, document.title, window.location.pathname);
         }
-    } catch (err) {
-        console.error(err);
-    }
-};
 
-const silentLogin = async () => {
-    try {
-        await _kc.login({
-            prompt: 'none',  // Silent authentication (no UI)
-            redirectUri: window.location.href, // Ensure the redirect goes back to the same page
-        });
-    } catch (err) {
-        console.error("Silent authentication failed:", err);
+        if (_kc.authenticated) {
+            console.log("Authenticated successfully.");
+        } else {
+            console.warn("Not authenticated. Will handle login via PrivateRoute.");
+        }
+
+        return _kc;
+    } catch (err: any) {
+        console.error("Keycloak init failed:", err);
+        return _kc;
     }
 };
 
