@@ -4,7 +4,7 @@ import Keycloak, {
     //KeycloakLoginOptions
 } from 'keycloak-js';
 
-const redirectUri = window.location.href || (import.meta.env.VITE_SSO_REDIRECT_URI as string);
+//const redirectUri = window.location.href || (import.meta.env.VITE_SSO_REDIRECT_URI as string);
 
 // const loginOptions: KeycloakLoginOptions = {
 //     redirectUri,

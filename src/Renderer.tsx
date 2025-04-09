@@ -176,6 +176,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
   const [formErrors, setFormErrors] = useState<{
     [key: string]: string | null;
   }>({});
+  const isFormCleared = useRef(false);
   
   const [modalOpen, setModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
@@ -216,12 +217,24 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
     return () => mediaQueryList.removeEventListener("change", handlePrint);
   }, []);
 
+  //on close, execute unlock form
+  useEffect(() => {
+     const handleClose = (event: BeforeUnloadEvent) => {
+      if (isFormCleared.current === false)
+      {
+        event.preventDefault();
+        unlockICMFinalFlags();
+      }
+     }
+     window.addEventListener("beforeunload", handleClose);
+     return () => window.removeEventListener("beforeunload", handleClose);
+  })
+
   /*
-  Initilaization on page load
+  Initialization on page load
   The states need to be initialised with ids of the elements that appera on screen on loading.
   Some attributes need to be set for paging for PDF generation
   */
-
   useEffect(() => {
     const initialFormStates: { [key: string]: string } = {};
     const initialGroupStates: { [key: string]: GroupState } = {}; // Changed type here
@@ -1461,6 +1474,7 @@ This is triggered when any value is cahnged on the element
       if ((await returnMessage) === "success") {
         const unlockMessage = unlockICMFinalFlags();
         if ((await unlockMessage) == "success") {
+          isFormCleared.current = true;
           window.opener = null;
           window.open("", "_self");
           window.close();
