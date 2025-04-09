@@ -4,6 +4,7 @@ import '@carbon/styles/css/styles.css';
 import "./page.scss";
 import React, { useState, useEffect, useRef, useContext } from "react";
 import { AuthenticationContext } from "./App";
+import {generateFillablePdf} from './FillablePDFButton';
 import {
   TextInput,
   Dropdown,
@@ -1566,6 +1567,9 @@ This is triggered when any value is cahnged on the element
                 </Button>
                 <Button onClick={handleSaveAndClose} kind="secondary" className="no-print">
                   Save And Close
+                </Button>
+                <Button onClick={() => generateFillablePdf(createSavedData())}>
+                  Download Fillable PDF
                 </Button>
 
               </>
