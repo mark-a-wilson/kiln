@@ -1,15 +1,15 @@
 import Keycloak, {
     KeycloakInstance,
-    KeycloakInitOptions,
-    KeycloakLoginOptions
+    KeycloakInitOptions
+    //KeycloakLoginOptions
 } from 'keycloak-js';
 
 const redirectUri = window.location.href || (import.meta.env.VITE_SSO_REDIRECT_URI as string);
 
-const loginOptions: KeycloakLoginOptions = {
-    redirectUri,
-    idpHint: 'idir',
-};
+// const loginOptions: KeycloakLoginOptions = {
+//     redirectUri,
+//     idpHint: 'idir',
+// };
 
 // Keycloak instance using environment variables
 const _kc: KeycloakInstance = new Keycloak({
@@ -30,8 +30,7 @@ export const initializeKeycloak = async (): Promise<KeycloakInstance | void> => 
         const initOptions: KeycloakInitOptions = {
             pkceMethod: 'S256',
             checkLoginIframe: false,
-            onLoad: 'login-required'
-            //silentCheckSsoFallback: false,
+            onLoad: 'check-sso'
             //silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html`
         };
 
@@ -39,29 +38,20 @@ export const initializeKeycloak = async (): Promise<KeycloakInstance | void> => 
         const auth: boolean = await _kc.init(initOptions);
         console.log("Authentication status:", auth); // Debugging step
 
-        if (auth) {
-            console.log("Keycloak already authenticated.");
-            return _kc;
-        } else {
-            //await silentLogin();
-            await silentLogin();
+        if (window.location.search.includes("code=") || window.location.search.includes("state=")) {
+            window.history.replaceState({}, document.title, window.location.pathname);
         }
-    } catch (err) {
-        console.error(err);
-    }
-};
 
-// Attempt silent login without triggering UI
-const silentLogin = async () => {
-    try {
-        await _kc.login({
-            prompt: 'none',
-            idpHint: 'idir',
-            redirectUri,
-        });
-    } catch (err) {
-        console.error("Silent login failed. Falling back to normal login:", err);
-        _kc.login(loginOptions); // fallback if silent login fails
+        if (_kc.authenticated) {
+            console.log("Authenticated successfully.");
+        } else {
+            console.warn("Not authenticated. Will handle login via PrivateRoute.");
+        }
+
+        return _kc;
+    } catch (err: any) {
+        console.error("Keycloak init failed:", err);
+        return _kc;
     }
 };
 

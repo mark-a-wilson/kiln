@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - test
-      - dev
+  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
