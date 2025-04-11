@@ -6,7 +6,6 @@
   </head>
   <body>
     <script>
-      // This script sends the current URL back to the parent window,
       // allowing Keycloak to complete the silent SSO check.
       if (window.parent !== window) {
         window.parent.postMessage(window.location.href, window.location.origin);
