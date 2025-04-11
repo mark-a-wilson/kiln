@@ -4,11 +4,14 @@ import Presenter from "./Presenter";
 import "@carbon/styles/css/styles.css";
 import { AuthenticationContext } from "./App";
 import { useNavigate } from 'react-router-dom';
+//import { useRealOnlineStatus } from './useOnlineStatus';
+import { saveForm, loadForm } from './storage';
 
 const NewFormPage: React.FC = () => {
   const [jsonContent, setJsonContent] = useState<object>({});
   const keycloak = useContext(AuthenticationContext);
   const navigate = useNavigate();
+  const isOnline = true;//useRealOnlineStatus();
 
   useEffect(() => {
 
@@ -30,30 +33,44 @@ const NewFormPage: React.FC = () => {
 
   const handleGenerateTemplate = async (params: { [key: string]: string | null }) => {
 
+    console.log("isOnline>>",isOnline);
     try {
-      const generateDataEndpoint = import.meta.env.VITE_COMM_API_GENERATE_ENDPOINT_URL;
-      console.log(generateDataEndpoint);
+      if( isOnline) {
+        console.log("Loading from api");
+        const generateDataEndpoint = import.meta.env.VITE_COMM_API_GENERATE_ENDPOINT_URL;
+        console.log(generateDataEndpoint);
+  
+        const token = keycloak.token;
+        console.log("KEYCLOAK", keycloak);
+  
+        const response = await fetch(generateDataEndpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ...params,
+            token,
+          }),
+        });
+  
+        if (!response.ok) {
+          throw new Error(`Error: ${response.statusText}`);
+        }
+  
+        const result = await response.json();
+        setJsonContent(result.save_data);
+        await saveForm("formId123", result.save_data);
 
-      const token = keycloak.token;
-      console.log("KEYCLOAK", keycloak);
-
-      const response = await fetch(generateDataEndpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...params,
-          token,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
+      }else {
+        console.log("Loading from local");
+        const savedForm = await loadForm("formId123");
+        if (savedForm) {
+          setJsonContent(savedForm);
+        }
+      
       }
 
-      const result = await response.json();
-      setJsonContent(result.save_data);
 
     } catch (error) {
       navigate('/unauthorized');
