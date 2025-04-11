@@ -31,7 +31,7 @@ const NewFormPage: React.FC = () => {
   const handleGenerateTemplate = async (params: { [key: string]: string | null }) => {
 
     try {
-      const generateDataEndpoint = import.meta.env.VITE_COMM_API_GENERATE_ENDPOINT_URL;
+      const generateDataEndpoint = "/api/generate";//import.meta.env.VITE_COMM_API_GENERATE_ENDPOINT_URL;
       console.log(generateDataEndpoint);
 
       const token = keycloak.token;

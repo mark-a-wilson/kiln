@@ -45,22 +45,17 @@ ENV VITE_COMM_API_LOADSAVEDJSON_ENDPOINT_URL=${VITE_COMM_API_LOADSAVEDJSON_ENDPO
 # Build the React application
 RUN npm run build
 
-# Stage 2: Use a smaller base image for the final build
-FROM node:20-alpine
+# Stage 2: Use Nginx to serve the React build
+FROM nginx:alpine
 
-# Set the working directory
-WORKDIR /app
+# Remove default Nginx configuration
+RUN rm /etc/nginx/conf.d/default.conf
 
-# Copy the build artifacts from the previous stage
-COPY --from=build /app/dist ./dist
-COPY --from=build /app/package.json ./
-COPY --from=build /app/package-lock.json ./
+# Copy custom Nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Install only production dependencies
-RUN npm ci --only=production
-
-# Use a lightweight server to serve the build files
-RUN npm install -g serve
+# Copy the React build files from Stage 1
+COPY --from=build /app/dist /usr/share/nginx/html
 
 # Set environment variable for the port
 ENV PORT 8080
@@ -68,5 +63,31 @@ ENV PORT 8080
 # Expose port 8080 to the outside world
 EXPOSE 8080
 
-# Set the command to start the application
-CMD ["serve", "-s", "dist", "-l", "8080"]
+# Start Nginx
+CMD ["nginx", "-g", "daemon off;"]
+
+# # Stage 2: Use a smaller base image for the final build
+# FROM node:20-alpine
+
+# # Set the working directory
+# WORKDIR /app
+
+# # Copy the build artifacts from the previous stage
+# COPY --from=build /app/dist ./dist
+# COPY --from=build /app/package.json ./
+# COPY --from=build /app/package-lock.json ./
+
+# # Install only production dependencies
+# RUN npm ci --only=production
+
+# # Use a lightweight server to serve the build files
+# RUN npm install -g serve
+
+# # Set environment variable for the port
+# ENV PORT 8080
+
+# # Expose port 8080 to the outside world
+# EXPOSE 8080
+
+# # Set the command to start the application
+# CMD ["serve", "-s", "dist", "-l", "8080"]

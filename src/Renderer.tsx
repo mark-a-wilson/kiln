@@ -1146,8 +1146,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
 
   const saveDataToICMApi = async () => {
     try {
-      const saveDataICMEndpoint = import.meta.env
-        .VITE_COMM_API_SAVEDATA_ICM_ENDPOINT_URL;
+      const saveDataICMEndpoint = "/api/saveICMData";//import.meta.env.VITE_COMM_API_SAVEDATA_ICM_ENDPOINT_URL;
       const queryParams = new URLSearchParams(window.location.search);
       const params: { [key: string]: string | null } = {};
       const token = keycloak.token;
@@ -1226,8 +1225,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
   };
   const unlockICMFinalFlags = async () => {
     try {
-      const unlockICMFinalEdpoint = import.meta.env
-        .VITE_COMM_API_UNLOCK_ICM_FORM_URL;
+      const unlockICMFinalEdpoint = "/api/clearICMLockedFlag";//import.meta.env.VITE_COMM_API_UNLOCK_ICM_FORM_URL;
       const queryParams = new URLSearchParams(window.location.search);
       const params: { [key: string]: string | null } = {};
       const token = keycloak.token;

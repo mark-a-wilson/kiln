@@ -32,7 +32,7 @@ const EditFormPage: React.FC = () => {
   const handleLoadTemplate = async (params: { [key: string]: string | null }) => {
 
     try {
-      const loadDataEndpoint = import.meta.env.VITE_COMM_API_LOADDATA_ICM_ENDPOINT_URL;
+      const loadDataEndpoint = "/api/loadICMData";//import.meta.env.VITE_COMM_API_LOADDATA_ICM_ENDPOINT_URL;
       console.log(loadDataEndpoint);
 
       const token = keycloak.token;
