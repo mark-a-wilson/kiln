@@ -57,6 +57,13 @@ html, body {
   margin: 0px 0;
   //border-radius: 5px;
 }
+
+.common-container {
+  border: 1px solid $border-color;
+  padding: 15px;
+  margin: 0px 0;
+  border-radius: 5px;
+}
 .cds--row {
   display: grid !important; /* Grid Layout for items */
   grid-template-columns: repeat(4, 1fr) !important;
@@ -329,4 +336,39 @@ margin-bottom: 15px;
 .cds--dropdown--readonly .cds--list-box__field{
   background:#f4f4f4;
   border:none
+}
+.custom-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 16px;
+}
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;  /* Centers content vertically */
+  justify-content: center; /* Centers content horizontally */
+  z-index: 9999;
+  backdrop-filter: blur(8px);
+}
+
+.loading-content {
+  display: flex;
+  flex-direction: column; /* Stack items vertically */
+  align-items: center; /* Center horizontally */
+  justify-content: center; /* Center vertically */
+  gap: 10px; /* Space between loader and message */
+}
+
+.loading-message {
+  font-size: 18px;
+  font-weight: bold;
+  //color: #0043ce;
+  text-align: center; /* Ensure text is centered */
 }

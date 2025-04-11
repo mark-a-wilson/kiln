@@ -45,28 +45,51 @@ ENV VITE_COMM_API_LOADSAVEDJSON_ENDPOINT_URL=${VITE_COMM_API_LOADSAVEDJSON_ENDPO
 # Build the React application
 RUN npm run build
 
-# Stage 2: Use a smaller base image for the final build
-FROM node:20-alpine
+# Stage 2: Use Nginx to serve the React build
+FROM nginx:alpine
 
-# Set the working directory
-WORKDIR /app
+# Injected via GitHub Actions
+ARG VITE_API_PROXY_TARGET
+ENV VITE_API_PROXY_TARGET=${VITE_API_PROXY_TARGET}
 
-# Copy the build artifacts from the previous stage
-COPY --from=build /app/dist ./dist
-COPY --from=build /app/package.json ./
-COPY --from=build /app/package-lock.json ./
+# Use envsubst for config templating
+RUN apk add --no-cache gettext
 
-# Install only production dependencies
-RUN npm ci --only=production
+# Move nginx.template.conf into container
+COPY nginx.template.conf /etc/nginx/nginx.template.conf
+RUN envsubst '${VITE_API_PROXY_TARGET}' < /etc/nginx/nginx.template.conf > /etc/nginx/conf.d/default.conf
 
-# Use a lightweight server to serve the build files
-RUN npm install -g serve
+# Copy build output from previous stage
+COPY --from=build /app/dist /usr/share/nginx/html
 
-# Set environment variable for the port
+EXPOSE 8080
 ENV PORT 8080
 
-# Expose port 8080 to the outside world
-EXPOSE 8080
+# Replace env vars at runtime and launch Nginx
+CMD ["nginx", "-g", "daemon off;"]
 
-# Set the command to start the application
-CMD ["serve", "-s", "dist", "-l", "8080"]
+# # Stage 2: Use a smaller base image for the final build
+# FROM node:20-alpine
+
+# # Set the working directory
+# WORKDIR /app
+
+# # Copy the build artifacts from the previous stage
+# COPY --from=build /app/dist ./dist
+# COPY --from=build /app/package.json ./
+# COPY --from=build /app/package-lock.json ./
+
+# # Install only production dependencies
+# RUN npm ci --only=production
+
+# # Use a lightweight server to serve the build files
+# RUN npm install -g serve
+
+# # Set environment variable for the port
+# ENV PORT 8080
+
+# # Expose port 8080 to the outside world
+# EXPOSE 8080
+
+# # Set the command to start the application
+# CMD ["serve", "-s", "dist", "-l", "8080"]
