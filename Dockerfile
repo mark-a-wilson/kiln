@@ -27,7 +27,6 @@ ARG VITE_SSO_AUTH_SERVER_URL
 ARG VITE_SSO_REALM
 ARG VITE_SSO_CLIENT_ID
 ARG VITE_COMM_API_LOADSAVEDJSON_ENDPOINT_URL
-ARG API_PROXY_TARGET
 
 ENV VITE_COMM_API_SAVEDATA_ENDPOINT_URL=${VITE_COMM_API_SAVEDATA_ENDPOINT_URL}
 ENV VITE_COMM_API_GENERATE_ENDPOINT_URL=${VITE_COMM_API_GENERATE_ENDPOINT_URL}
@@ -50,15 +49,15 @@ RUN npm run build
 FROM nginx:alpine
 
 # Injected via GitHub Actions
-ARG API_PROXY_TARGET
-ENV API_PROXY_TARGET=${API_PROXY_TARGET}
+ARG VITE_API_PROXY_TARGET
+ENV VITE_API_PROXY_TARGET=${VITE_API_PROXY_TARGET}
 
 # Use envsubst for config templating
 RUN apk add --no-cache gettext
 
 # Move nginx.template.conf into container
 COPY nginx.template.conf /etc/nginx/nginx.template.conf
-RUN envsubst '${API_PROXY_TARGET}' < /etc/nginx/nginx.template.conf > /etc/nginx/conf.d/default.conf
+RUN envsubst '${VITE_API_PROXY_TARGET}' < /etc/nginx/nginx.template.conf > /etc/nginx/conf.d/default.conf
 
 # Copy build output from previous stage
 COPY --from=build /app/dist /usr/share/nginx/html
