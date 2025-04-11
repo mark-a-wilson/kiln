@@ -4,6 +4,7 @@ import Presenter from "./Presenter";
 import "@carbon/styles/css/styles.css";
 import { AuthenticationContext } from "./App";
 import { useNavigate } from 'react-router-dom';
+import { API } from "./utils/api";
 
 const NewFormPage: React.FC = () => {
   const [jsonContent, setJsonContent] = useState<object>({});
@@ -31,7 +32,7 @@ const NewFormPage: React.FC = () => {
   const handleGenerateTemplate = async (params: { [key: string]: string | null }) => {
 
     try {
-      const generateDataEndpoint = "/api/generate";//import.meta.env.VITE_COMM_API_GENERATE_ENDPOINT_URL;
+      const generateDataEndpoint = API.generate;//import.meta.env.VITE_COMM_API_GENERATE_ENDPOINT_URL;
       console.log(generateDataEndpoint);
 
       const token = keycloak.token;
@@ -47,7 +48,7 @@ const NewFormPage: React.FC = () => {
           token,
         }),
       });
-
+      console.log("RESPONSE", response);
       if (!response.ok) {
         throw new Error(`Error: ${response.statusText}`);
       }

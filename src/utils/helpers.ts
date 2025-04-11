@@ -123,6 +123,15 @@ export const isFieldRequired = (validations: Array<any>): boolean => {
     return validations.some((validation) => validation.type === "required");
   };  
   
+export function getApiUrl(path: string, envVar?: string): string {
+    const isDev = import.meta.env.DEV;
+  
+    if (isDev && envVar) {
+      return envVar;
+    }
+
+    return `/api${path.startsWith("/") ? path : `/${path}`}`;
+}
 
 
    

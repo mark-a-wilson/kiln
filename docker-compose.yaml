@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_COMM_API_SAVEDATA_ENDPOINT_URL: http://host.docker.internal:3030/saveData
+        VITE_COMM_API_GENERATE_ENDPOINT_URL: http://host.docker.internal:3030/generate
+        VITE_COMM_API_EDIT_ENDPOINT_URL: http://host.docker.internal:3030/edit
+        VITE_COMM_API_SAVEDATA_ICM_ENDPOINT_URL: http://host.docker.internal:3030/saveICMData
+        VITE_COMM_API_LOADDATA_ICM_ENDPOINT_URL: http://host.docker.internal:3030/loadICMData
+        VITE_COMM_API_UNLOCK_ICM_FORM_URL: http://host.docker.internal:3030/clearICMLockedFlag
+        VITE_TEMPLATE_REPO_URL: http://host.docker.internal:3000
+        VITE_KLAMM_URL: http://host.docker.internal:8000
+        VITE_SSO_REDIRECT_URI: http://localhost:8080
+        VITE_SSO_AUTH_SERVER_URL: https://dev.loginproxy.gov.bc.ca/auth
+        VITE_SSO_REALM: 
+        VITE_SSO_CLIENT_ID: 
+        API_PROXY_TARGET: http://host.docker.internal:3030
+
+    image: kiln
+    ports:
+      - "8080:8080"

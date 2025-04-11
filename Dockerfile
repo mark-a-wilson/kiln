@@ -27,6 +27,7 @@ ARG VITE_SSO_AUTH_SERVER_URL
 ARG VITE_SSO_REALM
 ARG VITE_SSO_CLIENT_ID
 ARG VITE_COMM_API_LOADSAVEDJSON_ENDPOINT_URL
+ARG API_PROXY_TARGET
 
 ENV VITE_COMM_API_SAVEDATA_ENDPOINT_URL=${VITE_COMM_API_SAVEDATA_ENDPOINT_URL}
 ENV VITE_COMM_API_GENERATE_ENDPOINT_URL=${VITE_COMM_API_GENERATE_ENDPOINT_URL}
@@ -48,22 +49,24 @@ RUN npm run build
 # Stage 2: Use Nginx to serve the React build
 FROM nginx:alpine
 
-# Remove default Nginx configuration
-RUN rm /etc/nginx/conf.d/default.conf
+# Injected via GitHub Actions
+ARG API_PROXY_TARGET
+ENV API_PROXY_TARGET=${API_PROXY_TARGET}
 
-# Copy custom Nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Use envsubst for config templating
+RUN apk add --no-cache gettext
 
-# Copy the React build files from Stage 1
+# Move nginx.template.conf into container
+COPY nginx.template.conf /etc/nginx/nginx.template.conf
+RUN envsubst '${API_PROXY_TARGET}' < /etc/nginx/nginx.template.conf > /etc/nginx/conf.d/default.conf
+
+# Copy build output from previous stage
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Set environment variable for the port
+EXPOSE 8080
 ENV PORT 8080
 
-# Expose port 8080 to the outside world
-EXPOSE 8080
-
-# Start Nginx
+# Replace env vars at runtime and launch Nginx
 CMD ["nginx", "-g", "daemon off;"]
 
 # # Stage 2: Use a smaller base image for the final build
