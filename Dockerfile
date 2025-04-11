@@ -48,24 +48,27 @@ RUN npm run build
 # Stage 2: Use Nginx to serve the React build
 FROM nginx:alpine
 
+# Install envsubst for template variable substitution
+RUN apk add --no-cache gettext
+
+# Ensure OpenShift UID can write to needed paths
+RUN mkdir -p /var/cache/nginx /etc/nginx/conf.d /usr/share/nginx/html && \
+    chmod -R g=u /var/cache/nginx /etc/nginx /usr/share/nginx
+
 # Injected via GitHub Actions
 ARG VITE_API_PROXY_TARGET
 ENV VITE_API_PROXY_TARGET=${VITE_API_PROXY_TARGET}
 
-# Use envsubst for config templating
-RUN apk add --no-cache gettext
-
-# Move nginx.template.conf into container
+# Build the Nginx config with environment substitution
 COPY nginx.template.conf /etc/nginx/nginx.template.conf
 RUN envsubst '${VITE_API_PROXY_TARGET}' < /etc/nginx/nginx.template.conf > /etc/nginx/conf.d/default.conf
 
-# Copy build output from previous stage
+# Copy built app from previous stage
 COPY --from=build /app/dist /usr/share/nginx/html
 
 EXPOSE 8080
 ENV PORT 8080
 
-# Replace env vars at runtime and launch Nginx
 CMD ["nginx", "-g", "daemon off;"]
 
 # # Stage 2: Use a smaller base image for the final build
