@@ -92,6 +92,7 @@ jobs:
             echo "VITE_SSO_REALM=${{ secrets.VITE_SSO_REALM_PROD }}" >> $GITHUB_ENV
             echo "VITE_SSO_CLIENT_ID=${{ secrets.VITE_SSO_CLIENT_ID_PROD }}" >> $GITHUB_ENV
             echo "VITE_COMM_API_LOADSAVEDJSON_ENDPOINT_URL=${{ secrets.VITE_COMM_API_LOADSAVEDJSON_ENDPOINT_URL_PROD }}" >> $GITHUB_ENV
+            echo "VITE_API_PROXY_TARGET=${{ secrets.VITE_API_PROXY_TARGET_PROD }}" >> $GITHUB_ENV
 
           elif [[ "${GITHUB_REF##*/}" == "test" ]]; then
             echo "VITE_COMM_API_SAVEDATA_ENDPOINT_URL=${{ secrets.VITE_COMM_API_SAVEDATA_ENDPOINT_URL_TEST }}" >> $GITHUB_ENV
@@ -107,6 +108,7 @@ jobs:
             echo "VITE_SSO_REALM=${{ secrets.VITE_SSO_REALM_TEST }}" >> $GITHUB_ENV
             echo "VITE_SSO_CLIENT_ID=${{ secrets.VITE_SSO_CLIENT_ID_TEST }}" >> $GITHUB_ENV
             echo "VITE_COMM_API_LOADSAVEDJSON_ENDPOINT_URL=${{ secrets.VITE_COMM_API_LOADSAVEDJSON_ENDPOINT_URL_TEST }}" >> $GITHUB_ENV
+            echo "VITE_API_PROXY_TARGET=${{ secrets.VITE_API_PROXY_TARGET_TEST }}" >> $GITHUB_ENV
 
           else
             echo "VITE_COMM_API_SAVEDATA_ENDPOINT_URL=${{ secrets.VITE_COMM_API_SAVEDATA_ENDPOINT_URL_DEV }}" >> $GITHUB_ENV
@@ -122,6 +124,7 @@ jobs:
             echo "VITE_SSO_REALM=${{ secrets.VITE_SSO_REALM_DEV }}" >> $GITHUB_ENV
             echo "VITE_SSO_CLIENT_ID=${{ secrets.VITE_SSO_CLIENT_ID_DEV }}" >> $GITHUB_ENV
             echo "VITE_COMM_API_LOADSAVEDJSON_ENDPOINT_URL=${{ secrets.VITE_COMM_API_LOADSAVEDJSON_ENDPOINT_URL_DEV }}" >> $GITHUB_ENV
+            echo "VITE_API_PROXY_TARGET=${{ secrets.VITE_API_PROXY_TARGET_DEV }}" >> $GITHUB_ENV
           fi
 
       - name: Build and push Docker image
@@ -145,6 +148,7 @@ jobs:
             VITE_SSO_REALM=${{ env.VITE_SSO_REALM }}
             VITE_SSO_CLIENT_ID=${{ env.VITE_SSO_CLIENT_ID }}
             VITE_COMM_API_LOADSAVEDJSON_ENDPOINT_URL=${{ env.VITE_COMM_API_LOADSAVEDJSON_ENDPOINT_URL }}
+            VITE_API_PROXY_TARGET=${{ env.VITE_API_PROXY_TARGET }}
 
 
     outputs:

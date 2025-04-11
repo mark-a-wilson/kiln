@@ -4,6 +4,7 @@ import Presenter from "./Presenter";
 import "@carbon/styles/css/styles.css";
 import { AuthenticationContext } from "./App";
 import { useNavigate } from 'react-router-dom';
+import { API } from "./utils/api";
 import LoadingOverlay from "./common/LoadingOverlay"; 
 
 
@@ -35,7 +36,7 @@ const ViewFormPage: React.FC = () => {
   const handleLoadTemplate = async (params: { [key: string]: string | null }) => {
     setIsViewPageLoading(true);
     try {
-      const loadDataEndpoint = import.meta.env.VITE_COMM_API_LOADDATA_ICM_ENDPOINT_URL;
+      const loadDataEndpoint = API.loadICMData;//import.meta.env.VITE_COMM_API_LOADDATA_ICM_ENDPOINT_URL;
       console.log(loadDataEndpoint);
 
       const token = keycloak.token;

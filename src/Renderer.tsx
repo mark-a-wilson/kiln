@@ -30,6 +30,7 @@ import { FlexGrid } from "@carbon/react";
 import { Add, Subtract } from '@carbon/icons-react';
 import InputMask from "react-input-mask";
 import { CurrencyInput } from "react-currency-mask";
+import { API } from "./utils/api";
 import {
   generateUniqueId,
   handleLinkClick,
@@ -1292,8 +1293,7 @@ This is triggered when any value is cahnged on the element
   */
   const saveDataToICMApi = async () => {
     try {
-      const saveDataICMEndpoint = import.meta.env
-        .VITE_COMM_API_SAVEDATA_ICM_ENDPOINT_URL;
+      const saveDataICMEndpoint = API.saveICMData;//import.meta.env.VITE_COMM_API_SAVEDATA_ICM_ENDPOINT_URL;
       const queryParams = new URLSearchParams(window.location.search);
       const params: { [key: string]: string | null } = {};
       const token = keycloak.token;
@@ -1391,8 +1391,7 @@ This is triggered when any value is cahnged on the element
    */
   const unlockICMFinalFlags = async () => {
     try {
-      const unlockICMFinalEdpoint = import.meta.env
-        .VITE_COMM_API_UNLOCK_ICM_FORM_URL;
+      const unlockICMFinalEdpoint = API.unlockICMData;//import.meta.env.VITE_COMM_API_UNLOCK_ICM_FORM_URL;
       const queryParams = new URLSearchParams(window.location.search);
       const params: { [key: string]: string | null } = {};
       const token = keycloak.token;
