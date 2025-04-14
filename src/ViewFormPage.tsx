@@ -5,7 +5,7 @@ import "@carbon/styles/css/styles.css";
 import { AuthenticationContext } from "./App";
 import { useNavigate } from 'react-router-dom';
 import { API } from "./utils/api";
-import LoadingOverlay from "./common/LoadingOverlay"; 
+import LoadingOverlay from "./common/LoadingOverlay";
 
 
 const ViewFormPage: React.FC = () => {
@@ -37,7 +37,6 @@ const ViewFormPage: React.FC = () => {
     setIsViewPageLoading(true);
     try {
       const loadDataEndpoint = API.loadICMData;//import.meta.env.VITE_COMM_API_LOADDATA_ICM_ENDPOINT_URL;
-      console.log(loadDataEndpoint);
 
       const token = keycloak.token;
 
@@ -57,11 +56,10 @@ const ViewFormPage: React.FC = () => {
       }
 
       const result = await response.json();
-      console.log(result);
       setJsonContent(result);
 
     } catch (error) {
-      navigate("/error", { state: { message:  error instanceof Error ? error.message : String(error) } }); // Pass error
+      navigate("/error", { state: { message: error instanceof Error ? error.message : String(error) } }); // Pass error
       console.error("Failed to generate template:", error);
     }
     finally {
@@ -71,8 +69,8 @@ const ViewFormPage: React.FC = () => {
 
   return (
     <>
-    <LoadingOverlay isLoading={isViewPageLoading} message="Please wait while the form is being loaded." />
-    <Presenter data={jsonContent} mode="view" />
+      <LoadingOverlay isLoading={isViewPageLoading} message="Please wait while the form is being loaded." />
+      <Presenter data={jsonContent} mode="view" />
     </>
   );
 };
