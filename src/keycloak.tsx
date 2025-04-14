@@ -34,23 +34,23 @@ export const initializeKeycloak = async (): Promise<KeycloakInstance | void> => 
             //silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html`
         };
 
-        console.log("Initializing Keycloak...");
-        const auth: boolean = await _kc.init(initOptions);
-        console.log("Authentication status:", auth); // Debugging step
+        // console.log("Initializing Keycloak...");
+        await _kc.init(initOptions);
+        //console.log("Authentication status:", auth); // Debugging step
 
         if (window.location.search.includes("code=") || window.location.search.includes("state=")) {
             window.history.replaceState({}, document.title, window.location.pathname);
         }
 
-        if (_kc.authenticated) {
-            console.log("Authenticated successfully.");
-        } else {
-            console.warn("Not authenticated. Will handle login via PrivateRoute.");
-        }
+        // if (_kc.authenticated) {
+        //     console.log("Authenticated successfully.");
+        // } else {
+        //     console.warn("Not authenticated. Will handle login via PrivateRoute.");
+        // }
 
         return _kc;
     } catch (err: any) {
-        console.error("Keycloak init failed:", err);
+        //console.error("Keycloak init failed:", err);
         return _kc;
     }
 };

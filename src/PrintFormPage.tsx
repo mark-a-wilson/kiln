@@ -30,7 +30,6 @@ const PrintFormPage: React.FC = () => {
 
     try {
       const loadSavedJsonEndpoint = API.loadSavedJson;//import.meta.env.VITE_COMM_API_LOADSAVEDJSON_ENDPOINT_URL;
-      console.log(loadSavedJsonEndpoint);
 
       const response = await fetch(loadSavedJsonEndpoint, {
         method: "POST",
@@ -48,7 +47,6 @@ const PrintFormPage: React.FC = () => {
       }
 
       const result = await response.json();
-      console.log(result);
       setJsonContent(result);
 
     } catch (error) {
