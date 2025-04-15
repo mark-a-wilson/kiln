@@ -74,14 +74,20 @@ html, body {
   display: grid !important; /*  Grid Layout for items in Groups */
   grid-template-columns: repeat(4, 1fr) !important;
   gap: 15px !important;
+  padding: 16px;
 }
 
 .group-item-container {
   border: $border-width $border-color;
-  padding: 15px;
+  //padding: 15px;
   //margin: 20px 0;
   margin-bottom: 15px;
   border-radius: 5px;
+  font-family: "BC Sans";
+font-size: 32px;
+font-style: normal;
+font-weight: 700;
+line-height: 125%; /* 40px */
 }
 
 .fixed {
@@ -195,20 +201,19 @@ margin: auto
       @include button-style( $fixed-bg-color, #353433 ,#2D2D2D)
       ;
     }
-  }
-
-  .header-title-only {
-    color: #000;
-    text-align: center;
-    font-family: $default-font-family;
-    font-size: 28px;
-    font-style: normal;
-    font-weight: 700;
-    line-height: 54px;
-  }
+  } 
    
 }
 
+.header-title-only {
+  color: #000;
+  text-align: center;
+  font-family: $default-font-family;
+  font-size: 28px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 54px;
+}
 .header-form-id {
   display: flex;
   //width: 1440px;
@@ -236,13 +241,20 @@ margin-bottom: 15px;
 }
 
 .group-item-header {
-  color: #000;
+/*   color: #000;
 font-family: $default-font-family;
 font-size: 20px;
 font-style: normal;
 font-weight: 700;
 line-height: normal;
-margin-bottom: 15px;
+margin-bottom: 15px; */
+display: flex;
+height: 58px;
+padding: 12px 24px;
+justify-content: space-between;
+align-items: center;
+align-self: stretch;
+background: #F2F2F2;
 }
 
 .text-block {
@@ -371,4 +383,15 @@ margin-bottom: 15px;
   font-weight: bold;
   //color: #0043ce;
   text-align: center; /* Ensure text is centered */
+}
+
+.custom-buttons-only {
+  display: flex;
+  flex-wrap: wrap; /* Allow wrapping of buttons on smaller screens */
+  justify-content: flex-end; /* Align buttons to the right */
+  gap: 12px; /* Maintain spacing between buttons */
+    button {
+      @include button-style( $fixed-bg-color, #353433 ,#2D2D2D)
+      ;
+    }
 }

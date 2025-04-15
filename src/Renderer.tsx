@@ -696,7 +696,7 @@ This is triggered when any value is cahnged on the element
 
           >
             <Component
-              className="field-container"
+              className="field-container no-print"
               key={fieldId}
               id={fieldId}
               labelText={label}
@@ -708,21 +708,18 @@ This is triggered when any value is cahnged on the element
               invalidText={error || ""}
             />
           </InputMask>
-            <div className="hidden-on-screen cds--text-input-wrapper">
-              <div className="cds--text-input__label-wrapper">
-                <label className="cds--label" dir="auto"><span>{label}</span> </label>
+            <div className="hidden-on-screen field-wrapper-print">
+              <div className="field_label-wrapper-print">
+                <label className="field-label-print"><span>{label}</span> </label>
               </div>
-              <div className="cds--text-input__field-outer-wrapper">
-                <div className="cds--text-input__field-wrapper">
+              
+                <div className="field_value-wrapper-print">
                   {
                     groupId
                       ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || ""
                       : formStates[fieldId] || ""
                   }
-                </div>
-              </div>
-
-              <div className="cds--form__helper-text" dir="auto">{item.helperText}</div>
+                </div>             
             </div>
           </>
         );
@@ -804,20 +801,18 @@ This is triggered when any value is cahnged on the element
               invalidText={error || ""}
 
             />
-            <div className="hidden-on-screen cds--text-input-wrapper">
-              <div className="cds--text-input__label-wrapper">
-                <label className="cds--label" dir="auto"><span>{label}</span> </label>
+            <div className="hidden-on-screen field-wrapper-print">
+              <div className="field_label-wrapper-print">
+                <label className="field-label-print"><span>{label}</span> </label>
               </div>
-              <div className="cds--text-input__field-outer-wrapper">
-                <div className="cds--text-input__field-wrapper">
-                  {
+              
+                <div className="field_value-wrapper-print">
+                {
                     selectedItem?.label
                   }
-                </div>
-              </div>
+                </div>             
+            </div>      
 
-              <div className="cds--form__helper-text" dir="auto">{item.helperText}</div>
-            </div>
           </>
         );
       case "checkbox":
@@ -1159,6 +1154,19 @@ This is triggered when any value is cahnged on the element
                 {item.repeater && (<div className="group-item-header">
                   {item.repeaterItemLabel || item.label}
                   {(item.repeaterItemLabel || item.label) && ` ${groupIndex + 1}`}
+                  {item.groupItems && item.groupItems.length > 1 && (mode == "edit" || goBack) && formData.readOnly != true && (
+                  <div className="custom-buttons-only no-print">
+                  <Button
+                    kind="ghost"
+                    onClick={() => handleRemoveGroupItem(item.id, groupIndex)}
+                    renderIcon={Subtract}
+                    className="no-print"
+                  >
+                    Remove {item.repeaterItemLabel || item.label}
+                    {(item.repeaterItemLabel || item.label) && ` ${groupIndex + 1}`}
+                  </Button>
+                  </div>
+                )}
                 </div>)}
                 <div
                   className="group-fields-grid"
@@ -1177,21 +1185,11 @@ This is triggered when any value is cahnged on the element
                       {renderComponent(groupField, item.id, groupIndex)}
                     </div>
                   ))}
-                </div>
-                {item.groupItems && item.groupItems.length > 1 && (mode == "edit" || goBack) && formData.readOnly != true && (
-                  <Button
-                    kind="ghost"
-                    onClick={() => handleRemoveGroupItem(item.id, groupIndex)}
-                    renderIcon={Subtract}
-                    className="no-print"
-                  >
-                    Remove {item.repeaterItemLabel || item.label}
-                    {(item.repeaterItemLabel || item.label) && ` ${groupIndex + 1}`}
-                  </Button>
-                )}
+                </div>                
               </div>
             ))}
             {item.repeater && (mode == "edit" || goBack) && formData.readOnly != true && (
+              <div className="custom-buttons-only">
               <Button
                 kind="ghost"
                 onClick={() => handleAddGroupItem(item.id)}
@@ -1200,6 +1198,7 @@ This is triggered when any value is cahnged on the element
               >
                 Add {item.repeaterItemLabel || item.label}
               </Button>
+              </div>
             )}
           </div>
         );
