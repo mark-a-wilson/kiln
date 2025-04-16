@@ -35,19 +35,29 @@ const NewFormPage: React.FC = () => {
     setIsNewPageLoading(true);
 
     try {
-      const generateDataEndpoint = API.generate;//import.meta.env.VITE_COMM_API_GENERATE_ENDPOINT_URL;
+      const generateDataEndpoint = API.generate;
 
-      const token = keycloak.token;
+      const token = keycloak?.token ?? null;
+
+      const body: Record<string, any> = { ...params };
+
+      if (token) {
+        body.token = token;
+      } else {
+        const usernameMatch = document.cookie.match(/(?:^|;\s*)username=([^;]+)/);
+        const username = usernameMatch ? decodeURIComponent(usernameMatch[1]).trim() : null;
+
+        if (username && username.length > 0) {
+          body.username = username;
+        }
+      }
 
       const response = await fetch(generateDataEndpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          ...params,
-          token,
-        }),
+        body: JSON.stringify(body),
       });
       if (!response.ok) {
         const errorData = await response.json(); // Parse error response        
