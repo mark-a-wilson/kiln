@@ -1291,19 +1291,29 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
   */
   const saveDataToICMApi = async () => {
     try {
-      const saveDataICMEndpoint = API.saveICMData;//import.meta.env.VITE_COMM_API_SAVEDATA_ICM_ENDPOINT_URL;
+      const saveDataICMEndpoint = API.saveICMData;
       const queryParams = new URLSearchParams(window.location.search);
       const params: { [key: string]: string | null } = {};
-      const token = keycloak.token;
+      const token = keycloak?.token ?? null;
       queryParams.forEach((value, key) => {
         params[key] = value;
       });
-      const savedJson = {
+      const savedJson: Record<string, any> = {
         "attachmentId": params["attachmentId"],
         "OfficeName": params["OfficeName"],
-        token,
         "savedForm": JSON.stringify(createSavedData())
       };
+
+      if (token) {
+        savedJson.token = token;
+      } else {
+        const usernameMatch = document.cookie.match(/(?:^|;\s*)username=([^;]+)/);
+        const username = usernameMatch ? decodeURIComponent(usernameMatch[1]).trim() : null;
+
+        if (username && username.length > 0) {
+          savedJson.username = username;
+        }
+      }
 
       const response = await fetch(saveDataICMEndpoint, {
         method: "POST",
@@ -1389,23 +1399,37 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
   */
   const unlockICMFinalFlags = async () => {
     try {
-      const unlockICMFinalEdpoint = API.unlockICMData;//import.meta.env.VITE_COMM_API_UNLOCK_ICM_FORM_URL;
+
+
+
+
+      const unlockICMFinalEdpoint = API.unlockICMData;
       const queryParams = new URLSearchParams(window.location.search);
       const params: { [key: string]: string | null } = {};
-      const token = keycloak.token;
+      const token = keycloak?.token ?? null;
       queryParams.forEach((value, key) => {
         params[key] = value;
       });
+
+      const body: Record<string, any> = { ...params };
+
+      if (token) {
+        body.token = token;
+      } else {
+        const usernameMatch = document.cookie.match(/(?:^|;\s*)username=([^;]+)/);
+        const username = usernameMatch ? decodeURIComponent(usernameMatch[1]).trim() : null;
+
+        if (username && username.length > 0) {
+          body.username = username;
+        }
+      }
 
       const response = await fetch(unlockICMFinalEdpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          ...params,
-          token,
-        }),
+        body: JSON.stringify(body),
       });
       if (response.ok) {
         const result = await response.json();
