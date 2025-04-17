@@ -132,12 +132,18 @@ export const isFieldRequired = (validations: Array<any>): boolean => {
   
 export function getApiUrl(path: string, envVar?: string): string {
     const isDev = import.meta.env.DEV;
-  
     if (isDev && envVar) {
       return envVar;
     }
 
-    return `/api${path.startsWith("/") ? path : `/${path}`}`;
+    const match = window.location.pathname.match(/^\/(formfoundry-[^/]+)/);
+    const prefix = match ? `/${match[1]}` : "";
+  
+    // ensure path starts with a slash
+    const cleanPath = path.startsWith("/") ? path : `/${path}`;
+  
+
+    return `${prefix}/api${cleanPath}`;
 }
 
 
