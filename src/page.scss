@@ -67,7 +67,7 @@ html, body {
 .cds--row {
   display: grid !important; /* Grid Layout for items */
   grid-template-columns: repeat(4, 1fr) !important;
-  gap: 15px !important; 
+  gap: 20px !important; 
 }
 
 .group-fields-grid {
@@ -81,10 +81,10 @@ html, body {
   border: $border-width $border-color;
   //padding: 15px;
   //margin: 20px 0;
-  margin-bottom: 15px;
+  margin-bottom: 30px;
   border-radius: 5px;
   font-family: "BC Sans";
-font-size: 32px;
+font-size: 30px;
 font-style: normal;
 font-weight: 700;
 line-height: 125%; /* 40px */
@@ -205,14 +205,17 @@ margin: auto
    
 }
 
-.header-title-only {
-  color: #000;
-  text-align: center;
-  font-family: $default-font-family;
-  font-size: 28px;
-  font-style: normal;
-  font-weight: 700;
-  line-height: 54px;
+.header-title-only { 
+
+  color: #2D2D2D;
+/* Web/Headings/Heading 1 */
+font-family: $default-font-family;
+font-size: 36px;
+font-style: normal;
+font-weight: 700;
+line-height: 125%; /* 45px */
+margin-top: 15px;
+margin-bottom: 25px;
 }
 .header-form-id {
   display: flex;
@@ -233,7 +236,7 @@ letter-spacing: 0.32px;
 .group-header {
   color: #000;
 font-family: $default-font-family;
-font-size: 24px;
+font-size: 32px;
 font-style: normal;
 font-weight: 700;
 line-height: normal;
@@ -388,7 +391,7 @@ background: #F2F2F2;
 .custom-buttons-only {
   display: flex;
   flex-wrap: wrap; /* Allow wrapping of buttons on smaller screens */
-  justify-content: flex-end; /* Align buttons to the right */
+  //justify-content: flex-end; /* Align buttons to the right */
   gap: 12px; /* Maintain spacing between buttons */
     button {
       @include button-style( $fixed-bg-color, #353433 ,#2D2D2D)

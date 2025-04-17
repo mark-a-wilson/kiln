@@ -817,9 +817,10 @@ This is triggered when any value is cahnged on the element
         );
       case "checkbox":
         return (
+          <>
           <div style={{ marginBottom: "5px" }}>
             <Component
-              className="field-container"
+              className="field-container no-print"
               key={fieldId}
               id={fieldId}
               labelText={item.label}
@@ -833,6 +834,20 @@ This is triggered when any value is cahnged on the element
               invalidText={error || ""}
             />
           </div>
+          <div className="hidden-on-screen field-wrapper-print">
+            <div className="field_label-wrapper-print">
+              <label className="field-label-print"><span>{item.label}</span></label>
+            </div>
+
+            <div className="field_value-wrapper-print">
+              <label className="custom-checkbox-label">
+                <input type="checkbox" checked={!!(groupId ? groupStates[groupId]?.[groupIndex!]?.[fieldId] ?? false : formStates[fieldId] ?? false)}
+                 readOnly />
+                
+              </label>
+            </div>
+          </div>
+          </>
         );
       case "toggle":
         return (
@@ -917,29 +932,27 @@ This is triggered when any value is cahnged on the element
 
               />
             </Component>
-            <div className="hidden-on-screen cds--text-input-wrapper">
-              <div className="cds--text-input__label-wrapper">
-                <label className="cds--label" dir="auto"><span>{label}</span> </label>
+            <div className="hidden-on-screen field-wrapper-print">
+              <div className="field_label-wrapper-print">
+                <label className="field-label-print"><span>{label}</span> </label>
               </div>
-              <div className="cds--text-input__field-outer-wrapper">
-                <div className="cds--text-input__field-wrapper">
+              
+                <div className="field_value-wrapper-print">
                   {
                     groupId
                       ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || ""
                       : formStates[fieldId] || ""
                   }
-                </div>
-              </div>
-
-              <div className="cds--form__helper-text" dir="auto">{item.helperText}</div>
+                </div>              
             </div>
           </>
         );
       case "text-area":
         return (
+          <>
           <Component
             key={fieldId}
-            className="field-container"
+            className="field-container no-print"
             id={fieldId}
             labelText={label}
             placeholder={item.placeholder}
@@ -959,6 +972,20 @@ This is triggered when any value is cahnged on the element
             invalid={!!error}
             invalidText={error || ""}
           />
+          <div className="hidden-on-screen field-wrapper-print">
+              <div className="field_label-wrapper-print">
+                <label className="field-label-print"><span>{label}</span> </label>
+              </div>
+              
+                <div className="field_value-wrapper-print">
+                  {
+                    groupId
+                      ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || ""
+                      : formStates[fieldId] || ""
+                  }
+                </div>              
+            </div>
+          </>
         );
       case "button":
         return (
@@ -1065,10 +1092,16 @@ This is triggered when any value is cahnged on the element
             value: value,
             label: text,
           })) || [];
+          const valueSelectedForRadio=
+            groupId
+              ? groupStates[groupId]?.[groupIndex!]?.[fieldId]
+              : formStates[fieldId];
+          
         return (
+          <>
           <div key={fieldId} style={{ marginBottom: "5px" }}>
             <Component
-              className="field-container"
+              className="field-container  no-print"
               legendText={label}
               orientation="vertical"
               id={fieldId}
@@ -1085,6 +1118,7 @@ This is triggered when any value is cahnged on the element
               invalid={!!error}
               invalidText={error || ""}
             >
+              
               {radioOptions.map((option, index) => (
                 <RadioButton
                   key={index}
@@ -1094,6 +1128,26 @@ This is triggered when any value is cahnged on the element
                 />
               ))}
             </Component></div>
+            <div className="hidden-on-screen field-wrapper-print">
+              <div className="field_label-wrapper-print">
+                <label className="field-label-print"><span>{label}</span> </label>
+              </div>
+              
+                <div className="field_value-wrapper-print">
+                {radioOptions.map((option) => (
+                  <label key={option.value} >
+                    <input
+                      type="radio"                      
+                      value={option.value}
+                      checked={valueSelectedForRadio === option.value}                      
+                    />
+                    <span >{option.label}</span>
+                  </label>
+                ))}
+                </div>             
+            </div>  
+
+            </>
         );
 
       case "select":
@@ -1127,22 +1181,17 @@ This is triggered when any value is cahnged on the element
                 />
               ))}
             </Select>
-            <div className="hidden-on-screen cds--text-input-wrapper">
-              <div className="cds--text-input__label-wrapper">
-                <label className="cds--label" dir="auto"><span>{label}</span> </label>
+            <div className="hidden-on-screen field-wrapper-print">
+              <div className="field_label-wrapper-print">
+                <label className="field-label-print"><span>{label}</span> </label>
               </div>
-              <div className="cds--text-input__field-outer-wrapper">
-                <div className="cds--text-input__field-wrapper">
-                  {
-                    groupId
-                      ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || ""
-                      : formStates[fieldId] || ""
+              
+                <div className="field_value-wrapper-print">
+                {
+                    selectedItem?.label
                   }
-                </div>
-              </div>
-
-              <div className="cds--form__helper-text" dir="auto">{item.helperText}</div>
-            </div>
+                </div>             
+            </div>  
           </>
         );
       case "group":
@@ -1162,8 +1211,7 @@ This is triggered when any value is cahnged on the element
                     renderIcon={Subtract}
                     className="no-print"
                   >
-                    Remove {item.repeaterItemLabel || item.label}
-                    {(item.repeaterItemLabel || item.label) && ` ${groupIndex + 1}`}
+                    Remove
                   </Button>
                   </div>
                 )}
@@ -1595,7 +1643,7 @@ This is triggered when any value is cahnged on the element
 
   return (
 
-    <div ref={pdfContainerRef} >
+    <div ref={pdfContainerRef} className="full-frame">
 
       <div className="header-section fixed">
         <div className="header-image">
@@ -1631,15 +1679,17 @@ This is triggered when any value is cahnged on the element
               Print
             </Button>
           </div>
-
-          <div className="header-title-print hidden-on-screen" >
-            {formData.title} {goBack && (<span>(Preview)</span>)}
+          <div className="form-title hidden-on-screen">
+            <div className="header-form-id-print ">{formData.form_id}</div> 
+            <div className="header-title-print " >
+              {formData.title} {goBack && (<span>(Preview)</span>)}
+            </div>
           </div>
 
 
         </div>
       </div>
-      <div className="header-form-id">{formData.form_id}</div>
+      <div className="header-form-id no-print">{formData.form_id}</div>
       <div className="scrollable-content">
         <div className="header-section">
           <div className="header-title-buttons">
