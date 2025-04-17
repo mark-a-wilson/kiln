@@ -1197,7 +1197,7 @@ This is triggered when any value is cahnged on the element
       case "group":
         return (
           <div key={item.id} className="group-container">
-            <div className="group-header">{item.label}</div>
+            <div className="group-header">{item.repeater && item.label}</div>
             {item.groupItems?.map((groupItem, groupIndex) => (
               <div key={`${item.id}-${groupIndex}`} className="group-item-container">
                 {item.repeater && (<div className="group-item-header">
@@ -1215,6 +1215,9 @@ This is triggered when any value is cahnged on the element
                   </Button>
                   </div>
                 )}
+                </div>)}
+                {!item.repeater && (<div className="group-item-header">
+                  {item.label}                  
                 </div>)}
                 <div
                   className="group-fields-grid"
