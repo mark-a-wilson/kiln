@@ -9,7 +9,7 @@ import ErrorPage from "./ErrorPage";
 import "@carbon/styles/css/styles.css";
 
 import React, { useState, useEffect, createContext } from "react";
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 
 import { initializeKeycloak } from "./keycloak";
 import { PrivateRoute } from "./PrivateRoute";
@@ -22,7 +22,7 @@ const App: React.FC = () => {
   const location = useLocation(); // Get the current route
 
   // Public Routes
-  const publicRoutes = ["/preview", "/unauthorized", "/printToPDF","/error"];
+  const publicRoutes = ["/preview", "/unauthorized", "/printToPDF", "/error"];
 
   useEffect(() => {
     const initKeycloak = async () => {
@@ -67,10 +67,10 @@ const App: React.FC = () => {
   );
 };
 
-const WrappedApp = () => (
-  <Router>
-    <App />
-  </Router>
-);
+// const WrappedApp = () => (
+//   <Router>
+//     <App />
+//   </Router>
+// );
 
-export default WrappedApp;
+export default App;
