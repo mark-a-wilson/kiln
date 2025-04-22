@@ -1697,7 +1697,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
             {mode == "edit" && formData.readOnly != true && (
               <>
                 <Button onClick={handleSave} kind="secondary" className="no-print">
-                  Save Draft
+                  Save
                 </Button>
                 <Button onClick={handleSaveAndClose} kind="secondary" className="no-print">
                   Save And Close
