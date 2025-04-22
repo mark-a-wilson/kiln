@@ -5,7 +5,7 @@ import "@carbon/styles/css/styles.css";
 import { AuthenticationContext } from "./App";
 import { useNavigate } from 'react-router-dom';
 import { API } from "./utils/api";
-import LoadingOverlay from "./common/LoadingOverlay"; 
+import LoadingOverlay from "./common/LoadingOverlay";
 
 const NewFormPage: React.FC = () => {
   const [jsonContent, setJsonContent] = useState<object>({});
@@ -35,34 +35,40 @@ const NewFormPage: React.FC = () => {
     setIsNewPageLoading(true);
 
     try {
-      const generateDataEndpoint = API.generate;//import.meta.env.VITE_COMM_API_GENERATE_ENDPOINT_URL;
-      console.log(generateDataEndpoint);
+      const generateDataEndpoint = API.generate;
 
-      const token = keycloak.token;
-      console.log("KEYCLOAK", keycloak);
+      const token = keycloak?.token ?? null;
+
+      const body: Record<string, any> = { ...params };
+
+      if (token) {
+        body.token = token;
+      } else {
+        const usernameMatch = document.cookie.match(/(?:^|;\s*)username=([^;]+)/);
+        const username = usernameMatch ? decodeURIComponent(usernameMatch[1]).trim() : null;
+
+        if (username && username.length > 0) {
+          body.username = username;
+        }
+      }
 
       const response = await fetch(generateDataEndpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          ...params,
-          token,
-        }),
+        body: JSON.stringify(body),
       });
-      console.log("RESPONSE", response);
       if (!response.ok) {
         const errorData = await response.json(); // Parse error response        
         throw new Error(errorData.error || "Something went wrong");
-        
       } else {
         const result = await response.json();
         setJsonContent(result.save_data);
       }
 
-    } catch (error) {      
-      navigate("/error", { state: { message:  error instanceof Error ? error.message : String(error) } }); // Pass error
+    } catch (error) {
+      navigate("/error", { state: { message: error instanceof Error ? error.message : String(error) } }); // Pass error
       console.error("Failed to generate template:", error);
     }
     finally {
@@ -71,11 +77,11 @@ const NewFormPage: React.FC = () => {
   };
 
   return (
-    <>    
-    <LoadingOverlay isLoading={isNewPageLoading} message="Please wait while the form is being loaded." />
-    <Presenter data={jsonContent} mode="edit" />
+    <>
+      <LoadingOverlay isLoading={isNewPageLoading} message="Please wait while the form is being loaded." />
+      <Presenter data={jsonContent} mode="edit" />
     </>
-);
+  );
 };
 
 export default NewFormPage;

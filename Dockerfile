@@ -45,27 +45,25 @@ ENV VITE_COMM_API_LOADSAVEDJSON_ENDPOINT_URL=${VITE_COMM_API_LOADSAVEDJSON_ENDPO
 # Build the React application
 RUN npm run build
 
-# Stage 2: Use Nginx to serve the React build
-FROM nginx:alpine
-
-# Injected via GitHub Actions
 ARG VITE_API_PROXY_TARGET
 ENV VITE_API_PROXY_TARGET=${VITE_API_PROXY_TARGET}
 
-# Use envsubst for config templating
-RUN apk add --no-cache gettext
+# Build the nginx.conf using envsubst
+RUN apt-get update && apt-get install -y gettext && \
+    envsubst '${VITE_API_PROXY_TARGET}' < ./nginx.template.conf > ./nginx.conf && \
+    apt-get remove -y gettext && apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
 
-# Move nginx.template.conf into container
-COPY nginx.template.conf /etc/nginx/nginx.template.conf
-RUN envsubst '${VITE_API_PROXY_TARGET}' < /etc/nginx/nginx.template.conf > /etc/nginx/conf.d/default.conf
+# Stage 2: UBI NGINX for OpenShift-safe deploy
+FROM nginxinc/nginx-unprivileged 
 
-# Copy build output from previous stage
-COPY --from=build /app/dist /usr/share/nginx/html
+WORKDIR /usr/share/nginx/html
+
+COPY --from=build /app/dist .
+COPY --from=build /app/nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 8080
 ENV PORT 8080
 
-# Replace env vars at runtime and launch Nginx
 CMD ["nginx", "-g", "daemon off;"]
 
 # # Stage 2: Use a smaller base image for the final build
