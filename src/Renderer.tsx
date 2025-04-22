@@ -4,7 +4,7 @@ import '@carbon/styles/css/styles.css';
 import "./page.scss";
 import React, { useState, useEffect, useRef, useContext } from "react";
 import CustomModal from "./common/CustomModal"; // Import the modal component
-import LoadingOverlay from "./common/LoadingOverlay"; 
+import LoadingOverlay from "./common/LoadingOverlay";
 import { AuthenticationContext } from "./App";
 import {
   TextInput,
@@ -147,7 +147,7 @@ const componentMapping: { [key: string]: React.ElementType } = {
   radio: RadioButtonGroup,
   select: Select,
   "currency-input": TextInput,
-  "container":"div",
+  "container": "div",
 };
 
 /*
@@ -178,7 +178,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
     [key: string]: string | null;
   }>({});
   const isFormCleared = useRef(false);
-  
+
   const [modalOpen, setModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
   const [modalMessage, setModalMessage] = useState("");
@@ -188,18 +188,22 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
     return <div>Invalid Form</div>;
   }
 
-  //Apply CSS styles to item
-  const applyStyles = (item: Item): React.CSSProperties => {
-    return {
-      ...(isPrinting ? item.pdfStyles : item.webStyles),
-      gridColumn: `span ${item.webStyles?.webColumns || 4}`,
-      breakBefore: item.pdfStyles?.pageBreak as React.CSSProperties["breakBefore"] || "auto",
-    };
+  // only layout (grid‐column / pageBreak) for the wrapper
+  const applyWrapperStyles = (item: Item): React.CSSProperties => ({
+    gridColumn: `span ${item.webStyles?.webColumns || 4}`,
+    breakBefore: item.pdfStyles?.pageBreak as React.CSSProperties["breakBefore"] || "auto",
+  });
+
+  //Hide based on Web or PDF styles
+  const isHidden = (item: Item) => {
+    if (!isPrinting && item.webStyles?.display === 'none') return true;
+    if (isPrinting && item.pdfStyles?.display === 'none') return true;
+    return false;
   };
 
   const pdfContainerRef = useRef<HTMLDivElement>(null);
   const keycloak = useContext(AuthenticationContext);
-  const [isPrinting, setIsPrinting] = useState(false);  
+  const [isPrinting, setIsPrinting] = useState(false);
 
   //Switches between web and pdf CSS based on mode
   useEffect(() => {
@@ -220,15 +224,14 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
 
   //on close, execute unlock form
   useEffect(() => {
-     const handleClose = (event: BeforeUnloadEvent) => {
-      if (isFormCleared.current === false)
-      {
+    const handleClose = (event: BeforeUnloadEvent) => {
+      if (isFormCleared.current === false) {
         event.preventDefault();
         unlockICMFinalFlags();
       }
-     }
-     window.addEventListener("beforeunload", handleClose);
-     return () => window.removeEventListener("beforeunload", handleClose);
+    }
+    window.addEventListener("beforeunload", handleClose);
+    return () => window.removeEventListener("beforeunload", handleClose);
   })
 
   /*
@@ -239,9 +242,9 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
   useEffect(() => {
     const initialFormStates: { [key: string]: string } = {};
     const initialGroupStates: { [key: string]: GroupState } = {}; // Changed type here
-  /*
-    the data needed for loading the pdf version paging starts here.
-  */
+    /*
+      the data needed for loading the pdf version paging starts here.
+    */
     const formId = formData.form_id || "Unknown Form ID";
 
     // Generate the creation date dynamically
@@ -254,7 +257,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
 
     // Set these values as attributes on the <body> tag
     document.documentElement.setAttribute("data-form-id", formId);
-    document.documentElement.setAttribute("data-date", creationDate);     
+    document.documentElement.setAttribute("data-date", creationDate);
 
     /*
     the data needed for loading the pdf version paging ends here.
@@ -323,12 +326,12 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
   }, []);
 
 
-/*
-The following function is used to handle if any input value is change
-It will first validate the value based on the validations on the Item that came along 
-with the form. If valid , state is updated. 
-This is triggered when any value is cahnged on the element
-*/
+  /*
+  The following function is used to handle if any input value is change
+  It will first validate the value based on the validations on the Item that came along 
+  with the form. If valid , state is updated. 
+  This is triggered when any value is cahnged on the element
+  */
   const handleInputChange = (
     fieldId: string,
     value: any,
@@ -338,7 +341,7 @@ This is triggered when any value is cahnged on the element
   ) => {
     let validationError: string | null = null;
 
-    if (groupId !== null && groupIndex !== null) {     
+    if (groupId !== null && groupIndex !== null) {
       validationError = validateField(field, value);
       setGroupStates((prevState) => ({
         ...prevState,
@@ -346,7 +349,7 @@ This is triggered when any value is cahnged on the element
           index === groupIndex ? { ...item, [fieldId]: value } : item
         ),
       }));
-    } else {      
+    } else {
       validationError = validateField(field, value);
       setFormStates((prevState) => ({
         ...prevState,
@@ -387,7 +390,7 @@ This is triggered when any value is cahnged on the element
   ) => {
     setFormData((prevState) => {
       const newFormData = { ...prevState };
-      const group = newFormData?.data?.items? findGroup(newFormData.data.items, groupId) : undefined;
+      const group = newFormData?.data?.items ? findGroup(newFormData.data.items, groupId) : undefined;
 
       if (group && group.groupItems) {
         const groupIndex = group.groupItems.length;
@@ -442,22 +445,22 @@ This is triggered when any value is cahnged on the element
     setFormData((prevState) => {
       const newFormData = { ...prevState };
       //const group = newFormData?.data.items.find((item) => item.id === groupId);
-      const group = newFormData?.data?.items? findGroup(newFormData.data.items, groupId) : undefined;
+      const group = newFormData?.data?.items ? findGroup(newFormData.data.items, groupId) : undefined;
 
-      if (group && group.groupItems){
-      group?.groupItems?.splice(groupItemIndex, 1);
-      // Update IDs for remaining group items
-      group?.groupItems?.forEach((groupItem, newIndex) => {
-        groupItem.fields.forEach((field: Item) => {
-          field.id = generateUniqueId(
-            groupId,
-            newIndex,
-            field.id.split("-").slice(2).join("-")
-          );
+      if (group && group.groupItems) {
+        group?.groupItems?.splice(groupItemIndex, 1);
+        // Update IDs for remaining group items
+        group?.groupItems?.forEach((groupItem, newIndex) => {
+          groupItem.fields.forEach((field: Item) => {
+            field.id = generateUniqueId(
+              groupId,
+              newIndex,
+              field.id.split("-").slice(2).join("-")
+            );
+          });
         });
-      });
 
-    }
+      }
       return newFormData;
     });
 
@@ -508,11 +511,6 @@ This is triggered when any value is cahnged on the element
 
     if (!item.conditions || item.conditions.length === 0) {
       return true; // Default to visible if there are no conditions
-    }
-
-    //Hide field based on CSS "display" value
-    if (item.webStyles?.display === 'none' || item.pdfStyles?.display === 'none') {
-      return false;
     }
 
     const visibilityCondition = item.conditions.find(condition => condition.type === 'visibility');
@@ -655,7 +653,7 @@ This is triggered when any value is cahnged on the element
     groupId: string | null = null,
     groupIndex: number | null = null
   ) => {
- 
+
     const Component = componentMapping[item.type];
     if (!Component) return null;
 
@@ -690,7 +688,7 @@ This is triggered when any value is cahnged on the element
                 : formStates[fieldId] || ""
             }
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              handleInputChange(fieldId, e.target.value, groupId, groupIndex,item)
+              handleInputChange(fieldId, e.target.value, groupId, groupIndex, item)
             }
             readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
 
@@ -703,7 +701,10 @@ This is triggered when any value is cahnged on the element
               placeholder={item.placeholder}
               helperText={item.helperText}
               name={fieldId}
-              style={{ marginBottom: "5px" }}
+              style={{
+                marginBottom: "5px",
+                ...(isPrinting ? item.pdfStyles : item.webStyles),
+              }}
               invalid={!!error}
               invalidText={error || ""}
             />
@@ -712,14 +713,14 @@ This is triggered when any value is cahnged on the element
               <div className="field_label-wrapper-print">
                 <label className="field-label-print"><span>{label}</span> </label>
               </div>
-              
-                <div className="field_value-wrapper-print">
-                  {
-                    groupId
-                      ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || ""
-                      : formStates[fieldId] || ""
-                  }
-                </div>             
+
+              <div className="field_value-wrapper-print">
+                {
+                  groupId
+                    ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || ""
+                    : formStates[fieldId] || ""
+                }
+              </div>
             </div>
           </>
         );
@@ -737,8 +738,8 @@ This is triggered when any value is cahnged on the element
             }
           } */
             onChangeValue={(event, originalValue, maskedValue) => {
-             console.log(event, originalValue, maskedValue);
-              handleInputChange(fieldId, originalValue, groupId, groupIndex,item)
+              console.log(event, originalValue, maskedValue);
+              handleInputChange(fieldId, originalValue, groupId, groupIndex, item)
             }}
             currency="CAD"
 
@@ -753,7 +754,10 @@ This is triggered when any value is cahnged on the element
                 labelText={label}
                 placeholder={item.placeholder}
                 name={fieldId}
-                style={{ marginBottom: "5px" }}
+                style={{
+                  marginBottom: "5px",
+                  ...(isPrinting ? item.pdfStyles : item.webStyles),
+                }}
                 invalid={!!error}
                 invalidText={error || ""}
               />}
@@ -792,10 +796,13 @@ This is triggered when any value is cahnged on the element
                   fieldId,
                   selectedItem.value,
                   groupId,
-                  groupIndex,item
+                  groupIndex, item
                 )
               }
-              style={{ marginBottom: "5px" }}
+              style={{
+                marginBottom: "5px",
+                ...(isPrinting ? item.pdfStyles : item.webStyles),
+              }}
               readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
               invalid={!!error}
               invalidText={error || ""}
@@ -805,53 +812,59 @@ This is triggered when any value is cahnged on the element
               <div className="field_label-wrapper-print">
                 <label className="field-label-print"><span>{label}</span> </label>
               </div>
-              
-                <div className="field_value-wrapper-print">
+
+              <div className="field_value-wrapper-print">
                 {
-                    selectedItem?.label
-                  }
-                </div>             
-            </div>      
+                  selectedItem?.label
+                }
+              </div>
+            </div>
 
           </>
         );
       case "checkbox":
         return (
           <>
-          <div style={{ marginBottom: "5px" }}>
-            <Component
-              className="field-container no-print"
-              key={fieldId}
-              id={fieldId}
-              labelText={item.label}
-              checked={groupId ? groupStates[groupId]?.[groupIndex!]?.[fieldId] ?? false : formStates[fieldId] ?? false}
-              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                const isChecked = event.target.checked;
-                handleInputChange(fieldId, isChecked, groupId, groupIndex,item);
-              }}
-              readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
-              invalid={!!error}
-              invalidText={error || ""}
-            />
-          </div>
-          <div className="hidden-on-screen field-wrapper-print">
-            <div className="field_label-wrapper-print">
-              <label className="field-label-print"><span>{item.label}</span></label>
+            <div style={{
+              marginBottom: "5px",
+              ...(isPrinting ? item.pdfStyles : item.webStyles),
+            }}>
+              <Component
+                className="field-container no-print"
+                key={fieldId}
+                id={fieldId}
+                labelText={item.label}
+                checked={groupId ? groupStates[groupId]?.[groupIndex!]?.[fieldId] ?? false : formStates[fieldId] ?? false}
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                  const isChecked = event.target.checked;
+                  handleInputChange(fieldId, isChecked, groupId, groupIndex, item);
+                }}
+                readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
+                invalid={!!error}
+                invalidText={error || ""}
+              />
             </div>
+            <div className="hidden-on-screen field-wrapper-print">
+              <div className="field_label-wrapper-print">
+                <label className="field-label-print"><span>{item.label}</span></label>
+              </div>
 
-            <div className="field_value-wrapper-print">
-              <label className="custom-checkbox-label">
-                <input type="checkbox" checked={!!(groupId ? groupStates[groupId]?.[groupIndex!]?.[fieldId] ?? false : formStates[fieldId] ?? false)}
-                 readOnly />
-                
-              </label>
+              <div className="field_value-wrapper-print">
+                <label className="custom-checkbox-label">
+                  <input type="checkbox" checked={!!(groupId ? groupStates[groupId]?.[groupIndex!]?.[fieldId] ?? false : formStates[fieldId] ?? false)}
+                    readOnly />
+
+                </label>
+              </div>
             </div>
-          </div>
           </>
         );
       case "toggle":
         return (
-          <div key={fieldId} style={{ marginBottom: "25px" }}>
+          <div key={fieldId} style={{
+            marginBottom: "5px",
+            ...(isPrinting ? item.pdfStyles : item.webStyles),
+          }}>
 
             <Component
               className="field-container"
@@ -866,7 +879,7 @@ This is triggered when any value is cahnged on the element
                   : formStates[fieldId] || false
               }
               onToggle={(checked: boolean) =>
-                handleInputChange(fieldId, checked, groupId, groupIndex,item)
+                handleInputChange(fieldId, checked, groupId, groupIndex, item)
               }
               readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
               invalid={!!error}
@@ -874,7 +887,7 @@ This is triggered when any value is cahnged on the element
             />
           </div>
         );
-        //The date comes in json as either date or date-picker. So logic is used so that both can be used
+      //The date comes in json as either date or date-picker. So logic is used so that both can be used
       case "date":
       case "date-picker":
         const selectedDate = groupId
@@ -895,7 +908,7 @@ This is triggered when any value is cahnged on the element
               value={selectedDate ? [selectedDate] : []}
               onChange={(dates: Date[]) => {
                 if (dates.length === 0) {
-                  handleInputChange(fieldId, "", groupId, groupIndex,item);
+                  handleInputChange(fieldId, "", groupId, groupIndex, item);
                 } else {
                   // Save internal format for storage
                   const internalFormattedDate = formatDate(
@@ -914,7 +927,10 @@ This is triggered when any value is cahnged on the element
                   );
                 }
               }}
-              style={{ marginBottom: "5px" }}
+              style={{
+                marginBottom: "5px",
+                ...(isPrinting ? item.pdfStyles : item.webStyles),
+              }}
               dateFormat={dateFormat}
               readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
               invalid={!!error}
@@ -936,54 +952,57 @@ This is triggered when any value is cahnged on the element
               <div className="field_label-wrapper-print">
                 <label className="field-label-print"><span>{label}</span> </label>
               </div>
-              
-                <div className="field_value-wrapper-print">
-                  {
-                    groupId
-                      ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || ""
-                      : formStates[fieldId] || ""
-                  }
-                </div>              
+
+              <div className="field_value-wrapper-print">
+                {
+                  groupId
+                    ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || ""
+                    : formStates[fieldId] || ""
+                }
+              </div>
             </div>
           </>
         );
       case "text-area":
         return (
           <>
-          <Component
-            key={fieldId}
-            className="field-container no-print"
-            id={fieldId}
-            labelText={label}
-            placeholder={item.placeholder}
-            helperText={item.helperText}
-            name={fieldId}
-            value={
-              groupId
-                ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || ""
-                : formStates[fieldId] || ""
-            }
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-              handleInputChange(fieldId, e.target.value, groupId, groupIndex,item)
-            }
-            rows={4}
-            style={{ marginBottom: "5px" }}
-            readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
-            invalid={!!error}
-            invalidText={error || ""}
-          />
-          <div className="hidden-on-screen field-wrapper-print">
+            <Component
+              key={fieldId}
+              className="field-container no-print"
+              id={fieldId}
+              labelText={label}
+              placeholder={item.placeholder}
+              helperText={item.helperText}
+              name={fieldId}
+              value={
+                groupId
+                  ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || ""
+                  : formStates[fieldId] || ""
+              }
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                handleInputChange(fieldId, e.target.value, groupId, groupIndex, item)
+              }
+              rows={4}
+              style={{
+                marginBottom: "5px",
+                ...(isPrinting ? item.pdfStyles : item.webStyles),
+              }}
+              readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
+              invalid={!!error}
+              invalidText={error || ""}
+            />
+            <div className="hidden-on-screen field-wrapper-print">
               <div className="field_label-wrapper-print">
                 <label className="field-label-print"><span>{label}</span> </label>
               </div>
-              
-                <div className="field_value-wrapper-print">
-                  {
-                    groupId
-                      ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || ""
-                      : formStates[fieldId] || ""
-                  }
-                </div>              
+
+              <div className="field_value-wrapper-print">
+                {
+                  groupId
+                    ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || ""
+                    : formStates[fieldId] || ""
+                }
+              </div>
             </div>
           </>
         );
@@ -1003,7 +1022,10 @@ This is triggered when any value is cahnged on the element
                 item
               )
             }
-            style={{ marginBottom: "5px" }}
+            style={{
+              marginBottom: "5px",
+              ...(isPrinting ? item.pdfStyles : item.webStyles),
+            }}
           >
             {item.label}
           </Component>
@@ -1024,7 +1046,7 @@ This is triggered when any value is cahnged on the element
                 : formStates[fieldId] || 0
             }
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              handleInputChange(fieldId, e.target.value, groupId, groupIndex,item)
+              handleInputChange(fieldId, e.target.value, groupId, groupIndex, item)
             }
             onClick={(e: React.MouseEvent<HTMLInputElement>) =>
               handleInputChange(
@@ -1045,6 +1067,10 @@ This is triggered when any value is cahnged on the element
 
           <Component
             className="text-block field-container"
+            style={{
+              marginBottom: "10px",
+              ...(isPrinting ? item.pdfStyles : item.webStyles),
+            }}
             key={fieldId}
             id={fieldId}
             dangerouslySetInnerHTML={{ __html: parseDynamicText(textInfo) }}
@@ -1092,62 +1118,65 @@ This is triggered when any value is cahnged on the element
             value: value,
             label: text,
           })) || [];
-          const valueSelectedForRadio=
-            groupId
-              ? groupStates[groupId]?.[groupIndex!]?.[fieldId]
-              : formStates[fieldId];
-          
+        const valueSelectedForRadio =
+          groupId
+            ? groupStates[groupId]?.[groupIndex!]?.[fieldId]
+            : formStates[fieldId];
+
         return (
           <>
-          <div key={fieldId} style={{ marginBottom: "5px" }}>
-            <Component
-              className="field-container  no-print"
-              legendText={label}
-              orientation="vertical"
-              id={fieldId}
-              name={fieldId}
-              onChange={(value: string) =>
-                handleInputChange(fieldId, value, groupId, groupIndex,item)
-              }
-              valueSelected={
-                groupId
-                  ? groupStates[groupId]?.[groupIndex!]?.[fieldId]
-                  : formStates[fieldId]
-              }
-              readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
-              invalid={!!error}
-              invalidText={error || ""}
-            >
-              
-              {radioOptions.map((option, index) => (
-                <RadioButton
-                  key={index}
-                  labelText={option.label}
-                  value={option.value}
-                  id={`${fieldId}-${index}`}
-                />
-              ))}
-            </Component></div>
+            <div key={fieldId} style={{
+              marginBottom: "5px",
+              ...(isPrinting ? item.pdfStyles : item.webStyles),
+            }}>
+              <Component
+                className="field-container  no-print"
+                legendText={label}
+                orientation="vertical"
+                id={fieldId}
+                name={fieldId}
+                onChange={(value: string) =>
+                  handleInputChange(fieldId, value, groupId, groupIndex, item)
+                }
+                valueSelected={
+                  groupId
+                    ? groupStates[groupId]?.[groupIndex!]?.[fieldId]
+                    : formStates[fieldId]
+                }
+                readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
+                invalid={!!error}
+                invalidText={error || ""}
+              >
+
+                {radioOptions.map((option, index) => (
+                  <RadioButton
+                    key={index}
+                    labelText={option.label}
+                    value={option.value}
+                    id={`${fieldId}-${index}`}
+                  />
+                ))}
+              </Component></div>
             <div className="hidden-on-screen field-wrapper-print">
               <div className="field_label-wrapper-print">
                 <label className="field-label-print"><span>{label}</span> </label>
               </div>
-              
-                <div className="field_value-wrapper-print">
+
+              <div className="field_value-wrapper-print">
                 {radioOptions.map((option) => (
                   <label key={option.value} >
                     <input
-                      type="radio"                      
+                      type="radio"
                       value={option.value}
-                      checked={valueSelectedForRadio === option.value}                      
+                      checked={valueSelectedForRadio === option.value}
                     />
                     <span >{option.label}</span>
                   </label>
                 ))}
-                </div>             
-            </div>  
+              </div>
+            </div>
 
-            </>
+          </>
         );
 
       case "select":
@@ -1160,13 +1189,16 @@ This is triggered when any value is cahnged on the element
               name={fieldId}
               labelText={label}
               helperText={item.helperText}
+              style={{
+                ...(isPrinting ? item.pdfStyles : item.webStyles),
+              }}
               value={
                 groupId
                   ? groupStates[groupId]?.[groupIndex!]?.[fieldId]
                   : formStates[fieldId]
               }
               onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                handleInputChange(fieldId, e.target.value, groupId, groupIndex,item)
+                handleInputChange(fieldId, e.target.value, groupId, groupIndex, item)
               }
 
               invalid={!!error}
@@ -1185,13 +1217,13 @@ This is triggered when any value is cahnged on the element
               <div className="field_label-wrapper-print">
                 <label className="field-label-print"><span>{label}</span> </label>
               </div>
-              
-                <div className="field_value-wrapper-print">
+
+              <div className="field_value-wrapper-print">
                 {
-                    selectedItem?.label
-                  }
-                </div>             
-            </div>  
+                  selectedItem?.label
+                }
+              </div>
+            </div>
           </>
         );
       case "group":
@@ -1204,17 +1236,17 @@ This is triggered when any value is cahnged on the element
                   {item.repeaterItemLabel || item.label}
                   {(item.repeaterItemLabel || item.label) && ` ${groupIndex + 1}`}
                   {item.groupItems && item.groupItems.length > 1 && (mode == "edit" || goBack) && formData.readOnly != true && (
-                  <div className="custom-buttons-only no-print">
-                  <Button
-                    kind="ghost"
-                    onClick={() => handleRemoveGroupItem(item.id, groupIndex)}
-                    renderIcon={Subtract}
-                    className="no-print"
-                  >
-                    Remove
-                  </Button>
-                  </div>
-                )}
+                    <div className="custom-buttons-only no-print">
+                      <Button
+                        kind="ghost"
+                        onClick={() => handleRemoveGroupItem(item.id, groupIndex)}
+                        renderIcon={Subtract}
+                        className="no-print"
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  )}
                 </div>)}
                 <div
                   className="group-fields-grid"
@@ -1224,51 +1256,51 @@ This is triggered when any value is cahnged on the element
                     gap: "15px",
                   }}
                 >
-                  {groupItem.fields.map((groupField) => (
+                  {groupItem.fields.filter(groupField => !isHidden(groupField)).map((groupField) => (
                     <div
                       key={groupField.id}
-                      style={applyStyles(groupField)}
+                      style={applyWrapperStyles(groupField)}
                       data-print-columns={groupField.pdfStyles?.printColumns || 4}
                     >
                       {renderComponent(groupField, item.id, groupIndex)}
                     </div>
                   ))}
-                </div>                
+                </div>
               </div>
             ))}
             {item.repeater && (mode == "edit" || goBack) && formData.readOnly != true && (
               <div className="custom-buttons-only">
-              <Button
-                kind="ghost"
-                onClick={() => handleAddGroupItem(item.id)}
-                renderIcon={Add}
-                className="no-print"
-              >
-                Add {item.repeaterItemLabel || item.label}
-              </Button>
+                <Button
+                  kind="ghost"
+                  onClick={() => handleAddGroupItem(item.id)}
+                  renderIcon={Add}
+                  className="no-print"
+                >
+                  Add {item.repeaterItemLabel || item.label}
+                </Button>
               </div>
             )}
           </div>
         );
-        case "container":
-          
-          return (
-            <>            
-              <div key={item.id} className="common-container">
+      case "container":
+
+        return (
+          <>
+            <div key={item.id} className="common-container">
               <div className="group-header">{item.label}</div>
-                  {item.containerItems?.map((containerItem) => (                 
-                    <div
-                      key={containerItem.id}
-                      style={applyStyles(containerItem)}
-                      data-print-columns={containerItem.pdfStyles?.printColumns || 4}
-                    >
-                      {renderComponent(containerItem, containerItem.type === "group" ? containerItem.id : null, null)}
-                      
-                    </div>           
-                  ))}            
-              </div>              
-              </>
-          );  
+              {item.containerItems?.filter(containerItem => !isHidden(containerItem)).map((containerItem) => (
+                <div
+                  key={containerItem.id}
+                  style={applyWrapperStyles(containerItem)}
+                  data-print-columns={containerItem.pdfStyles?.printColumns || 4}
+                >
+                  {renderComponent(containerItem, containerItem.type === "group" ? containerItem.id : null, null)}
+
+                </div>
+              ))}
+            </div>
+          </>
+        );
       default:
         return null;
     }
@@ -1279,10 +1311,10 @@ This is triggered when any value is cahnged on the element
   */
   const createSavedData = () => {
     const saveFieldData: SavedFieldData = {};
-  
+
     const processItems = (items: Item[]) => {
-      items.forEach((item) => {       
-  
+      items.forEach((item) => {
+
         if (item.type === "container" && shouldFieldBeIncludedForSaving(item) && item.containerItems) {
           // Recursively process container items
           processItems(item.containerItems);
@@ -1293,7 +1325,7 @@ This is triggered when any value is cahnged on the element
         } else if (item.type === "group" && shouldFieldBeIncludedForSaving(item)) {
           const visibleGroupItems = groupStates[item.id]?.map((groupItemState, groupIndex) => {
             const filteredGroupItem: { [key: string]: FieldValue } = {};
-  
+
             item.groupItems?.[groupIndex]?.fields.forEach((field) => {
               if (
                 shouldFieldBeIncludedForSaving(field, item.id, groupIndex) &&
@@ -1302,25 +1334,25 @@ This is triggered when any value is cahnged on the element
                 filteredGroupItem[field.id] = groupItemState[field.id];
               }
             });
-  
+
             return Object.keys(filteredGroupItem).length > 0 ? filteredGroupItem : null;
           });
-  
+
           // Filter out any null values (groups where no fields were visible)
           const cleanedGroupItems = visibleGroupItems.filter((group) => group !== null);
-  
+
           if (cleanedGroupItems.length > 0) {
             saveFieldData[item.id] = cleanedGroupItems;
           }
         }
       });
     };
-  
+
     // Start processing from the root items
     if (formData?.data?.items) {
       processItems(formData.data.items);
     }
-  
+
     // Update metadata
     data.metadata.updated_date = new Date().toLocaleDateString() + "";
     const savedData: SavedData = {
@@ -1328,11 +1360,11 @@ This is triggered when any value is cahnged on the element
       form_definition: data.form_definition,
       metadata: data.metadata,
     };
-  
+
     console.log("Saved Data", JSON.stringify(savedData));
     return savedData;
   };
-  
+
 
   /*
   Endpoint for 'Save' and 'Save and Close'
@@ -1370,7 +1402,7 @@ This is triggered when any value is cahnged on the element
         console.error("Error:", response.statusText);
         return "failed";
       }
-    } catch (error) {      
+    } catch (error) {
       console.error("Error:", error);
       return "failed";
     }
@@ -1386,7 +1418,7 @@ This is triggered when any value is cahnged on the element
     let isValid = true;
 
     const processItems = (items: Item[]) => {
-      items.forEach((item) => {   
+      items.forEach((item) => {
 
         if (item.type === "container" && item.containerItems) {
           if (isFieldVisible(item, null, null)) {
@@ -1434,9 +1466,9 @@ This is triggered when any value is cahnged on the element
     return isValid;
   };
 
-   /*
-   Call to end point for unlock flags in ICM
-   */
+  /*
+  Call to end point for unlock flags in ICM
+  */
   const unlockICMFinalFlags = async () => {
     try {
       const unlockICMFinalEdpoint = API.unlockICMData;//import.meta.env.VITE_COMM_API_UNLOCK_ICM_FORM_URL;
@@ -1465,7 +1497,7 @@ This is triggered when any value is cahnged on the element
         console.error("Error:", response.statusText);
         return "failed";
       }
-    } catch (error) {      
+    } catch (error) {
       console.error("Error:", error);
       return "failed";
     }
@@ -1479,23 +1511,23 @@ This is triggered when any value is cahnged on the element
   const handleSave = async () => {
     setIsLoading(true); // Show loading overlay
     setModalOpen(false); // Ensure modal is closed when a new request starts
-    try{
+    try {
       if (validateAllFields()) {
         const returnMessage = saveDataToICMApi();
-       if ((await returnMessage) === "success") {        
+        if ((await returnMessage) === "success") {
           setModalTitle("Success ✅");
           setModalMessage("Form Saved Successfully.");
-        } else {        
+        } else {
           setModalTitle("Error ❌ ");
           setModalMessage("Error saving form. Please try again.");
         }
         setModalOpen(true);
-      } else {      
+      } else {
         setModalTitle("Validation Error ❌ ");
         setModalMessage("Error saving form. Please clear the errors in the form before saving.");
         setModalOpen(true);
       }
-    } catch(error) {
+    } catch (error) {
       setModalTitle("Error ❌ ");
       setModalMessage("Error saving form. Please try again.");
       setModalOpen(true);
@@ -1503,7 +1535,7 @@ This is triggered when any value is cahnged on the element
     finally {
       setIsLoading(false); // Hide loading overlay once request completes
     }
-    
+
   };
 
   /*
@@ -1515,40 +1547,40 @@ This is triggered when any value is cahnged on the element
   const handleSaveAndClose = async () => {
     setIsLoading(true); // Show loading overlay
     setModalOpen(false); // Ensure modal is closed when a new request starts
-    try{
-    if (validateAllFields()) {
-      const returnMessage = saveDataToICMApi();
-      if ((await returnMessage) === "success") {
-        const unlockMessage = unlockICMFinalFlags();
-        if ((await unlockMessage) == "success") {
-          isFormCleared.current = true;
-          window.opener = null;
-          window.open("", "_self");
-          window.close();
-        }
-        else {          
-          setModalTitle("Error ❌");
-          setModalMessage("Error clearing locked flags. Please try again.");
-          setModalOpen(true);
+    try {
+      if (validateAllFields()) {
+        const returnMessage = saveDataToICMApi();
+        if ((await returnMessage) === "success") {
+          const unlockMessage = unlockICMFinalFlags();
+          if ((await unlockMessage) == "success") {
+            isFormCleared.current = true;
+            window.opener = null;
+            window.open("", "_self");
+            window.close();
           }
-      } else {       
-        setModalTitle("Error ❌");
-        setModalMessage("Error saving form. Please try again.");
+          else {
+            setModalTitle("Error ❌");
+            setModalMessage("Error clearing locked flags. Please try again.");
+            setModalOpen(true);
+          }
+        } else {
+          setModalTitle("Error ❌");
+          setModalMessage("Error saving form. Please try again.");
+          setModalOpen(true);
+        }
+      } else {
+        setModalTitle("Validation Error ❌");
+        setModalMessage("Error saving form. Please clear the errors in the form before saving.");
         setModalOpen(true);
       }
-    } else {
-      setModalTitle("Validation Error ❌");
-      setModalMessage("Error saving form. Please clear the errors in the form before saving.");
+    } catch (error) {
+      setModalTitle("Error ❌");
+      setModalMessage("Error saving form. Please try again.");
       setModalOpen(true);
     }
-  } catch(error) {
-    setModalTitle("Error ❌");
-    setModalMessage("Error saving form. Please try again.");
-    setModalOpen(true);
-  }
-  finally{
-    setIsLoading(false);
-  }
+    finally {
+      setIsLoading(false);
+    }
   };
 
   /*
@@ -1680,7 +1712,7 @@ This is triggered when any value is cahnged on the element
             </Button>
           </div>
           <div className="form-title hidden-on-screen">
-            <div className="header-form-id-print ">{formData.form_id}</div> 
+            <div className="header-form-id-print ">{formData.form_id}</div>
             <div className="header-title-print " >
               {formData.title} {goBack && (<span>(Preview)</span>)}
             </div>
@@ -1704,26 +1736,23 @@ This is triggered when any value is cahnged on the element
 
         <div className="content-wrapper">
 
-        <CustomModal
-        title={modalTitle}
-        message={modalMessage}
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-      />
+          <CustomModal
+            title={modalTitle}
+            message={modalMessage}
+            isOpen={modalOpen}
+            onClose={() => setModalOpen(false)}
+          />
           {/* Loading overlay when API call is in progress */}
           <LoadingOverlay isLoading={isLoading} message="Please wait while the form is being saved." />
           <FlexGrid>
             <Row >
-              {formData.data.items.map((item, index) => (
+              {formData.data.items.filter(item => !isHidden(item)).map(item => (
                 <div
                   key={item.id}
-                  style={applyStyles(item)}
-                  data-print-columns={item.pdfStyles?.printColumns || 4}>
-                  {renderComponent(
-                    item,
-                    item.type === "group" ? item.id : null,
-                    index
-                  )}
+                  style={applyWrapperStyles(item)}
+                  data-print-columns={item.pdfStyles?.printColumns || 4}
+                >
+                  {renderComponent(item)}
                 </div>
               ))}
             </Row>

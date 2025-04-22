@@ -4,7 +4,7 @@
     display: block; /* Show only during printing */
   }
 
-  .full-frame{
+  .full-frame {
     display: flex;
     height: 792px;
     padding: 36px;
@@ -12,16 +12,16 @@
     align-items: flex-start;
     gap: 24px;
     flex: 1 0 0;
-    background: #FFF;
+    background: #fff;
   }
 
- .header-image{
+  .header-image {
     display: flex;
     width: 540px;
     align-items: center;
     gap: 10px;
     border-bottom: 1px solid #919191;
-    background: #FFF;
+    background: #fff;
   }
 
   .header-image-only {
@@ -29,9 +29,20 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 12.5px;
-
   }
-  
+
+  .header-image,
+  .header-image-only {
+    overflow: visible;
+    height: auto;
+    margin-bottom: 4px;
+  }
+
+  .header-image-only img {
+    overflow: visible;
+    height: auto;
+    display: block;
+  }
 
   .header-title-print {
     /*color: #000;
@@ -49,10 +60,9 @@
     font-weight: 600;
     line-height: normal;
     /*border: 1px solid #000;*/
-    
   }
 
-  .form-title{
+  .form-title {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -62,7 +72,7 @@
     border: 1px solid #000;*/
   }
 
-  .header-form-id-print{
+  .header-form-id-print {
     color: #000;
     text-align: right;
     /* Print/Body/Label */
@@ -85,12 +95,11 @@
 
   /* Set page size and margins */
   @page {
-    
     @top-left {
-        content: "";
-      }
+      content: "";
+    }
     @top-center {
-    content: "";
+      content: "";
     }
     @top-right {
       content: none;
@@ -98,19 +107,16 @@
     @bottom-left {
       content: attr(data-form-id);
       font-family: "BC Sans"; /* Change the font */
-      font-size: 12px; 
+      font-size: 12px;
       font-weight: bold;
-      
     }
     @bottom-center {
       content: "";
-      
     }
     @bottom-right {
       content: "Page " counter(page) " of " counter(pages);
       font-family: "BC Sans"; /* Change the font */
       font-size: 12px;
-      
     }
     size: A4; /* Options: A4, Letter, etc. */
     margin: 0.5mm 10mm 20mm 10mm; /* top right bottom left */
@@ -127,13 +133,12 @@
     break-after: avoid;
     gap: 0px !important; /* Adjust gap for print */
     padding: 0px !important;
-    
   }
 
   .group-item-container {
-    page-break-inside: avoid; 
-    font-weight: normal; 
-    font-family: "Noto Sans" !important;  
+    page-break-inside: avoid;
+    font-weight: normal;
+    font-family: "Noto Sans" !important;
     font-size: 13px !important;
     gap: 0px !important; /* Adjust gap for print */
     padding: 0px !important;
@@ -179,17 +184,15 @@
     padding: 5px; /* Add padding for readability */
   }
 
-  .cds--row.cds--row {   
+  .cds--row.cds--row {
     gap: 0px !important; /* Adjust gap for print */
   }
 
-  
   .group-fields-grid {
     display: grid !important; /* Revert to grid for print */
     grid-template-columns: repeat(4, 1fr) !important;
     gap: 0px !important;
     padding: 0px !important;
-    
   }
 
   .group-fields-grid.group-fields-grid {
@@ -218,14 +221,13 @@
     align-self: stretch;
     word-wrap: break-word;
     white-space: normal;
-    overflow-wrap: break-word; /* Ensure text wraps */    
-  flex-wrap: wrap; 
-  flex: 1;
-  align-content: center;
-  font-family: "Noto Sans";
+    overflow-wrap: break-word; /* Ensure text wraps */
+    flex-wrap: wrap;
+    flex: 1;
+    align-content: center;
+    font-family: "Noto Sans";
   }
- 
-  
+
   .help-text {
     font-size: 0.85rem;
     color: #666;
@@ -233,100 +235,113 @@
   .print-only {
     display: block;
   }
-    
-    .help-text {
-        font-size: 0.85rem;
-        color: #666;
-    }
-    .print-only {
-        display: block;
-    }
 
-    .hidden-on-screen {
-        display: block !important; /* Show only during printing */
-        page-break-inside: avoid;
+  .help-text {
+    font-size: 0.85rem;
+    color: #666;
+  }
+  .print-only {
+    display: block;
+  }
 
-    }
+  .hidden-on-screen {
+    display: block !important; /* Show only during printing */
+    page-break-inside: avoid;
+  }
 
-    .page-break {
-      break-before: page; /* Modern browsers */
-      page-break-before: always; /* Fallback for older browsers */
-    }
+  .page-break {
+    break-before: page; /* Modern browsers */
+    page-break-before: always; /* Fallback for older browsers */
+  }
 
-    .scrollable-content {
-      width: 100%;
-      /*border: 1px solid #000;*/
-      padding: 0px !important;
-      gap: 0px !important;
-    }
+  .scrollable-content {
+    width: 100%;
+    /*border: 1px solid #000;*/
+    padding: 0px !important;
+    gap: 0px !important;
+  }
 
-    .content-wrapper {     
+  .content-wrapper {
     display: flex;
     width: 100%;
     padding: 0px !important;
-    flex-direction: column;    
+    flex-direction: column;
     gap: 0px !important;
     /*border: 1px solid #000;*/
-    
-    }
-    .header-section {      
-      display: flex;
-      width: 100%;
-      padding: 0px !important;  
-      display: flex;
-      flex-wrap: wrap;
-      align-items: flex-start;
-      gap: 10px;  
-    } 
-      
-  .common-container {         
-    
-  break-inside: avoid; /* Modern property to prevent page breaks */
-  page-break-inside: avoid; /* Legacy property for compatibility */       
-    } 
-    
-    .field-wrapper-print {      
-      display: flex !important;     
-      flex-wrap: wrap;     
-      width: 100%;
-      align-items: stretch;
-      /*border: 1px solid #000;*/
-    }
+  }
+  .header-section {
+    display: flex;
+    width: 100%;
+    padding: 0px !important;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 10px;
+  }
 
-    .field_label-wrapper-print {
-      /*display: flex; */     
-      min-height: 30px;      
-      align-items: flex-start;      
-      border-bottom: 1px solid #919191;
-      background: #F4F4F4 !important;
-      width: 30%;
-      max-width: 180px;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-      height: auto;
-      align-content: center;
-      padding:10px;
-      
-    }
+  .common-container {
+    break-inside: avoid; /* Modern property to prevent page breaks */
+    page-break-inside: avoid; /* Legacy property for compatibility */
+  }
 
-    .field-label-print {
-      color: #000;
-      font-family: "Noto Sans";
-      font-size: 11px;
-      font-style: normal;
-      font-weight: 300;     
-      
-    }
+  .field-wrapper-print {
+    display: flex !important;
+    flex-wrap: wrap;
+    width: 100%;
+    align-items: stretch;
+    position: relative !important;
+    /*border: 1px solid #000;*/
+  }
 
-    .group-item-header {
-      
-      height: 58px;
-      padding: 0px 0px !important;
-      justify-content: space-between;
-      align-items: left;
-      align-self: stretch;
-  
-  } 
+  .field_label-wrapper-print {
+    /*display: flex; */
+    min-height: 30px;
+    align-items: flex-start;
+    border-bottom: 1px solid #919191;
+    background: #f4f4f4 !important;
+    width: 30%;
+    max-width: 180px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    height: auto;
+    align-content: center;
+    padding: 10px;
+    overflow: visible;
+    box-sizing: border-box;
+    margin-bottom: -1px;
+  }
+
+  .field-label-print {
+    color: #000;
+    font-family: "Noto Sans";
+    font-size: 11px;
+    font-style: normal;
+    font-weight: 300;
+  }
+
+  .field_label-wrapper-print,
+  .field_value-wrapper-print {
+    border-bottom: none;
+  }
+
+  .field-wrapper-print::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background-color: #919191;
+    z-index: 2;
+  }
+
+  .group-item-header {
+    height: 58px;
+    padding: 0px 0px !important;
+    justify-content: space-between;
+    align-items: left;
+    align-self: stretch;
+  }
 
   .group-header {
     color: #000;
@@ -337,12 +352,23 @@
     font-style: normal !important;
     font-weight: 600 !important;
     line-height: 125%;
-    margin-top:20px
-
-} 
+    margin-top: 20px;
+  }
   .text-block {
     font-family: "Noto Sans" !important;
     font-size: 11px !important;
     font-style: normal !important;
-  }  
+  }
+
+  ol {
+    list-style-type: decimal !important;
+    list-style-position: outside !important;
+    margin: 0 0 1em 1.5em !important;
+    padding: 0 !important;
+  }
+
+  ol li {
+    display: list-item !important;
+    margin: 0.25em 0 !important;
+  }
 }
