@@ -242,7 +242,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
   /*
     the data needed for loading the pdf version paging starts here.
   */
-    const formId = formData.form_id || "Unknown Form ID";
+    const formId = formData.form_id + " - " + formData.title || "Unknown Form ID";
 
     // Generate the creation date dynamically
     const creationDate = new Date().toLocaleDateString("en-US", {
@@ -253,7 +253,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
 
 
     // Set these values as attributes on the <body> tag
-    document.documentElement.setAttribute("data-form-id", formId);
+    document.documentElement.setAttribute("data-form-id", formId );
     document.documentElement.setAttribute("data-date", creationDate);     
 
     /*
@@ -1647,8 +1647,8 @@ This is triggered when any value is cahnged on the element
   return (
 
     <div ref={pdfContainerRef} className="full-frame">
-
-      <div className="header-section fixed">
+      <div className="fixed">
+      <div className="header-section">
         <div className="header-image">
           <div className="header-image-only">
 
@@ -1665,7 +1665,7 @@ This is triggered when any value is cahnged on the element
             {mode == "edit" && formData.readOnly != true && (
               <>
                 <Button onClick={handleSave} kind="secondary" className="no-print">
-                  Save
+                  Save Draft
                 </Button>
                 <Button onClick={handleSaveAndClose} kind="secondary" className="no-print">
                   Save And Close
@@ -1691,6 +1691,7 @@ This is triggered when any value is cahnged on the element
 
 
         </div>
+      </div>
       </div>
       <div className="header-form-id no-print">{formData.form_id}</div>
       <div className="scrollable-content">

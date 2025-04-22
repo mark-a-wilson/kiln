@@ -91,7 +91,7 @@ line-height: 125%; /* 40px */
 }
 
 .fixed {
-  //position: sticky; /* Fix the header at the top */
+  position: sticky; /* Fix the header at the top */
   top: 0; /* Position it at the very top */
   left: 0;
   width: 100%; /* Make it span the entire width */
@@ -100,7 +100,6 @@ line-height: 125%; /* 40px */
   //box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: Add a shadow */
   flex-wrap: wrap; 
 }
-
 .scrollable-content {
   margin-top: 0; 
 }
@@ -161,7 +160,7 @@ margin: auto
 }
 
 .header-section {
-  //position: fixed;
+  //position: sticky;
   display: flex;
   width: 100%;
   padding: $outer-padding;  
