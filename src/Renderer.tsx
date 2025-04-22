@@ -243,9 +243,9 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
   useEffect(() => {
     const initialFormStates: { [key: string]: string } = {};
     const initialGroupStates: { [key: string]: GroupState } = {}; // Changed type here
-  /*
-    the data needed for loading the pdf version paging starts here.
-  */
+    /*
+      the data needed for loading the pdf version paging starts here.
+    */
     const formId = formData.form_id + " - " + formData.title || "Unknown Form ID";
 
     // Generate the creation date dynamically
@@ -257,8 +257,8 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
 
 
     // Set these values as attributes on the <body> tag
-    document.documentElement.setAttribute("data-form-id", formId );
-    document.documentElement.setAttribute("data-date", creationDate);     
+    document.documentElement.setAttribute("data-form-id", formId);
+    document.documentElement.setAttribute("data-date", creationDate);
 
     /*
     the data needed for loading the pdf version paging ends here.
@@ -1250,7 +1250,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                   )}
                 </div>)}
                 {!item.repeater && (<div className="group-item-header">
-                  {item.label}                  
+                  {item.label}
                 </div>)}
                 <div
                   className="group-fields-grid"
@@ -1297,8 +1297,8 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                   key={containerItem.id}
                   style={applyWrapperStyles(containerItem)}
                   data-print-columns={containerItem.pdfStyles?.printColumns || 4}
+                >
                   {renderComponent(containerItem, containerItem.type === "group" ? containerItem.id : null, null)}
-
                 </div>
               ))}
             </div>
@@ -1703,50 +1703,50 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
 
     <div ref={pdfContainerRef} className="full-frame">
       <div className="fixed">
-      <div className="header-section">
-        <div className="header-image">
-          <div className="header-image-only">
+        <div className="header-section">
+          <div className="header-image">
+            <div className="header-image-only">
 
-            {formData.ministry_id && (
-              <img
-                src={ministryLogoPath}
-                width="232px"
-                alt="ministry logo"
+              {formData.ministry_id && (
+                <img
+                  src={ministryLogoPath}
+                  width="232px"
+                  alt="ministry logo"
 
-              />
-            )}
-          </div>
-          <div className="header-buttons-only no-print">
-            {mode == "edit" && formData.readOnly != true && (
-              <>
-                <Button onClick={handleSave} kind="secondary" className="no-print">
-                  Save
-                </Button>
-                <Button onClick={handleSaveAndClose} kind="secondary" className="no-print">
-                  Save And Close
-                </Button>
-
-              </>
-            )}
-            {goBack && (
-              <Button onClick={goBack} kind="secondary" className="no-print">
-                Back
-              </Button>
-            )}
-            <Button kind="secondary" onClick={handlePrint} className="no-print">
-              Print
-            </Button>
-          </div>
-          <div className="form-title hidden-on-screen">
-            <div className="header-form-id-print ">{formData.form_id}</div>
-            <div className="header-title-print " >
-              {formData.title} {goBack && (<span>(Preview)</span>)}
+                />
+              )}
             </div>
+            <div className="header-buttons-only no-print">
+              {mode == "edit" && formData.readOnly != true && (
+                <>
+                  <Button onClick={handleSave} kind="secondary" className="no-print">
+                    Save
+                  </Button>
+                  <Button onClick={handleSaveAndClose} kind="secondary" className="no-print">
+                    Save And Close
+                  </Button>
+
+                </>
+              )}
+              {goBack && (
+                <Button onClick={goBack} kind="secondary" className="no-print">
+                  Back
+                </Button>
+              )}
+              <Button kind="secondary" onClick={handlePrint} className="no-print">
+                Print
+              </Button>
+            </div>
+            <div className="form-title hidden-on-screen">
+              <div className="header-form-id-print ">{formData.form_id}</div>
+              <div className="header-title-print " >
+                {formData.title} {goBack && (<span>(Preview)</span>)}
+              </div>
+            </div>
+
+
           </div>
-
-
         </div>
-      </div>
       </div>
       <div className="header-form-id no-print">{formData.form_id}</div>
       <div className="scrollable-content">
