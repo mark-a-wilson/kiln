@@ -189,13 +189,17 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
     return <div>Invalid Form</div>;
   }
 
-  //Apply CSS styles to item
-  const applyStyles = (item: Item): React.CSSProperties => {
-    return {
-      ...(isPrinting ? item.pdfStyles : item.webStyles),
-      gridColumn: `span ${item.webStyles?.webColumns || 4}`,
-      breakBefore: item.pdfStyles?.pageBreak as React.CSSProperties["breakBefore"] || "auto",
-    };
+  // only layout (grid‐column / pageBreak) for the wrapper
+  const applyWrapperStyles = (item: Item): React.CSSProperties => ({
+    gridColumn: `span ${item.webStyles?.webColumns || 4}`,
+    breakBefore: item.pdfStyles?.pageBreak as React.CSSProperties["breakBefore"] || "auto",
+  });
+
+  //Hide based on Web or PDF styles
+  const isHidden = (item: Item) => {
+    if (!isPrinting && item.webStyles?.display === 'none') return true;
+    if (isPrinting && item.pdfStyles?.display === 'none') return true;
+    return false;
   };
 
   const pdfContainerRef = useRef<HTMLDivElement>(null);
@@ -239,10 +243,10 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
   useEffect(() => {
     const initialFormStates: { [key: string]: string } = {};
     const initialGroupStates: { [key: string]: GroupState } = {}; // Changed type here
-    /*
-      the data needed for loading the pdf version paging starts here.
-    */
-    const formId = formData.form_id || "Unknown Form ID";
+  /*
+    the data needed for loading the pdf version paging starts here.
+  */
+    const formId = formData.form_id + " - " + formData.title || "Unknown Form ID";
 
     // Generate the creation date dynamically
     const creationDate = new Date().toLocaleDateString("en-US", {
@@ -253,8 +257,8 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
 
 
     // Set these values as attributes on the <body> tag
-    document.documentElement.setAttribute("data-form-id", formId);
-    document.documentElement.setAttribute("data-date", creationDate);
+    document.documentElement.setAttribute("data-form-id", formId );
+    document.documentElement.setAttribute("data-date", creationDate);     
 
     /*
     the data needed for loading the pdf version paging ends here.
@@ -510,11 +514,6 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
       return true; // Default to visible if there are no conditions
     }
 
-    //Hide field based on CSS "display" value
-    if (item.webStyles?.display === 'none' || item.pdfStyles?.display === 'none') {
-      return false;
-    }
-
     const visibilityCondition = item.conditions.find(condition => condition.type === 'visibility');
 
     if (visibilityCondition) {
@@ -696,33 +695,33 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
 
           >
             <Component
-              className="field-container"
+              className="field-container no-print"
               key={fieldId}
               id={fieldId}
               labelText={label}
               placeholder={item.placeholder}
               helperText={item.helperText}
               name={fieldId}
-              style={{ marginBottom: "5px" }}
+              style={{
+                marginBottom: "5px",
+                ...(isPrinting ? item.pdfStyles : item.webStyles),
+              }}
               invalid={!!error}
               invalidText={error || ""}
             />
           </InputMask>
-            <div className="hidden-on-screen cds--text-input-wrapper">
-              <div className="cds--text-input__label-wrapper">
-                <label className="cds--label" dir="auto"><span>{label}</span> </label>
-              </div>
-              <div className="cds--text-input__field-outer-wrapper">
-                <div className="cds--text-input__field-wrapper">
-                  {
-                    groupId
-                      ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || ""
-                      : formStates[fieldId] || ""
-                  }
-                </div>
+            <div className="hidden-on-screen field-wrapper-print">
+              <div className="field_label-wrapper-print">
+                <label className="field-label-print"><span>{label}</span> </label>
               </div>
 
-              <div className="cds--form__helper-text" dir="auto">{item.helperText}</div>
+              <div className="field_value-wrapper-print">
+                {
+                  groupId
+                    ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || ""
+                    : formStates[fieldId] || ""
+                }
+              </div>
             </div>
           </>
         );
@@ -756,7 +755,10 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                 labelText={label}
                 placeholder={item.placeholder}
                 name={fieldId}
-                style={{ marginBottom: "5px" }}
+                style={{
+                  marginBottom: "5px",
+                  ...(isPrinting ? item.pdfStyles : item.webStyles),
+                }}
                 invalid={!!error}
                 invalidText={error || ""}
               />}
@@ -798,50 +800,73 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                   groupIndex, item
                 )
               }
-              style={{ marginBottom: "5px" }}
-              readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
-              invalid={!!error}
-              invalidText={error || ""}
-
-            />
-            <div className="hidden-on-screen cds--text-input-wrapper">
-              <div className="cds--text-input__label-wrapper">
-                <label className="cds--label" dir="auto"><span>{label}</span> </label>
-              </div>
-              <div className="cds--text-input__field-outer-wrapper">
-                <div className="cds--text-input__field-wrapper">
-                  {
-                    selectedItem?.label
-                  }
-                </div>
-              </div>
-
-              <div className="cds--form__helper-text" dir="auto">{item.helperText}</div>
-            </div>
-          </>
-        );
-      case "checkbox":
-        return (
-          <div style={{ marginBottom: "5px" }}>
-            <Component
-              className="field-container"
-              key={fieldId}
-              id={fieldId}
-              labelText={item.label}
-              checked={groupId ? groupStates[groupId]?.[groupIndex!]?.[fieldId] ?? false : formStates[fieldId] ?? false}
-              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                const isChecked = event.target.checked;
-                handleInputChange(fieldId, isChecked, groupId, groupIndex, item);
+              style={{
+                marginBottom: "5px",
+                ...(isPrinting ? item.pdfStyles : item.webStyles),
               }}
               readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
               invalid={!!error}
               invalidText={error || ""}
+
             />
-          </div>
+            <div className="hidden-on-screen field-wrapper-print">
+              <div className="field_label-wrapper-print">
+                <label className="field-label-print"><span>{label}</span> </label>
+              </div>
+
+              <div className="field_value-wrapper-print">
+                {
+                  selectedItem?.label
+                }
+              </div>
+            </div>
+
+          </>
+        );
+      case "checkbox":
+        return (
+
+          <>
+            <div style={{
+              marginBottom: "5px",
+              ...(isPrinting ? item.pdfStyles : item.webStyles),
+            }}>
+              <Component
+                className="field-container no-print"
+                key={fieldId}
+                id={fieldId}
+                labelText={item.label}
+                checked={groupId ? groupStates[groupId]?.[groupIndex!]?.[fieldId] ?? false : formStates[fieldId] ?? false}
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                  const isChecked = event.target.checked;
+                  handleInputChange(fieldId, isChecked, groupId, groupIndex, item);
+                }}
+                readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
+                invalid={!!error}
+                invalidText={error || ""}
+              />
+            </div>
+            <div className="hidden-on-screen field-wrapper-print">
+              <div className="field_label-wrapper-print">
+                <label className="field-label-print"><span>{item.label}</span></label>
+              </div>
+
+              <div className="field_value-wrapper-print">
+                <label className="custom-checkbox-label">
+                  <input type="checkbox" checked={!!(groupId ? groupStates[groupId]?.[groupIndex!]?.[fieldId] ?? false : formStates[fieldId] ?? false)}
+                    readOnly />
+
+                </label>
+              </div>
+            </div>
+          </>
         );
       case "toggle":
         return (
-          <div key={fieldId} style={{ marginBottom: "25px" }}>
+          <div key={fieldId} style={{
+            marginBottom: "5px",
+            ...(isPrinting ? item.pdfStyles : item.webStyles),
+          }}>
 
             <Component
               className="field-container"
@@ -904,7 +929,10 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                   );
                 }
               }}
-              style={{ marginBottom: "5px" }}
+              style={{
+                marginBottom: "5px",
+                ...(isPrinting ? item.pdfStyles : item.webStyles),
+              }}
               dateFormat={dateFormat}
               readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
               invalid={!!error}
@@ -922,48 +950,64 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
 
               />
             </Component>
-            <div className="hidden-on-screen cds--text-input-wrapper">
-              <div className="cds--text-input__label-wrapper">
-                <label className="cds--label" dir="auto"><span>{label}</span> </label>
-              </div>
-              <div className="cds--text-input__field-outer-wrapper">
-                <div className="cds--text-input__field-wrapper">
-                  {
-                    groupId
-                      ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || ""
-                      : formStates[fieldId] || ""
-                  }
-                </div>
+            <div className="hidden-on-screen field-wrapper-print">
+              <div className="field_label-wrapper-print">
+                <label className="field-label-print"><span>{label}</span> </label>
               </div>
 
-              <div className="cds--form__helper-text" dir="auto">{item.helperText}</div>
+              <div className="field_value-wrapper-print">
+                {
+                  groupId
+                    ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || ""
+                    : formStates[fieldId] || ""
+                }
+              </div>
             </div>
           </>
         );
       case "text-area":
         return (
-          <Component
-            key={fieldId}
-            className="field-container"
-            id={fieldId}
-            labelText={label}
-            placeholder={item.placeholder}
-            helperText={item.helperText}
-            name={fieldId}
-            value={
-              groupId
-                ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || ""
-                : formStates[fieldId] || ""
-            }
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-              handleInputChange(fieldId, e.target.value, groupId, groupIndex, item)
-            }
-            rows={4}
-            style={{ marginBottom: "5px" }}
-            readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
-            invalid={!!error}
-            invalidText={error || ""}
-          />
+
+          <>
+            <Component
+              key={fieldId}
+              className="field-container no-print"
+              id={fieldId}
+              labelText={label}
+              placeholder={item.placeholder}
+              helperText={item.helperText}
+              name={fieldId}
+              value={
+                groupId
+                  ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || ""
+                  : formStates[fieldId] || ""
+              }
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                handleInputChange(fieldId, e.target.value, groupId, groupIndex, item)
+              }
+              rows={4}
+              style={{
+                marginBottom: "5px",
+                ...(isPrinting ? item.pdfStyles : item.webStyles),
+              }}
+              readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
+              invalid={!!error}
+              invalidText={error || ""}
+            />
+            <div className="hidden-on-screen field-wrapper-print">
+              <div className="field_label-wrapper-print">
+                <label className="field-label-print"><span>{label}</span> </label>
+              </div>
+
+              <div className="field_value-wrapper-print">
+                {
+                  groupId
+                    ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || ""
+                    : formStates[fieldId] || ""
+                }
+              </div>
+            </div>
+          </>
         );
       case "button":
         return (
@@ -981,7 +1025,10 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                 item
               )
             }
-            style={{ marginBottom: "5px" }}
+            style={{
+              marginBottom: "5px",
+              ...(isPrinting ? item.pdfStyles : item.webStyles),
+            }}
           >
             {item.label}
           </Component>
@@ -1023,6 +1070,10 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
 
           <Component
             className="text-block field-container"
+            style={{
+              marginBottom: "10px",
+              ...(isPrinting ? item.pdfStyles : item.webStyles),
+            }}
             key={fieldId}
             id={fieldId}
             dangerouslySetInnerHTML={{ __html: parseDynamicText(textInfo) }}
@@ -1070,36 +1121,65 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
             value: value,
             label: text,
           })) || [];
-        return (
-          <div key={fieldId} style={{ marginBottom: "5px" }}>
-            <Component
-              className="field-container"
-              legendText={label}
-              id={fieldId}
-              name={fieldId}
-              onChange={(value: string) =>
-                handleInputChange(fieldId, value, groupId, groupIndex, item)
-              }
-              valueSelected={
-                groupId
-                  ? groupStates[groupId]?.[groupIndex!]?.[fieldId]
-                  : formStates[fieldId]
-              }
-              readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
-              invalid={!!error}
-              invalidText={error || ""}
-            >
-              {radioOptions.map((option, index) => (
-                <RadioButton
-                  key={index}
-                  labelText={option.label}
-                  value={option.value}
-                  id={`${fieldId}-${index}`}
-                />
-              ))}
-            </Component></div>
-        );
+        const valueSelectedForRadio =
+          groupId
+            ? groupStates[groupId]?.[groupIndex!]?.[fieldId]
+            : formStates[fieldId];
 
+        return (
+          <>
+            <div key={fieldId} style={{
+              marginBottom: "5px",
+              ...(isPrinting ? item.pdfStyles : item.webStyles),
+            }}>
+              <Component
+                className="field-container  no-print"
+                legendText={label}
+                orientation="vertical"
+                id={fieldId}
+                name={fieldId}
+                onChange={(value: string) =>
+                  handleInputChange(fieldId, value, groupId, groupIndex, item)
+                }
+                valueSelected={
+                  groupId
+                    ? groupStates[groupId]?.[groupIndex!]?.[fieldId]
+                    : formStates[fieldId]
+                }
+                readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
+                invalid={!!error}
+                invalidText={error || ""}
+              >
+
+                {radioOptions.map((option, index) => (
+                  <RadioButton
+                    key={index}
+                    labelText={option.label}
+                    value={option.value}
+                    id={`${fieldId}-${index}`}
+                  />
+                ))}
+              </Component></div>
+            <div className="hidden-on-screen field-wrapper-print">
+              <div className="field_label-wrapper-print">
+                <label className="field-label-print"><span>{label}</span> </label>
+              </div>
+
+              <div className="field_value-wrapper-print">
+                {radioOptions.map((option) => (
+                  <label key={option.value} >
+                    <input
+                      type="radio"
+                      value={option.value}
+                      checked={valueSelectedForRadio === option.value}
+                    />
+                    <span >{option.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          </>
+        );
       case "select":
         const itemsForSelect = item.listItems || [];
         return (
@@ -1110,6 +1190,9 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
               name={fieldId}
               labelText={label}
               helperText={item.helperText}
+              style={{
+                ...(isPrinting ? item.pdfStyles : item.webStyles),
+              }}
               value={
                 groupId
                   ? groupStates[groupId]?.[groupIndex!]?.[fieldId]
@@ -1131,33 +1214,43 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                 />
               ))}
             </Select>
-            <div className="hidden-on-screen cds--text-input-wrapper">
-              <div className="cds--text-input__label-wrapper">
-                <label className="cds--label" dir="auto"><span>{label}</span> </label>
-              </div>
-              <div className="cds--text-input__field-outer-wrapper">
-                <div className="cds--text-input__field-wrapper">
-                  {
-                    groupId
-                      ? groupStates[groupId]?.[groupIndex!]?.[fieldId] || ""
-                      : formStates[fieldId] || ""
-                  }
-                </div>
+            <div className="hidden-on-screen field-wrapper-print">
+              <div className="field_label-wrapper-print">
+                <label className="field-label-print"><span>{label}</span> </label>
               </div>
 
-              <div className="cds--form__helper-text" dir="auto">{item.helperText}</div>
+              <div className="field_value-wrapper-print">
+                {
+                  selectedItem?.label
+                }
+              </div>
             </div>
           </>
         );
       case "group":
         return (
           <div key={item.id} className="group-container">
-            <div className="group-header">{item.label}</div>
+            <div className="group-header">{item.repeater && item.label}</div>
             {item.groupItems?.map((groupItem, groupIndex) => (
               <div key={`${item.id}-${groupIndex}`} className="group-item-container">
                 {item.repeater && (<div className="group-item-header">
                   {item.repeaterItemLabel || item.label}
                   {(item.repeaterItemLabel || item.label) && ` ${groupIndex + 1}`}
+                  {item.groupItems && item.groupItems.length > 1 && (mode == "edit" || goBack) && formData.readOnly != true && (
+                    <div className="custom-buttons-only no-print">
+                      <Button
+                        kind="ghost"
+                        onClick={() => handleRemoveGroupItem(item.id, groupIndex)}
+                        renderIcon={Subtract}
+                        className="no-print"
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  )}
+                </div>)}
+                {!item.repeater && (<div className="group-item-header">
+                  {item.label}                  
                 </div>)}
                 <div
                   className="group-fields-grid"
@@ -1167,38 +1260,29 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                     gap: "15px",
                   }}
                 >
-                  {groupItem.fields.map((groupField) => (
+                  {groupItem.fields.filter(groupField => !isHidden(groupField)).map((groupField) => (
                     <div
                       key={groupField.id}
-                      style={applyStyles(groupField)}
+                      style={applyWrapperStyles(groupField)}
                       data-print-columns={groupField.pdfStyles?.printColumns || 4}
                     >
                       {renderComponent(groupField, item.id, groupIndex)}
                     </div>
                   ))}
                 </div>
-                {item.groupItems && item.groupItems.length > 1 && (mode == "edit" || goBack) && formData.readOnly != true && (
-                  <Button
-                    kind="ghost"
-                    onClick={() => handleRemoveGroupItem(item.id, groupIndex)}
-                    renderIcon={Subtract}
-                    className="no-print"
-                  >
-                    Remove {item.repeaterItemLabel || item.label}
-                    {(item.repeaterItemLabel || item.label) && ` ${groupIndex + 1}`}
-                  </Button>
-                )}
               </div>
             ))}
             {item.repeater && (mode == "edit" || goBack) && formData.readOnly != true && (
-              <Button
-                kind="ghost"
-                onClick={() => handleAddGroupItem(item.id)}
-                renderIcon={Add}
-                className="no-print"
-              >
-                Add {item.repeaterItemLabel || item.label}
-              </Button>
+              <div className="custom-buttons-only">
+                <Button
+                  kind="ghost"
+                  onClick={() => handleAddGroupItem(item.id)}
+                  renderIcon={Add}
+                  className="no-print"
+                >
+                  Add {item.repeaterItemLabel || item.label}
+                </Button>
+              </div>
             )}
           </div>
         );
@@ -1208,12 +1292,11 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
           <>
             <div key={item.id} className="common-container">
               <div className="group-header">{item.label}</div>
-              {item.containerItems?.map((containerItem) => (
+              {item.containerItems?.filter(containerItem => !isHidden(containerItem)).map((containerItem) => (
                 <div
                   key={containerItem.id}
-                  style={applyStyles(containerItem)}
+                  style={applyWrapperStyles(containerItem)}
                   data-print-columns={containerItem.pdfStyles?.printColumns || 4}
-                >
                   {renderComponent(containerItem, containerItem.type === "group" ? containerItem.id : null, null)}
 
                 </div>
@@ -1618,9 +1701,9 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
 
   return (
 
-    <div ref={pdfContainerRef} >
-
-      <div className="header-section fixed">
+    <div ref={pdfContainerRef} className="full-frame">
+      <div className="fixed">
+      <div className="header-section">
         <div className="header-image">
           <div className="header-image-only">
 
@@ -1654,14 +1737,18 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
               Print
             </Button>
           </div>
-
-          <div className="header-title-print hidden-on-screen" >
-            {formData.title} {goBack && (<span>(Preview)</span>)}
+          <div className="form-title hidden-on-screen">
+            <div className="header-form-id-print ">{formData.form_id}</div>
+            <div className="header-title-print " >
+              {formData.title} {goBack && (<span>(Preview)</span>)}
+            </div>
           </div>
 
 
         </div>
       </div>
+      </div>
+      <div className="header-form-id no-print">{formData.form_id}</div>
       <div className="scrollable-content">
         <div className="header-section">
           <div className="header-title-buttons">
@@ -1686,16 +1773,13 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
           <LoadingOverlay isLoading={isLoading} message="Please wait while the form is being saved." />
           <FlexGrid>
             <Row >
-              {formData.data.items.map((item, index) => (
+              {formData.data.items.filter(item => !isHidden(item)).map(item => (
                 <div
                   key={item.id}
-                  style={applyStyles(item)}
-                  data-print-columns={item.pdfStyles?.printColumns || 4}>
-                  {renderComponent(
-                    item,
-                    item.type === "group" ? item.id : null,
-                    index
-                  )}
+                  style={applyWrapperStyles(item)}
+                  data-print-columns={item.pdfStyles?.printColumns || 4}
+                >
+                  {renderComponent(item)}
                 </div>
               ))}
             </Row>

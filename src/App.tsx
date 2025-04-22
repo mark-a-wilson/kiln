@@ -7,6 +7,7 @@ import PrintFormPage from "./PrintFormPage";
 import UnauthorizedPage from "./UnauthorizedPage";
 import ErrorPage from "./ErrorPage";
 import "@carbon/styles/css/styles.css";
+import "@fontsource/noto-sans";
 
 import React, { useState, useEffect, createContext } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
