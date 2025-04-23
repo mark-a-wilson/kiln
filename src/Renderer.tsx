@@ -1748,7 +1748,11 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
           </div>
         </div>
       </div>
-      <div className="header-form-id no-print">{formData.form_id}</div>
+      <div className="header-form-id no-print">
+        <div className="form-id-section">
+        {formData.form_id}
+        </div>
+      </div>
       <div className="scrollable-content">
         <div className="header-section">
           <div className="header-title-buttons">

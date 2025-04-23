@@ -220,7 +220,7 @@ margin-bottom: 25px;
 }
 .header-form-id {
   display: flex;
-  //width: 1440px;
+  width: 1440px;
   padding: 24px 220px 16px 270px;
   align-items: center;
   background: #ECEAE8;
@@ -234,6 +234,25 @@ line-height: 150%; /* 24px */
 letter-spacing: 0.32px;
 } 
 
+
+
+.form-id-section {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: flex-start;
+
+  width: 100%;
+  max-width: 836px;
+  margin: 0 auto;
+  padding: $outer-padding;  
+
+  gap: 10px;
+  
+
+  // Optional:
+  // min-height: 70px; // if you want a minimum height
+}
 .group-header {
   color: #000;
 font-family: $default-font-family;
