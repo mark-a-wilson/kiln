@@ -710,7 +710,9 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
               invalidText={error || ""}
             />
           </InputMask>
-            <div className="hidden-on-screen field-wrapper-print">
+            <div className="hidden-on-screen field-wrapper-print" style={{
+              ...(isPrinting ? item.pdfStyles : item.webStyles),
+            }}>
               <div className="field_label-wrapper-print">
                 <label className="field-label-print"><span>{label}</span> </label>
               </div>
@@ -809,7 +811,9 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
               invalidText={error || ""}
 
             />
-            <div className="hidden-on-screen field-wrapper-print">
+            <div className="hidden-on-screen field-wrapper-print" style={{
+              ...(isPrinting ? item.pdfStyles : item.webStyles),
+            }}>
               <div className="field_label-wrapper-print">
                 <label className="field-label-print"><span>{label}</span> </label>
               </div>
@@ -846,7 +850,9 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                 invalidText={error || ""}
               />
             </div>
-            <div className="hidden-on-screen field-wrapper-print">
+            <div className="hidden-on-screen field-wrapper-print" style={{
+              ...(isPrinting ? item.pdfStyles : item.webStyles),
+            }}>
               <div className="field_label-wrapper-print">
                 <label className="field-label-print"><span>{item.label}</span></label>
               </div>
@@ -950,7 +956,9 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
 
               />
             </Component>
-            <div className="hidden-on-screen field-wrapper-print">
+            <div className="hidden-on-screen field-wrapper-print" style={{
+              ...(isPrinting ? item.pdfStyles : item.webStyles),
+            }}>
               <div className="field_label-wrapper-print">
                 <label className="field-label-print"><span>{label}</span> </label>
               </div>
@@ -994,7 +1002,9 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
               invalid={!!error}
               invalidText={error || ""}
             />
-            <div className="hidden-on-screen field-wrapper-print">
+            <div className="hidden-on-screen field-wrapper-print" style={{
+              ...(isPrinting ? item.pdfStyles : item.webStyles),
+            }}>
               <div className="field_label-wrapper-print">
                 <label className="field-label-print"><span>{label}</span> </label>
               </div>
@@ -1160,7 +1170,9 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                   />
                 ))}
               </Component></div>
-            <div className="hidden-on-screen field-wrapper-print">
+            <div className="hidden-on-screen field-wrapper-print" style={{
+              ...(isPrinting ? item.pdfStyles : item.webStyles),
+            }}>
               <div className="field_label-wrapper-print">
                 <label className="field-label-print"><span>{label}</span> </label>
               </div>
@@ -1214,7 +1226,9 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                 />
               ))}
             </Select>
-            <div className="hidden-on-screen field-wrapper-print">
+            <div className="hidden-on-screen field-wrapper-print" style={{
+              ...(isPrinting ? item.pdfStyles : item.webStyles),
+            }}>
               <div className="field_label-wrapper-print">
                 <label className="field-label-print"><span>{label}</span> </label>
               </div>
