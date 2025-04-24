@@ -28,7 +28,7 @@ import {
 import DynamicTable from "./DynamicTable";
 import { parseISO, format as formatDate, parse } from "date-fns";
 import { FlexGrid } from "@carbon/react";
-import { Add, Subtract } from '@carbon/icons-react';
+import { Add, TrashCan  } from '@carbon/icons-react';
 import InputMask from "react-input-mask";
 import { CurrencyInput } from "react-currency-mask";
 import { API } from "./utils/api";
@@ -1002,7 +1002,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
               invalid={!!error}
               invalidText={error || ""}
             />
-            <div className="hidden-on-screen field-wrapper-print" style={{
+            <div className="hidden-on-screen field-wrapper-print text-area" style={{
               ...(isPrinting ? item.pdfStyles : item.webStyles),
             }}>
               <div className="field_label-wrapper-print">
@@ -1251,11 +1251,11 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                   {item.repeaterItemLabel || item.label}
                   {(item.repeaterItemLabel || item.label) && ` ${groupIndex + 1}`}
                   {item.groupItems && item.groupItems.length > 1 && (mode == "edit" || goBack) && formData.readOnly != true && (
-                    <div className="custom-buttons-only no-print">
+                    <div className="custom-buttons-no-bg no-print">
                       <Button
                         kind="ghost"
                         onClick={() => handleRemoveGroupItem(item.id, groupIndex)}
-                        renderIcon={Subtract}
+                        renderIcon={TrashCan}
                         className="no-print"
                       >
                         Remove
@@ -1294,7 +1294,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                   renderIcon={Add}
                   className="no-print"
                 >
-                  Add {item.repeaterItemLabel || item.label}
+                  Add another
                 </Button>
               </div>
             )}

@@ -410,4 +410,8 @@
     font-weight: 300 !important;
     line-height: 150% !important; /* 16.5px */
   }
+
+  .text-area {
+    min-height: 60px;
+}
 }
