@@ -25,6 +25,18 @@ const App: React.FC = () => {
   // Public Routes
   const publicRoutes = ["/preview", "/unauthorized", "/printToPDF", "/error"];
 
+  const isICMEnabled = import.meta.env.VITE_ENABLE_NEW_FORM === "true";
+  console.log(isICMEnabled);
+  const NewFormConditionalRoute = isICMEnabled ? (
+    <PrivateRoute>
+      <NewFormPage />
+    </PrivateRoute>
+  ) : (
+    <PreviewFormPage/>
+  );
+
+  console.log("NewFormConditionalRoute",NewFormConditionalRoute);
+
   useEffect(() => {
     const initKeycloak = async () => {
       try {
@@ -60,7 +72,7 @@ const App: React.FC = () => {
         <Route path="/error" element={<ErrorPage />} />
 
         {/* Protected Routes */}
-        <Route path="/new" element={<PrivateRoute><NewFormPage /></PrivateRoute>} />
+        <Route path="/new" element={NewFormConditionalRoute}/>
         <Route path="/edit" element={<PrivateRoute><EditFormPage /></PrivateRoute>} />
         <Route path="/view" element={<PrivateRoute><ViewFormPage /></PrivateRoute>} />
       </Routes>
