@@ -95,6 +95,7 @@
   .fixed-save-buttons {
     display: none !important;
   }
+  
 
   /* Set page size and margins */
   @page {
@@ -109,10 +110,10 @@
     }
     @bottom-left {
       content: attr(data-form-id);
-      font-family: "BC Sans"; /* Change the font */
-      font-size: 12px;
-      font-weight: bold;
-    }
+      font-family: "BC Sans"; /* Change the font*/
+      font-size: 12px;      
+    }   
+
     @bottom-center {
       content: "";
     }
