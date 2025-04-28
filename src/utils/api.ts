@@ -8,4 +8,5 @@ export const API = {
   loadICMData: getApiUrl("/loadICMData", import.meta.env.VITE_COMM_API_LOADDATA_ICM_ENDPOINT_URL),
   unlockICMData: getApiUrl("/clearICMLockedFlag", import.meta.env.VITE_COMM_API_UNLOCK_ICM_FORM_URL),
   loadSavedJson: getApiUrl("/loadSavedJson", import.meta.env.VITE_COMM_API_LOADSAVEDJSON_ENDPOINT_URL),  
+  generateStandalone: getApiUrl("/generateStandalone", import.meta.env.VITE_COMM_API_GENERATE_STANDALONE_ENDPOINT_URL),
 };

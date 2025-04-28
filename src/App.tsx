@@ -1,5 +1,6 @@
 import "./App.css";
 import NewFormPage from "./NewFormPage";
+import NewStandalonePage from "./NewStandalonePage";
 import EditFormPage from "./EditFormPage";
 import ViewFormPage from "./ViewFormPage";
 import PreviewFormPage from "./PreviewFormPage";
@@ -32,7 +33,7 @@ const App: React.FC = () => {
       <NewFormPage />
     </PrivateRoute>
   ) : (
-    <PreviewFormPage/>
+    <NewStandalonePage/>
   );
 
   console.log("NewFormConditionalRoute",NewFormConditionalRoute);
