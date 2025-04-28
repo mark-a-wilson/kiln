@@ -5,10 +5,12 @@ import ViewFormPage from "./ViewFormPage";
 import PreviewFormPage from "./PreviewFormPage";
 import PrintFormPage from "./PrintFormPage";
 import UnauthorizedPage from "./UnauthorizedPage";
+import ErrorPage from "./ErrorPage";
 import "@carbon/styles/css/styles.css";
+import "@fontsource/noto-sans";
 
 import React, { useState, useEffect, createContext } from "react";
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 
 import { initializeKeycloak } from "./keycloak";
 import { PrivateRoute } from "./PrivateRoute";
@@ -21,15 +23,13 @@ const App: React.FC = () => {
   const location = useLocation(); // Get the current route
 
   // Public Routes
-  const publicRoutes = ["/preview", "/unauthorized", "/printToPDF"];
+  const publicRoutes = ["/preview", "/unauthorized", "/printToPDF", "/error"];
 
   useEffect(() => {
     const initKeycloak = async () => {
       try {
         const _keycloak = await initializeKeycloak();
-        if (_keycloak?.authenticated) {
-          setKeycloak(_keycloak);
-        }
+        setKeycloak(_keycloak);
       } catch (error) {
         console.error("Keycloak initialization error:", error);
       } finally {
@@ -43,7 +43,7 @@ const App: React.FC = () => {
     } else {
       setLoading(false);
     }
-  },);
+  }, []);
 
   //Loading page when waiting for authentication
   if (loading) {
@@ -57,6 +57,7 @@ const App: React.FC = () => {
         <Route path="/preview" element={<PreviewFormPage />} />
         <Route path="/printToPDF" element={<PrintFormPage />} />
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
+        <Route path="/error" element={<ErrorPage />} />
 
         {/* Protected Routes */}
         <Route path="/new" element={<PrivateRoute><NewFormPage /></PrivateRoute>} />
@@ -67,10 +68,10 @@ const App: React.FC = () => {
   );
 };
 
-const WrappedApp = () => (
-  <Router>
-    <App />
-  </Router>
-);
+// const WrappedApp = () => (
+//   <Router>
+//     <App />
+//   </Router>
+// );
 
-export default WrappedApp;
+export default App;

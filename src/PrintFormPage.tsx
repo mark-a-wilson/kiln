@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 import "./App.css";
 import Presenter from "./Presenter";
 import "@carbon/styles/css/styles.css";
-
+import { API } from "./utils/api";
 
 const PrintFormPage: React.FC = () => {
   const [jsonContent, setJsonContent] = useState<object>({});
- 
+
 
   useEffect(() => {
 
@@ -29,8 +29,8 @@ const PrintFormPage: React.FC = () => {
   const handleLoadSavedJson = async (params: { [key: string]: string | null }) => {
 
     try {
-      const loadSavedJsonEndpoint = import.meta.env.VITE_COMM_API_LOADSAVEDJSON_ENDPOINT_URL;
-      console.log(loadSavedJsonEndpoint);
+
+      const loadSavedJsonEndpoint = API.loadSavedJson;
 
       const response = await fetch(loadSavedJsonEndpoint, {
         method: "POST",
@@ -39,7 +39,7 @@ const PrintFormPage: React.FC = () => {
         },
         body: JSON.stringify({
           ...params
-          
+
         }),
       });
 
@@ -48,7 +48,6 @@ const PrintFormPage: React.FC = () => {
       }
 
       const result = await response.json();
-      console.log(result);
       setJsonContent(result);
 
     } catch (error) {

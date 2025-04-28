@@ -1,17 +1,91 @@
 /* Ensure styles apply only to printed pages */
 @media print {
+  body {
+    font-family: "Noto Sans", sans-serif !important;
+  }
   .hidden-on-screen {
     display: block; /* Show only during printing */
   }
 
+  .full-frame {
+    display: flex;
+    height: 792px;
+    padding: 36px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 24px;
+    flex: 1 0 0;
+    background: #fff;
+  }
+
+  .header-image {
+    display: flex;
+    width: 540px;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid #919191;
+    background: #fff;
+  }
+
+  .header-image-only {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12.5px;
+  }
+
+  .header-image,
+  .header-image-only {
+    overflow: visible;
+    height: auto;
+    margin-bottom: 4px;
+  }
+
+  .header-image-only img {
+    overflow: visible;
+    height: auto;
+    display: block;
+  }
+
   .header-title-print {
-    color: #000;
+    /*color: #000;
     text-align: right;
     font-family: "BC Sans";
     font-size: 22px;
     font-style: normal;
-    font-weight: 700;
-    
+    font-weight: 700;*/
+    color: #000;
+    text-align: right;
+    /* Print/Headings/Form Title */
+    font-family: "Noto Sans";
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    /*border: 1px solid #000;*/
+  }
+
+  .form-title {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    /*align-items: flex-end;*/
+    flex: 1 0;
+    /*align-self: stretch;
+    border: 1px solid #000;*/
+  }
+
+  .header-form-id-print {
+    color: #000;
+    text-align: right;
+    /* Print/Body/Label */
+    font-family: "Noto Sans";
+    font-size: 11px;
+    font-style: normal;
+    font-weight: 300;
+    line-height: 150%; /* 16.5px */
+    letter-spacing: 0.32px;
+    /*border: 1px solid #000;*/
   }
   /* Hide buttons and other unwanted elements */
   button,
@@ -24,12 +98,11 @@
 
   /* Set page size and margins */
   @page {
-    
     @top-left {
-        content: "";
-      }
+      content: "";
+    }
     @top-center {
-    content: "";
+      content: "";
     }
     @top-right {
       content: none;
@@ -37,46 +110,42 @@
     @bottom-left {
       content: attr(data-form-id);
       font-family: "BC Sans"; /* Change the font */
-      font-size: 12px; 
+      font-size: 12px;
       font-weight: bold;
-      
     }
     @bottom-center {
       content: "";
-      
     }
     @bottom-right {
       content: "Page " counter(page) " of " counter(pages);
       font-family: "BC Sans"; /* Change the font */
       font-size: 12px;
-      
     }
     size: A4; /* Options: A4, Letter, etc. */
     margin: 10mm 10mm 20mm 10mm; /* top right bottom left */
     /* Footer styling */
   }
 
-  
-  .carbon-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr; /* Adjust as needed */
-    gap: 1rem;
-  }
-
   /* Keep grouped fields together */
 
   .group-container {
-    display: grid;
-    gap: 10px;
-    
+    /*display: grid;
+    gap: 10px;    
     padding: 10px;
     /*page-break-inside: avoid;*/
     break-after: avoid;
-    
+    gap: 0px !important; /* Adjust gap for print */
+    padding: 0px !important;
   }
 
   .group-item-container {
-    page-break-inside: avoid;    
+    page-break-inside: avoid;
+    font-weight: normal;
+    font-family: "Noto Sans" !important;
+    font-size: 13px !important;
+    gap: 0px !important; /* Adjust gap for print */
+    padding: 0px !important;
+    border: 0px !important;
   }
 
   /* Dynamic column styling based on JSON */
@@ -90,19 +159,6 @@
 
   .group-container[data-print-columns="3"] {
     grid-column: span 3 !important;
-  }
-
-  .field-container {
-    display: flex;
-    flex-direction: column;
-    all: unset; /* Clears competing styles */
-    padding: 5px;
-    overflow-wrap: break-word;
-    word-wrap: break-word;
-    word-break: break-word;
-    white-space: normal; /* Allow wrapping */
-    font-size: 2pt;
-    grid-column: span 4;
   }
 
   /* Adjust based on the data-print-columns attribute */
@@ -131,16 +187,19 @@
     padding: 5px; /* Add padding for readability */
   }
 
-  .cds--row {
-    display: grid !important; /* Revert to grid for print */
-    grid-template-columns: repeat(4, 1fr) !important;
-    gap: 15px !important; /* Adjust gap for print */
+  .cds--row.cds--row {
+    gap: 0px !important; /* Adjust gap for print */
   }
 
   .group-fields-grid {
     display: grid !important; /* Revert to grid for print */
     grid-template-columns: repeat(4, 1fr) !important;
-    gap: 15px !important;
+    gap: 0px !important;
+    padding: 0px !important;
+  }
+
+  .group-fields-grid.group-fields-grid {
+    gap: 0px !important; /* Adjust gap for print */
   }
 
   /* Text styles */
@@ -148,36 +207,32 @@
     font-size: 18pt;
     font-weight: bold;
   }
-  p {
+  /* p {
     font-size: 12pt;
-  }
+  } */
 
-  .cds--text-input__field-wrapper {
-    font-size: 14px; /* Adjust font size for print */
-    padding:15px;
+  .field_value-wrapper-print {
+    border-bottom: 1px solid #919191 !important;
+    padding-bottom: 2px !important;
+    background-clip: padding-box !important;
+    font-size: 13px !important;
+    font-weight: 300 !important;
+    display: flex;
+    width: 70%;
+    min-height: 24px;
+    padding: 2px 10px;
+    align-items: flex-start;
+    /*gap: 10px;*/
+    align-self: stretch;
     word-wrap: break-word;
     white-space: normal;
     overflow-wrap: break-word; /* Ensure text wraps */
-       
-    text-align: left;
-    vertical-align: middle;      /* Center text horizontally */    
-    border: 1px solid #ccc;
-    min-height: 45px;
+    flex-wrap: wrap;
+    flex: 1 !important;
+    align-content: center;
+    font-family: "Noto Sans";
   }
 
-  .cds--text-input {
-    font-size: 16px; /* Adjust font size for print */
-    padding: 2px; /* Reduce padding for more space */
-    word-wrap: break-word;
-    white-space: normal;
-    overflow-wrap: break-word; /* Ensure text wraps */
-    padding: 5px;
-  }
-  .bx--field {
-    width: 100%;
-    display: inline-block;
-    box-sizing: border-box;
-  }
   .help-text {
     font-size: 0.85rem;
     color: #666;
@@ -185,42 +240,178 @@
   .print-only {
     display: block;
   }
-    
-    .help-text {
-        font-size: 0.85rem;
-        color: #666;
-    }
-    .print-only {
-        display: block;
-    }
 
-    .hidden-on-screen {
-        display: block !important; /* Show only during printing */
-        page-break-inside: avoid;
+  .help-text {
+    font-size: 0.85rem;
+    color: #666;
+  }
+  .print-only {
+    display: block;
+  }
 
-    }
+  .hidden-on-screen {
+    display: block !important; /* Show only during printing */
+    page-break-inside: avoid;
+  }
 
-    .page-break {
-      break-before: page; /* Modern browsers */
-      page-break-before: always; /* Fallback for older browsers */
-    }
+  .page-break {
+    break-before: page; /* Modern browsers */
+    page-break-before: always; /* Fallback for older browsers */
+  }
 
-    .content-wrapper {     
+  .scrollable-content {
+    width: 100%;
+    /*border: 1px solid #000;*/
+    padding: 0px !important;
+    gap: 0px !important;
+  }
+
+  .content-wrapper {
     display: flex;
     width: 100%;
     padding: 0px !important;
-    flex-direction: column;    
-    gap: 42px;
-    }
-    .header-section {      
-      display: flex;
-      width: 100%;
-      padding: 0px !important;  
-      display: flex;
-      flex-wrap: wrap;
-      align-items: flex-start;
-      gap: 10px;  
-    } 
-      
-    
+    flex-direction: column;
+    gap: 0px !important;
+    /*border: 1px solid #000;*/
+  }
+  .header-section {
+    display: flex;
+    width: 100%;
+    padding: 0px !important;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 10px;
+    min-height: 0px !important;
+  }
+
+  .common-container {
+    break-inside: avoid; /* Modern property to prevent page breaks */
+    page-break-inside: avoid; /* Legacy property for compatibility */
+  }
+
+  .field-wrapper-print {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    width: 100%;
+    align-items: stretch;
+    position: relative !important;
+    /*border: 1px solid #000;*/
+  }
+
+  .hidden-on-screen.field-wrapper-print {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    width: 100%;
+    align-items: stretch;
+    position: relative !important;
+    /*border: 1px solid #000;*/
+  }
+
+  .field_label-wrapper-print {
+    /*display: flex; */
+    min-height: 30px;
+    align-items: flex-start;
+    background: #f4f4f4 !important;
+    width: 30% !important;
+    max-width: 180px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    height: auto;
+    align-content: center;
+    padding: 10px;
+    padding-bottom: 2px !important;
+    background-clip: padding-box !important;
+    border-bottom: 1px solid #919191 !important;
+
+    overflow: visible;
+    box-sizing: border-box;
+  }
+
+  .field-label-print {
+    color: #000;
+    font-family: "Noto Sans";
+    font-size: 11px;
+    font-style: normal;
+    font-weight: 300;
+  }
+
+  .group-item-header {
+    height: 58px;
+    padding: 0px 0px !important;
+    justify-content: space-between;
+    align-items: left;
+    align-self: stretch;
+  }
+
+  /* .field_label-wrapper-print,
+  .field_value-wrapper-print {
+    padding-bottom: 2px !important;
+    margin-bottom: 0 !important;
+    border-bottom: 1px solid #919191 !important;
+    background-clip: padding-box !important;
+  } */
+
+  .field-wrapper-print,
+  .hidden-on-screen.field-wrapper-print {
+    flex-wrap: nowrap !important;
+    margin-top: 1px !important;
+  }
+
+  .group-header {
+    color: #000;
+
+    /* Print/Headings/Heading 2 */
+    font-family: "Noto Sans" !important;
+    font-size: 13px !important;
+    font-style: normal !important;
+    font-weight: 600 !important;
+    line-height: 125%;
+    margin-top: 20px;
+  }
+  .text-block {
+    font-family: "Noto Sans" !important;
+    font-size: 11px !important;
+    font-style: normal !important;
+  }
+
+  ol {
+    list-style-type: decimal !important;
+    list-style-position: outside !important;
+    margin: 0 0 1em 1.5em !important;
+    padding: 0 !important;
+  }
+
+  ol li {
+    display: list-item !important;
+    margin: 0.25em 0 !important;
+  }
+
+  ul {
+    list-style-type: disc !important;
+    list-style-position: outside !important;
+    margin: 0 0 1em 1.5em !important;
+    padding-left: 0 !important;
+  }
+  ul li {
+    display: list-item !important;
+    margin: 0.25em 0 !important;
+  }
+
+  p,
+  li,
+  .text-block,
+  .help-text,
+  .field_label-wrapper-print,
+  .field_value-wrapper-print {
+    /* color: var(--typography-color-secondary) !important; */
+    font-family: "Noto Sans" !important;
+    font-size: 11px !important;
+    font-weight: 300 !important;
+    line-height: 150% !important; /* 16.5px */
+  }
+
+  .text-area {
+    min-height: 60px;
+}
 }
