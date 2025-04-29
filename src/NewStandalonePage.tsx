@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { API } from "./utils/api";
 import LoadingOverlay from "./common/LoadingOverlay";
 
-const NewFormPage: React.FC = () => {
+const NewStandalonePage: React.FC = () => {
   const [jsonContent, setJsonContent] = useState<object>({});  
   const navigate = useNavigate();
   const [isNewPageLoading, setIsNewPageLoading] = useState(false);
@@ -65,9 +65,9 @@ const NewFormPage: React.FC = () => {
   return (
     <>
       <LoadingOverlay isLoading={isNewPageLoading} message="Please wait while the form is being loaded." />
-      <Presenter data={jsonContent} mode="edit" />
+      <Presenter data={jsonContent} mode="standalone" />
     </>
   );
 };
 
-export default NewFormPage;
+export default NewStandalonePage
