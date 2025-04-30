@@ -382,6 +382,11 @@
     font-weight: 700;    
   }
 
+  .text-block h2 {
+    font-size: 11px !important;
+      font-weight: 700;
+  }
+
   ol {
     list-style-type: decimal !important;
     list-style-position: outside !important;

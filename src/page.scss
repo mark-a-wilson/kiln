@@ -316,6 +316,11 @@ background: #F2F2F2;
   }
 }
 
+.text-block h2 {
+  font-size: 28px;
+    font-weight: 700;
+}
+
 @media (max-width: 768px) {
   .fixed {
     flex-direction: column; /* Stack elements vertically on smaller screens */
