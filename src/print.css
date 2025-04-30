@@ -123,7 +123,7 @@
       font-size: 12px;
     }
     size: A4; /* Options: A4, Letter, etc. */
-    margin: 10mm 10mm 20mm 10mm; /* top right bottom left */
+    margin: 10mm 5mm 20mm 5mm; /* top right bottom left */
     /* Footer styling */
   }
 
@@ -373,7 +373,18 @@
   .text-block {
     font-family: "Noto Sans" !important;
     font-size: 11px !important;
-    font-style: normal !important;
+    font-style: normal !important;   
+
+  }
+
+  .text-block h1 {
+    font-size: 13px !important;
+    font-weight: 700;    
+  }
+
+  .text-block h2 {
+    font-size: 11px !important;
+      font-weight: 700;
   }
 
   ol {

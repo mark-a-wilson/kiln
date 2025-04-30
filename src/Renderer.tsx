@@ -812,7 +812,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
 
           <>
             <div style={{
-              marginBottom: "5px",
+              marginBottom: "0px",
               ...(isPrinting ? item.pdfStyles : item.webStyles),
             }}>
               <Component
@@ -1119,7 +1119,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
         return (
           <>
             <div key={fieldId} style={{
-              marginBottom: "5px",
+              marginBottom: "0px",
               ...(isPrinting ? item.pdfStyles : item.webStyles),
             }}>
               <Component

@@ -61,6 +61,7 @@ html, body {
   //padding: 15px;
   margin: 0px 0;
   //border-radius: 5px;
+  margin-bottom: 6px;
 }
 
 .common-container {
@@ -86,7 +87,7 @@ html, body {
   border: $border-width $border-color;
   //padding: 15px;
   //margin: 20px 0;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
   border-radius: 5px;
   font-family: "BC Sans";
 font-size: 30px;
@@ -221,7 +222,7 @@ font-size: 36px;
 font-style: normal;
 font-weight: 700;
 line-height: 125%; /* 45px */
-margin-top: 15px;
+margin-top: 40px;
 margin-bottom: 25px;
 }
 .header-form-id {
@@ -258,7 +259,7 @@ margin-bottom: 25px;
 .group-header {
   color: #000;
 font-family: $default-font-family;
-font-size: 32px;
+font-size: 28px;
 font-style: normal;
 font-weight: 700;
 line-height: normal;
@@ -292,9 +293,10 @@ background: #F2F2F2;
 
   // Nested styles for h1
   h1 {
-    font-size: 20px;
+    font-size: 32px;
     font-weight: 700;    
   }
+  
 
   // Nested styles for paragraphs
   p {
@@ -312,6 +314,11 @@ background: #F2F2F2;
       text-decoration: underline;
     }
   }
+}
+
+.text-block h2 {
+  font-size: 28px;
+    font-weight: 700;
 }
 
 @media (max-width: 768px) {
@@ -374,6 +381,10 @@ background: #F2F2F2;
 .cds--text-area__wrapper--readonly .cds--text-area{
   background:#f4f4f4;
   border:none
+}
+
+.cds--checkbox-label-text {
+  font-size: 16px;
 }
 .custom-modal-footer {
   display: flex;
