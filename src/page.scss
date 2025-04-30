@@ -377,7 +377,8 @@ background: #F2F2F2;
 
 .cds--text-input-wrapper--readonly .cds--text-input,
 .cds--date-picker__input[readonly] ,
-.cds--dropdown--readonly .cds--list-box__field{
+.cds--dropdown--readonly .cds--list-box__field,
+.cds--text-area__wrapper--readonly .cds--text-area{
   background:#f4f4f4;
   border:none
 }
