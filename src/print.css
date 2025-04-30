@@ -373,7 +373,13 @@
   .text-block {
     font-family: "Noto Sans" !important;
     font-size: 11px !important;
-    font-style: normal !important;
+    font-style: normal !important;   
+
+  }
+
+  .text-block h1 {
+    font-size: 13px !important;
+    font-weight: 700;    
   }
 
   ol {
