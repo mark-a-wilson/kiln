@@ -242,27 +242,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
   */
   useEffect(() => {
     const initialFormStates: { [key: string]: string } = {};
-    const initialGroupStates: { [key: string]: GroupState } = {}; // Changed type here
-    /*
-      the data needed for loading the pdf version paging starts here.
-    */
-    const formId = formData.form_id + " - " + formData.title || "Unknown Form ID";
-
-    // Generate the creation date dynamically
-    const creationDate = new Date().toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-
-
-    // Set these values as attributes on the <body> tag
-    document.documentElement.setAttribute("data-form-id", formId);
-    document.documentElement.setAttribute("data-date", creationDate);
-
-    /*
-    the data needed for loading the pdf version paging ends here.
-  */
+    const initialGroupStates: { [key: string]: GroupState } = {}; // Changed type here   
 
     /*
     recursive anonymous helper function to process the items in the form json initially.
@@ -832,7 +812,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
 
           <>
             <div style={{
-              marginBottom: "5px",
+              marginBottom: "0px",
               ...(isPrinting ? item.pdfStyles : item.webStyles),
             }}>
               <Component
@@ -1139,7 +1119,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
         return (
           <>
             <div key={fieldId} style={{
-              marginBottom: "5px",
+              marginBottom: "0px",
               ...(isPrinting ? item.pdfStyles : item.webStyles),
             }}>
               <Component
@@ -1317,7 +1297,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
               ))}
             </div>
           </>
-        );
+        );        
       default:
         return null;
     }
@@ -1654,7 +1634,24 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
 
       setIsPrinting(true); // Force printing mode
       document.body.offsetHeight; // Force reflow
-
+      const extraFooterInfo = formStates["footerExtraInfo"];
+      const formFooter = formData?.form_id && formData?.title
+  ? formData.form_id + " - " + formData.title + (extraFooterInfo ? " - " + extraFooterInfo : "")
+  : "Unknown Form ID";
+    
+        // Set these values as attributes on the <body> tag
+      document.documentElement.setAttribute("data-form-id", formFooter);
+         
+    /*Generate the creation date dynamically
+    const creationDate = new Date().toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+    // Set these values as attributes on the <body> tag
+   
+    document.documentElement.setAttribute("data-date", creationDate);*/
+  
       setTimeout(() => {
         window.print();
       }, 150); // Ensure styles are applied before printing
