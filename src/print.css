@@ -95,7 +95,9 @@
   .fixed-save-buttons {
     display: none !important;
   }
-  
+  .fixed {
+    box-shadow: none !important;    
+  }
 
   /* Set page size and margins */
   @page {
