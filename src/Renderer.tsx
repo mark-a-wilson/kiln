@@ -1757,7 +1757,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
         <div className="header-section">
           <div className="header-title-buttons">
             <div className="header-title-only no-print" >
-              <h1>{formData.title} {goBack && (<span>(Preview)</span>)}</h1>
+            {formData.title} {goBack && (<span>(Preview)</span>)}
             </div>
 
           </div>
