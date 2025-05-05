@@ -23,20 +23,25 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const location = useLocation(); // Get the current route
 
-  // Public Routes
-  const publicRoutes = ["/preview", "/unauthorized", "/printToPDF", "/error"];
+  const isStandalone = import.meta.env.VITE_IS_STANDALONE === "true";
+  console.log("Is Standalone",isStandalone);
 
-  const isICMEnabled = import.meta.env.VITE_ENABLE_NEW_FORM === "true";
-  console.log(isICMEnabled);
-  const NewFormConditionalRoute = isICMEnabled ? (
+  // Public Routes
+  const publicRoutes = [
+    "/preview",
+    "/unauthorized",
+    "/printToPDF",
+    "/error",
+    ...(isStandalone ? ["/new"] : []),
+  ];
+  const NewFormConditionalRoute = isStandalone ? (
+    <NewStandalonePage/>
+  ) :(
     <PrivateRoute>
       <NewFormPage />
     </PrivateRoute>
-  ) : (
-    <NewStandalonePage/>
-  );
-
-  console.log("NewFormConditionalRoute",NewFormConditionalRoute);
+  ) ;
+ 
 
   useEffect(() => {
     const initKeycloak = async () => {
@@ -51,7 +56,7 @@ const App: React.FC = () => {
     };
 
     // Initialize Keycloak for protected routes
-    if (!publicRoutes.includes(location.pathname)) {
+    if (!publicRoutes.includes(location.pathname)) {      
       initKeycloak();
     } else {
       setLoading(false);
