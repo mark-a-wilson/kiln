@@ -181,7 +181,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
   const isFormCleared = useRef(false);
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalTitle, setModalTitle] = useState("");
+  const [modalTitle, setModalTitle] = useState("KILN");
   const [modalMessage, setModalMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -244,27 +244,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
   */
   useEffect(() => {
     const initialFormStates: { [key: string]: string } = {};
-    const initialGroupStates: { [key: string]: GroupState } = {}; // Changed type here
-    /*
-      the data needed for loading the pdf version paging starts here.
-    */
-    const formId = formData.form_id + " - " + formData.title || "Unknown Form ID";
-
-    // Generate the creation date dynamically
-    const creationDate = new Date().toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-
-
-    // Set these values as attributes on the <body> tag
-    document.documentElement.setAttribute("data-form-id", formId);
-    document.documentElement.setAttribute("data-date", creationDate);
-
-    /*
-    the data needed for loading the pdf version paging ends here.
-  */
+    const initialGroupStates: { [key: string]: GroupState } = {}; // Changed type here   
 
     /*
     recursive anonymous helper function to process the items in the form json initially.
@@ -704,8 +684,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
               placeholder={item.placeholder}
               helperText={item.helperText}
               name={fieldId}
-              style={{
-                marginBottom: "5px",
+              style={{                
                 ...(isPrinting ? item.pdfStyles : item.webStyles),
               }}
               invalid={!!error}
@@ -759,8 +738,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                 labelText={label}
                 placeholder={item.placeholder}
                 name={fieldId}
-                style={{
-                  marginBottom: "5px",
+                style={{                  
                   ...(isPrinting ? item.pdfStyles : item.webStyles),
                 }}
                 invalid={!!error}
@@ -804,8 +782,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                   groupIndex, item
                 )
               }
-              style={{
-                marginBottom: "5px",
+              style={{               
                 ...(isPrinting ? item.pdfStyles : item.webStyles),
               }}
               readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
@@ -833,8 +810,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
         return (
 
           <>
-            <div style={{
-              marginBottom: "5px",
+            <div style={{              
               ...(isPrinting ? item.pdfStyles : item.webStyles),
             }}>
               <Component
@@ -859,12 +835,13 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                 <label className="field-label-print"><span>{item.label}</span></label>
               </div>
 
-              <div className="field_value-wrapper-print">
-                <label className="custom-checkbox-label">
-                  <input type="checkbox" checked={!!(groupId ? groupStates[groupId]?.[groupIndex!]?.[fieldId] ?? false : formStates[fieldId] ?? false)}
-                    readOnly />
-
-                </label>
+              <div className="field_value-wrapper-print" >
+              {
+                (groupId
+                  ? groupStates[groupId]?.[groupIndex!]?.[fieldId]
+                  : formStates[fieldId]
+                ) ? <span>☑</span> : <span>☐</span>
+              }                                 
               </div>
             </div>
           </>
@@ -872,7 +849,6 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
       case "toggle":
         return (
           <div key={fieldId} style={{
-            marginBottom: "5px",
             ...(isPrinting ? item.pdfStyles : item.webStyles),
           }}>
 
@@ -937,8 +913,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                   );
                 }
               }}
-              style={{
-                marginBottom: "5px",
+              style={{                
                 ...(isPrinting ? item.pdfStyles : item.webStyles),
               }}
               dateFormat={dateFormat}
@@ -996,8 +971,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                 handleInputChange(fieldId, e.target.value, groupId, groupIndex, item)
               }
               rows={4}
-              style={{
-                marginBottom: "5px",
+              style={{                
                 ...(isPrinting ? item.pdfStyles : item.webStyles),
               }}
               readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
@@ -1037,8 +1011,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                 item
               )
             }
-            style={{
-              marginBottom: "5px",
+            style={{              
               ...(isPrinting ? item.pdfStyles : item.webStyles),
             }}
           >
@@ -1082,9 +1055,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
 
           <Component
             className="text-block field-container"
-            style={{
-              marginBottom: "10px",
-              ...(isPrinting ? item.pdfStyles : item.webStyles),
+            style={{...(isPrinting ? item.pdfStyles : item.webStyles),
             }}
             key={fieldId}
             id={fieldId}
@@ -1141,7 +1112,6 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
         return (
           <>
             <div key={fieldId} style={{
-              marginBottom: "5px",
               ...(isPrinting ? item.pdfStyles : item.webStyles),
             }}>
               <Component
@@ -1273,7 +1243,6 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                   style={{
                     display: "grid",
                     gridTemplateColumns: "repeat(4, 1fr)",
-                    gap: "15px",
                   }}
                 >
                   {groupItem.fields.filter(groupField => !isHidden(groupField)).map((groupField) => (
@@ -1319,7 +1288,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
               ))}
             </div>
           </>
-        );
+        );        
       default:
         return null;
     }
@@ -1656,7 +1625,24 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
 
       setIsPrinting(true); // Force printing mode
       document.body.offsetHeight; // Force reflow
-
+      const extraFooterInfo = formStates["footerExtraInfo"];
+      const formFooter = formData?.form_id && formData?.title
+  ? formData.form_id + " - " + formData.title + (extraFooterInfo ? " - " + extraFooterInfo : "")
+  : "Unknown Form ID";
+    
+        // Set these values as attributes on the <body> tag
+      document.documentElement.setAttribute("data-form-id", formFooter);
+         
+    /*Generate the creation date dynamically
+    const creationDate = new Date().toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+    // Set these values as attributes on the <body> tag
+   
+    document.documentElement.setAttribute("data-date", creationDate);*/
+  
       setTimeout(() => {
         window.print();
       }, 150); // Ensure styles are applied before printing
@@ -1773,7 +1759,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
         <div className="header-section">
           <div className="header-title-buttons">
             <div className="header-title-only no-print" >
-              {formData.title} {goBack && (<span>(Preview)</span>)}
+            {formData.title} {goBack && (<span>(Preview)</span>)}
             </div>
 
           </div>

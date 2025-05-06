@@ -10,7 +10,7 @@
   .full-frame {
     display: flex;
     height: 792px;
-    padding: 36px;
+    
     flex-direction: column;
     align-items: flex-start;
     gap: 24px;
@@ -95,6 +95,9 @@
   .fixed-save-buttons {
     display: none !important;
   }
+  .fixed {
+    box-shadow: none !important;    
+  }
 
   /* Set page size and margins */
   @page {
@@ -109,10 +112,10 @@
     }
     @bottom-left {
       content: attr(data-form-id);
-      font-family: "BC Sans"; /* Change the font */
-      font-size: 12px;
-      font-weight: bold;
-    }
+      font-family: "BC Sans"; /* Change the font*/
+      font-size: 12px;      
+    }   
+
     @bottom-center {
       content: "";
     }
@@ -372,7 +375,18 @@
   .text-block {
     font-family: "Noto Sans" !important;
     font-size: 11px !important;
-    font-style: normal !important;
+    font-style: normal !important;   
+
+  }
+
+  .text-block h1 {
+    font-size: 13px !important;
+    font-weight: 700;    
+  }
+
+  .text-block h2 {
+    font-size: 11px !important;
+      font-weight: 700;
   }
 
   ol {
