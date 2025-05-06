@@ -6,6 +6,7 @@ import PreviewFormPage from "./PreviewFormPage";
 import PrintFormPage from "./PrintFormPage";
 import UnauthorizedPage from "./UnauthorizedPage";
 import ErrorPage from "./ErrorPage";
+import OfflineFormPage from "./OfflineFormPage";
 import "@carbon/styles/css/styles.css";
 import "@fontsource/noto-sans";
 
@@ -23,7 +24,7 @@ const App: React.FC = () => {
   const location = useLocation(); // Get the current route
 
   // Public Routes
-  const publicRoutes = ["/preview", "/unauthorized", "/printToPDF", "/error"];
+  const publicRoutes = ["offline", "/preview", "/unauthorized", "/printToPDF", "/error"];
 
   useEffect(() => {
     const initKeycloak = async () => {
@@ -58,6 +59,7 @@ const App: React.FC = () => {
         <Route path="/printToPDF" element={<PrintFormPage />} />
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
         <Route path="/error" element={<ErrorPage />} />
+        <Route path="/offline" element={<OfflineFormPage />} />
 
         {/* Protected Routes */}
         <Route path="/new" element={<PrivateRoute><NewFormPage /></PrivateRoute>} />

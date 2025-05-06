@@ -1,11 +1,14 @@
 # Use the official Node.js 20 image as the base image
-FROM node:20 as build
+FROM node:20 AS build
 
 # Set the working directory
 WORKDIR /app
 
 # Copy package.json and package-lock.json
-COPY package.json package-lock.json* ./
+COPY package.json ./
+
+# update package.lock if needed
+RUN npm install --package-lock-only
 
 # Install dependencies
 RUN npm ci
