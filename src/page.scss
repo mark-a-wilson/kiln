@@ -460,6 +460,7 @@ h1 {
   display: flex;
   flex-wrap: wrap; /* Allow wrapping of buttons on smaller screens */
   //justify-content: flex-end; /* Align buttons to the right */
+  margin-left: auto; /*Push button to right of header*/
   gap: 12px; /* Maintain spacing between buttons */
     button {
       @include button-style( null, null ,#2D2D2D);
