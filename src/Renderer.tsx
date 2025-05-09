@@ -1616,6 +1616,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
               accept: { 'application/json': ['.json'] },
             },
           ],
+          startIn:"downloads",
         };
         
         const handle = await (window as any).showSaveFilePicker(options);
