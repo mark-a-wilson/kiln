@@ -7,6 +7,7 @@ import { useHref } from 'react-router-dom';
 import CustomModal from "./common/CustomModal"; // Import the modal component
 import LoadingOverlay from "./common/LoadingOverlay";
 import { AuthenticationContext } from "./App";
+
 import {
   TextInput,
   Dropdown,
@@ -1592,6 +1593,53 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
     }
   };
 
+  const createFileNameForDownload = () => {
+    
+  const params = new URLSearchParams(window.location.search);
+  const attachmentId = params.get("attachmentId");  
+  return attachmentId ? formData.form_id+'_'+attachmentId : formData.form_id;
+  }
+
+  const handleSaveForOffline = async () => {
+    
+    const fileName = createFileNameForDownload();
+    console.log(fileName);
+    const jsonStr = JSON.stringify(createSavedData(), null, 2); // pretty print   
+    
+    if ('showSaveFilePicker' in window) {
+      try {
+        const options = {
+          suggestedName: fileName+'.json',
+          types: [
+            {
+              description: 'JSON Files',
+              accept: { 'application/json': ['.json'] },
+            },
+          ],
+        };
+        
+        const handle = await (window as any).showSaveFilePicker(options);
+        const writable = await handle.createWritable();
+        await writable.write(jsonStr);
+        await writable.close();
+        return;
+      } catch (err) {
+        console.warn('Save cancelled or failed:', err);
+      }
+    } else {
+
+      // Fallback for unsupported browsers
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName+'.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    }  
+   
+  }
+
   /*
   function for Print button. It uses pagedJs and browser's print functionality
   for printing PDF. Sets the title of document to formId
@@ -1697,7 +1745,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
       // Return the value as is if no formatting is required
       return value;
     });
-  };
+  };  
 
   return (
 
@@ -1724,6 +1772,9 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                   </Button>
                   <Button onClick={handleSaveAndClose} kind="secondary" className="no-print">
                     Save And Close
+                  </Button>
+                  <Button onClick={handleSaveForOffline} kind="secondary" className="no-print">
+                    Save For Offline
                   </Button>
 
                 </>
