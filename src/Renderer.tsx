@@ -1359,12 +1359,9 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
   const saveDataToICMApi = async () => {
     try {
       const saveDataICMEndpoint = API.saveICMData;
-      const queryParams = new URLSearchParams(window.location.search);
-      const params: { [key: string]: string | null } = {};
+      const state = window.history.state as { formParams?: Record<string,string> };
+      const params = state?.formParams ?? {};
       const token = keycloak?.token ?? null;
-      queryParams.forEach((value, key) => {
-        params[key] = value;
-      });
       const savedJson: Record<string, any> = {
         "attachmentId": params["attachmentId"],
         "OfficeName": params["OfficeName"],
@@ -1467,16 +1464,10 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
   const unlockICMFinalFlags = async () => {
     try {
 
-
-
-
       const unlockICMFinalEdpoint = API.unlockICMData;
-      const queryParams = new URLSearchParams(window.location.search);
-      const params: { [key: string]: string | null } = {};
+      const state = window.history.state as { formParams?: Record<string,string> };
+      const params = state?.formParams ?? {};
       const token = keycloak?.token ?? null;
-      queryParams.forEach((value, key) => {
-        params[key] = value;
-      });
 
       const body: Record<string, any> = { ...params };
 

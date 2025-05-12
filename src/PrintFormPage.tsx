@@ -11,16 +11,19 @@ const PrintFormPage: React.FC = () => {
   useEffect(() => {
 
     const queryParams = new URLSearchParams(window.location.search);
-    const params: { [key: string]: string | null } = {};
+    const params = Object.fromEntries(queryParams.entries()) as Record<string,string>;
 
-    // Iterate over all query parameters and store them in the params object
-    queryParams.forEach((value, key) => {
-      params[key] = value;
-    });
 
     if (params) {
 
       handleLoadSavedJson(params);
+
+      const cleanUrl = window.location.origin + window.location.pathname;
+      window.history.replaceState(
+        { formParams: params },   
+        document.title,
+        cleanUrl
+      );
     }
 
 
