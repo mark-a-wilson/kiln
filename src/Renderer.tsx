@@ -59,6 +59,7 @@ interface Item {
   listItems?: { value: string; text: string }[];
   groupItems?: { fields: Item[] }[];
   repeater?: boolean;
+  clear_button?: boolean;
   labelText: string;
   helperText?: string;
   value?: string;
@@ -471,6 +472,83 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
       };
     });
   };
+
+  /*
+   Function to clear the fields in a group.Triggered on Clear button.
+   This method will update the group states by removing the states of the fields 
+   and any validation errors
+  */
+  const handleClearGroup = (groupId: string) => {
+    // Clear the values in groupStates
+    setGroupStates(prev => {
+      const clearedGroup = prev[groupId].map(groupItem =>
+        Object.fromEntries(
+          Object.keys(groupItem).map(fieldId => [fieldId, ""])
+        ) as { [key: string]: string }
+      );
+      return { ...prev, [groupId]: clearedGroup };
+    });
+
+    // Clear any validation errors on those fields
+    setFormErrors(prev => {
+      const next = { ...prev };
+      const sampleItem = groupStates[groupId]?.[0] || {};
+      Object.keys(sampleItem).forEach(fieldId => {
+        next[fieldId] = null;
+      });
+      return next;
+    });
+  };
+
+  /*
+   Function to clear the fields in a container.Triggered on Clear button.
+   This method will clear all the fields and and a group if its nested within the container.
+   Also clear any validation errors.
+ */
+  const handleClearContainer = (containerId: string) => {
+    const containerDef = formData.data.items.find(
+      (it) => it.id === containerId && it.type === "container"
+    );
+    if (!containerDef || !containerDef.containerItems) {
+      return;
+    }
+    const items = containerDef.containerItems;
+
+    // Clear the value of the fields
+    setFormStates((prev) => {
+      const next = { ...prev };
+      for (const ci of items) {
+        if (ci.type !== "group") {
+          next[ci.id] = "";
+        }
+      }
+      return next;
+    });
+
+    // If any of those items are themselves groups, go to handleClearGroup
+    for (const ci of items) {
+      if (ci.type === "group") {
+        handleClearGroup(ci.id);
+      }
+    }
+
+    // Remove any validation errors 
+    setFormErrors((prev) => {
+      const next = { ...prev };
+      for (const ci of items) {
+        if (ci.type === "group") {
+          const sample = groupStates[ci.id]?.[0] || {};
+          for (const fid of Object.keys(sample)) {
+            next[fid] = null;
+          }
+        } else {
+          next[ci.id] = null;
+        }
+      }
+      return next;
+    });
+  };
+
 
   /*
   Function to verify whether the state of the element should be included in savedJson or not.
@@ -1236,6 +1314,17 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                 </div>)}
                 {!item.repeater && (<div className="group-item-header">
                   {item.label}
+                  {item.groupItems && item.groupItems.length == 1 && !item.repeater && item.clear_button && (mode == "edit" || goBack) && formData.readOnly != true && (
+                    <div className="custom-buttons-no-bg no-print">
+                      <Button
+                        kind="ghost"
+                        onClick={() => handleClearGroup(item.id)}
+                        className="no-print"
+                      >
+                        Clear
+                      </Button>
+                    </div>
+                  )}
                 </div>)}
                 <div
                   className="group-fields-grid"
@@ -1275,7 +1364,25 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
         return (
           <>
             <div key={item.id} className="common-container">
-              <div className="group-header">{item.label}</div>
+              <div className="group-header"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                {item.label}
+                {item.containerItems && item.clear_button && (mode == "edit" || goBack) && formData.readOnly != true && (
+                  <div className="custom-buttons-no-bg no-print">
+                    <Button
+                      kind="ghost"
+                      onClick={() => handleClearContainer(item.id)}
+                      className="no-print"
+                    >
+                      Clear
+                    </Button>
+                  </div>
+                )}</div>
               {item.containerItems?.filter(containerItem => !isHidden(containerItem)).map((containerItem) => (
                 <div
                   key={containerItem.id}
@@ -1360,12 +1467,9 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
   const saveDataToICMApi = async () => {
     try {
       const saveDataICMEndpoint = API.saveICMData;
-      const queryParams = new URLSearchParams(window.location.search);
-      const params: { [key: string]: string | null } = {};
+      const state = window.history.state as { formParams?: Record<string,string> };
+      const params = state?.formParams ?? {};
       const token = keycloak?.token ?? null;
-      queryParams.forEach((value, key) => {
-        params[key] = value;
-      });
       const savedJson: Record<string, any> = {
         "attachmentId": params["attachmentId"],
         "OfficeName": params["OfficeName"],
@@ -1468,16 +1572,10 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
   const unlockICMFinalFlags = async () => {
     try {
 
-
-
-
       const unlockICMFinalEdpoint = API.unlockICMData;
-      const queryParams = new URLSearchParams(window.location.search);
-      const params: { [key: string]: string | null } = {};
+      const state = window.history.state as { formParams?: Record<string,string> };
+      const params = state?.formParams ?? {};
       const token = keycloak?.token ?? null;
-      queryParams.forEach((value, key) => {
-        params[key] = value;
-      });
 
       const body: Record<string, any> = { ...params };
 
