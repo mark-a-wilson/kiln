@@ -1691,11 +1691,11 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
     }
   };
 
-  const createFileNameForDownload = () => {
-    
-  const params = new URLSearchParams(window.location.search);
-  const attachmentId = params.get("attachmentId");  
-  return attachmentId ? formData.form_id+'_'+attachmentId : formData.form_id;
+  const createFileNameForDownload = () => {  
+    const state = window.history.state as { formParams?: Record<string,string> };
+    const params = state?.formParams ?? {};  
+    const attachmentId = params["attachmentId"];  
+    return attachmentId ? formData.form_id+'_'+attachmentId : formData.form_id;
   }
 
   const handleSaveForOffline = async () => {
