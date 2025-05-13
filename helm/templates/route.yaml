@@ -1,14 +1,17 @@
-# apiVersion: route.openshift.io/v1
-# kind: Route
-# metadata:
-#   name: kiln
-#   labels:
-#     app.kubernetes.io/name: kiln
-# spec:
-#   to:
-#     kind: Service
-#     name: kiln
-#   port:
-#     targetPort: 8080
-#   tls:
-#     termination: edge
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: kiln-route
+  annotations:
+    haproxy.router.openshift.io/ip_whitelist: 142.22.0.0/15 142.24.0.0/13 142.32.0.0/14 142.36.0.0/16
+  labels:
+    app.kubernetes.io/name: kiln
+spec:
+  host: kiln.d70240-dev.svc.cluster.local
+  to:
+    kind: Service
+    name: kiln
+  port:
+    targetPort: 8080
+  tls:
+    termination: edge
