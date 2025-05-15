@@ -1498,8 +1498,10 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
         console.log("Result ", result);
         return "success";
       } else {
-        console.error("Error:", response.statusText);
-        return "failed";
+        const errorData = await response.json(); // Parse error response        
+        //throw new Error(errorData.error || "Something went wrong");
+        console.error("Error:",errorData.error);
+        return errorData?.error || "Error saving form. Please try again.";
       }
     } catch (error) {
       console.error("Error:", error);
@@ -1620,13 +1622,13 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
     setModalOpen(false); // Ensure modal is closed when a new request starts
     try {
       if (validateAllFields()) {
-        const returnMessage = saveDataToICMApi();
-        if ((await returnMessage) === "success") {
+        const returnMessage =await saveDataToICMApi();
+        if ((returnMessage) === "success") {
           setModalTitle("Success ✅");
           setModalMessage("Form Saved Successfully.");
         } else {
           setModalTitle("Error ❌ ");
-          setModalMessage("Error saving form. Please try again.");
+          setModalMessage(returnMessage);
         }
         setModalOpen(true);
       } else {
@@ -1656,8 +1658,8 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
     setModalOpen(false); // Ensure modal is closed when a new request starts
     try {
       if (validateAllFields()) {
-        const returnMessage = saveDataToICMApi();
-        if ((await returnMessage) === "success") {
+        const returnMessage = await saveDataToICMApi();
+        if ((returnMessage) === "success") {
           const unlockMessage = unlockICMFinalFlags();
           if ((await unlockMessage) == "success") {
             isFormCleared.current = true;
@@ -1672,7 +1674,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
           }
         } else {
           setModalTitle("Error ❌");
-          setModalMessage("Error saving form. Please try again.");
+          setModalMessage(returnMessage);
           setModalOpen(true);
         }
       } else {
