@@ -15,22 +15,20 @@ const NewFormPage: React.FC = () => {
 
   useEffect(() => {
 
-    const queryParams = new URLSearchParams(window.location.search);
-    const params = Object.fromEntries(queryParams.entries()) as Record<string,string>;
+    const { search, pathname } = window.location;
 
-
-    if (params) {
-
+    if (search) {
+      const params = Object.fromEntries(new URLSearchParams(search).entries()) as Record<string,string>;
+      sessionStorage.setItem("formParams", JSON.stringify(params));
       handleGenerateTemplate(params);
-      
-      const cleanUrl = window.location.origin + window.location.pathname;
-      window.history.replaceState(
-        { formParams: params },   
-        document.title,
-        cleanUrl
-      );
-
+      window.history.replaceState({}, document.title, pathname);
     }
+    else {
+      const stored = sessionStorage.getItem("formParams");
+      if (stored) {
+        const params = JSON.parse(stored) as Record<string,string>;
+        handleGenerateTemplate(params);
+      }}
 
 
   }, []);
