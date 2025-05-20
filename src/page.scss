@@ -1,0 +1,468 @@
+:root {
+  --border-color: #ccc;
+  --border-width: 1px solid;
+  --fixed-bg-color: #fff;
+  --box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --z-index-top: 1000;
+  --dark-red: #b30000;
+  --default-font-family: "BC Sans", sans-serif;
+  --default-font-size: 16px;
+  --outer-padding: 0px 60px;
+  --label-font-size: 16px;
+  --label-font-weight: bold;
+  --label-font-style: normal;
+}
+
+// Use CSS variables in SCSS
+$border-color: var(--border-color);
+$border-width: var(--border-width);
+$fixed-bg-color: var(--fixed-bg-color);
+$box-shadow: var(--box-shadow);
+$z-index-top: var(--z-index-top);
+$dark-red: var(--dark-red);
+$default-font-family: var(--default-font-family);
+$default-font-size: var(--default-font-size);
+$outer-padding: var(--outer-padding);
+$label-font-size: var(--label-font-size);
+$label-font-weight:var(--label-font-weight);
+$label-font-style: var(--label-font-style);
+
+// Mixins
+@mixin button-style($bg-color: null, $border-color : null, $text-color) {
+  display: flex;
+  height: 40px;
+  padding:  6px 12px;
+  justify-content: center;
+  align-items: center;
+  gap:  8px;  
+  @if $bg-color != null {
+    background: $bg-color;
+  }
+  @if $border-color != null {
+    border-radius:  4px;  
+    border: 1px solid $border-color;
+  }
+  
+  color: $text-color;
+  text-align: center;
+  font-family: $default-font-family;
+  font-size: $default-font-size;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 27.008px; /* 168.8% */
+}
+html, body {
+  font-family: $default-font-family, sans-serif;
+}
+
+// Styles
+.group-container {
+  //border: 1px solid $border-color;
+  //padding: 15px;
+  margin: 0px 0;
+  //border-radius: 5px;
+  margin-bottom: 32px;
+}
+
+.common-container {
+  border: 1px solid $border-color;
+  padding: 15px;
+  margin: 0px 0;
+  border-radius: 5px;
+}
+.cds--row {
+  display: grid !important; /* Grid Layout for items */
+  grid-template-columns: repeat(4, 1fr) !important;
+  //gap: 20px !important; 
+}
+
+.group-fields-grid {
+  display: grid !important; /*  Grid Layout for items in Groups */
+  grid-template-columns: repeat(4, 1fr) !important;
+  //gap: 15px !important;
+  padding: 16px;
+}
+
+.group-item-container {
+  border: $border-width $border-color;
+  //padding: 15px;
+  //margin: 20px 0;
+  margin-bottom: 20px;
+  border-radius: 5px;
+  font-family: "BC Sans";
+font-size: 30px;
+font-style: normal;
+font-weight: 700;
+line-height: 125%; /* 40px */
+}
+
+.fixed {
+  position: sticky; /* Fix the header at the top */
+  top: 0; /* Position it at the very top */
+  left: 0;
+  width: 100%; /* Make it span the entire width */
+  z-index: 1000; /* Ensure it stays above other content */
+  //background-color: #fff; /* Optional: Set a background color */
+  //box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: Add a shadow */
+  flex-wrap: wrap; 
+  background: $fixed-bg-color;
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+}
+.scrollable-content {
+  margin-top: 0; 
+}
+
+.fixed-save-buttons,
+.fixed-preview-buttons {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: $fixed-bg-color;
+  padding: 10px 20px;
+  box-shadow: $box-shadow;
+  display: flex;
+  z-index: $z-index-top;
+
+  &.fixed-save-buttons {
+    justify-content: center;
+
+    button {
+      margin: 0 10px;
+    }
+  }
+
+  &.fixed-preview-buttons {
+    justify-content: space-between;
+
+    Button {
+      margin-left: auto; /* Push the button to the right */
+    }
+  }
+}
+
+.content-wrapper {
+  //padding-top: 60px; /* Adjust based on the height of the fixed header */
+  display: flex;
+width: 100%;
+padding: $outer-padding;
+flex-direction: column;
+//align-items: flex-start;
+gap: 42px;
+max-width: 836px;
+margin: auto
+}
+
+.required-asterisk {
+  color: $dark-red;
+  font-weight: bold;
+  margin-left: 2px;
+}
+
+.override-font {
+  padding: 10px 0px;
+  font: initial;
+  font-weight: normal;
+  font-family: $default-font-family;
+  font-size: $default-font-size;
+}
+
+.header-section {
+  //position: sticky;
+  display: flex;
+  width: 100%;
+  padding: $outer-padding;  
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 10px;  
+  background: $fixed-bg-color;
+  //overflow: hidden; 
+  //border-bottom: 1px solid #C8C8C8;    
+  //box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+  max-width: 836px;
+  margin: auto;
+  min-height: 70px;
+  height: auto;
+  .header-image,
+  .header-title-buttons {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;   
+  } 
+
+  .header-image-only{
+    align-items: left;
+  }
+  
+  .header-buttons-only {
+    /* display: flex;
+    align-items: right;
+    gap: 12px;
+ */
+
+  display: flex;
+  flex-wrap: wrap; /* Allow wrapping of buttons on smaller screens */
+  justify-content: flex-end; /* Align buttons to the right */
+  gap: 12px; /* Maintain spacing between buttons */
+    button {
+      @include button-style( $fixed-bg-color, #353433 ,#2D2D2D)
+      ;
+    }
+  } 
+   
+}
+
+.header-title-only { 
+
+  color: #2D2D2D;
+/* Web/Headings/Heading 1 */
+font-family: $default-font-family;
+font-size: 36px;
+font-style: normal;
+font-weight: 700;
+line-height: 125%; /* 45px */
+margin-top: 40px;
+margin-bottom: 25px;
+}
+.header-form-id {
+  display: flex;  
+  background: #ECEAE8;
+  color: #525252;
+  font-family: "BC Sans";
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 150%; /* 24px */
+  letter-spacing: 0.32px;
+  width: 100%;  
+  flex-wrap: wrap;  
+  gap: 10px; 
+  margin: auto;
+  min-height: 70px;
+  height: auto;
+} 
+
+.form-id-section { 
+  display: flex;
+  width: 100%;
+  padding: $outer-padding;  
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 10px;
+  max-width: 836px;
+  margin: auto;  
+}
+
+
+.group-header {
+  color: #000;
+font-family: $default-font-family;
+font-size: 28px;
+font-style: normal;
+font-weight: 700;
+line-height: normal;
+margin-bottom: 15px;
+}
+
+.group-item-header {
+/*   color: #000;
+font-family: $default-font-family;
+font-size: 20px;
+font-style: normal;
+font-weight: 700;
+line-height: normal;
+margin-bottom: 15px; */
+display: flex;
+height: 58px;
+padding: 12px 24px;
+justify-content: space-between;
+align-items: center;
+align-self: stretch;
+background: #F2F2F2;
+}
+
+.text-block {
+  padding: 10px 0px;
+  font: initial;
+  font-weight: normal;
+  font-family: $default-font-family;
+  font-size: $default-font-size; 
+
+
+  // Nested styles for h1
+  h1 {
+    font-size: 32px;
+    font-weight: 700;    
+  }
+  
+
+  // Nested styles for paragraphs
+  p {
+    font-size: 16px;
+    //color: $text-color;
+    line-height: 1.6;
+  }
+
+  // Nested styles for links
+  a {
+    //color: $link-color;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.text-block h1 {
+  font-size: 32px;
+  font-weight: 700;    
+}
+.text-block h2 {
+  font-size: 28px;
+    font-weight: 700;
+}
+
+h1 {
+  font-size: 36px;
+  font-weight: 700;    
+}
+
+.field-container {
+  margin-bottom: 20px !important;
+}
+
+@media (max-width: 768px) {
+  .fixed {
+    flex-direction: column; /* Stack elements vertically on smaller screens */
+    align-items: center; /* Center align on smaller screens */
+  }
+  @media not print {
+  .cds--row {
+    display: flex !important; /* Switch to flex layout for mobile */
+    flex-direction: column !important; /* Stack elements vertically on smaller screens */
+    gap: 10px !important; /* Add spacing between items */
+  }
+
+  .group-fields-grid {
+    display: flex !important; /*Switch to flex layout for mobile  */
+    flex-direction: column !important; /* Stack elements vertically on smaller screens */
+    //gap: 10px !important; /* Add spacing between items */
+  }
+}
+}
+
+.cds--form__helper-text {
+  color: #525252; /* Bootstrap's default grey shade */
+  font-size:1rem
+}
+
+.cds--label {
+  font-weight: $label-font-weight;
+  font-size: $label-font-size;
+  font-style: $label-font-style;
+}
+
+.print-only {
+  display: hidden;
+}
+
+.hidden-on-screen {
+  display: none; /* Hide on screen */
+}
+.cds--toggle__label-text {
+  padding: 10px 0px;
+  font: initial;
+  font-weight: normal;
+  font-family: $default-font-family;
+  font-size: $default-font-size;
+  color: #000; 
+}
+
+.cds--text-input,.cds--dropdown ,.cds--date-picker__input,.cds--text-area {
+
+  border:1px solid #8D8D8D;
+  background:none
+
+}
+
+.cds--text-input-wrapper--readonly .cds--text-input,
+.cds--date-picker__input[readonly] ,
+.cds--dropdown--readonly .cds--list-box__field,
+.cds--text-area__wrapper--readonly .cds--text-area{
+  background:#f4f4f4;
+  border:none
+}
+
+.cds--checkbox-label-text {
+  font-size: 16px;
+}
+.custom-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 16px;
+}
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;  /* Centers content vertically */
+  justify-content: center; /* Centers content horizontally */
+  z-index: 9999;
+  backdrop-filter: blur(8px);
+}
+
+.loading-content {
+  display: flex;
+  flex-direction: column; /* Stack items vertically */
+  align-items: center; /* Center horizontally */
+  justify-content: center; /* Center vertically */
+  gap: 10px; /* Space between loader and message */
+}
+
+.loading-message {
+  font-size: 18px;
+  font-weight: bold;
+  //color: #0043ce;
+  text-align: center; /* Ensure text is centered */
+}
+
+.custom-buttons-only {
+  display: flex;
+  flex-wrap: wrap; /* Allow wrapping of buttons on smaller screens */
+  //justify-content: flex-end; /* Align buttons to the right */
+  gap: 12px; /* Maintain spacing between buttons */
+    button {
+      @include button-style( null, #353433 ,#2D2D2D);
+    }
+}
+
+.custom-buttons-only {
+  display: flex;
+  flex-wrap: wrap; /* Allow wrapping of buttons on smaller screens */
+  //justify-content: flex-end; /* Align buttons to the right */
+  gap: 12px; /* Maintain spacing between buttons */
+    button {
+      @include button-style( null, #353433 ,#2D2D2D);
+    }
+}
+
+.custom-buttons-no-bg {
+  display: flex;
+  flex-wrap: wrap; /* Allow wrapping of buttons on smaller screens */
+  //justify-content: flex-end; /* Align buttons to the right */
+  margin-left: auto; /*Push button to right of header*/
+  gap: 12px; /* Maintain spacing between buttons */
+    button {
+      @include button-style( null, null ,#2D2D2D);
+    }
+}
