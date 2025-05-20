@@ -17,7 +17,20 @@ import { initializeKeycloak } from "./keycloak";
 import { PrivateRoute } from "./PrivateRoute";
 
 export const AuthenticationContext = createContext<any>(null);
-
+// Extend the Window interface for TypeScript compatibility
+interface LaunchParams{
+  targetURL: string;
+ files: Array <FileSystemFileHandle>;
+}
+interface LaunchQueue {
+ launchParams: LaunchParams;
+ setConsumer(consumer: (launchParams: LaunchParams) => Promise<void> | void): void;
+}
+declare global {
+ interface Window {
+   launchQueue?: LaunchQueue;
+ }
+}
 const App: React.FC = () => {
   const [keycloak, setKeycloak] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -27,6 +40,21 @@ const App: React.FC = () => {
   const publicRoutes = ["offline", "/preview", "/unauthorized", "/printToPDF", "/error"];
 
   useEffect(() => {
+    if (window.launchQueue  && ('launchQueue') in window ) {
+      console.log("LaunchQueue available, setting consumer...", window.launchQueue);
+      window.launchQueue.setConsumer(async (launchParams: LaunchParams) => {
+        console.log("Consumer triggered:", launchParams);
+        if (launchParams.files && launchParams.files.length > 0) {
+          const fileHandle = launchParams.files[0];
+          const file = await fileHandle.getFile();
+          console.log("File is ", file);
+        } else {
+          console.log("No files found in launchParams.");
+        }
+      });
+    } else {
+      console.log("window.launchQueue not available.");
+    }
     const initKeycloak = async () => {
       try {
         const _keycloak = await initializeKeycloak();
