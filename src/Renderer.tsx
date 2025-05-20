@@ -103,6 +103,7 @@ interface Template {
   title: string;
   readOnly?: boolean;
   form_id: string;
+  footer: string;
   data: {
     items: Item[];
   };
@@ -604,6 +605,11 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
       return true;
     }
 
+  }
+
+  const executeFooter = (footer: string) => {
+    const footerFunction = new Function("formStates", "groupStates", footer);
+    return footerFunction(formStates, groupStates);
   }
 
   const executeCalculatedValueAndSetIfExists = (item: Item, groupId: string | null = null,
@@ -1723,10 +1729,10 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
 
       setIsPrinting(true); // Force printing mode
       document.body.offsetHeight; // Force reflow
-      const extraFooterInfo = formStates["footerExtraInfo"];
+      const extraFooterInfo = executeFooter(formData.footer);
       const formFooter = formData?.form_id && formData?.title
-  ? formData.form_id + " - " + formData.title + (extraFooterInfo ? " - " + extraFooterInfo : "")
-  : "Unknown Form ID";
+        ? formData.form_id + " - " + formData.title + (extraFooterInfo ? " - " + extraFooterInfo : "")
+        : "Unknown Form ID";
     
         // Set these values as attributes on the <body> tag
       document.documentElement.setAttribute("data-form-id", formFooter);
