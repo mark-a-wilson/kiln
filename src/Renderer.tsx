@@ -230,7 +230,10 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
     const handleClose = (event: BeforeUnloadEvent) => {
       if (isFormCleared.current === false) {
         event.preventDefault();
-        unlockICMFinalFlags();
+        if (mode === "edit" || mode === "generate")
+        {
+          unlockICMFinalFlags();
+        }
       }
     }
     window.addEventListener("beforeunload", handleClose);
@@ -1878,6 +1881,13 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
 
                 </>
               )}
+              {mode=="offline"&& formData.readOnly != true && (
+                <>
+                <Button onClick={handleSaveForOffline} kind="secondary" className="no-print">
+                    Save
+                  </Button>
+                </>
+                )}
               {goBack && (
                 <Button onClick={goBack} kind="secondary" className="no-print">
                   Back

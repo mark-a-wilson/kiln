@@ -23,6 +23,10 @@ export default defineConfig({
       "display": "standalone",
       "id": "/offline",
       "scope": "/offline",
+      "launch_handler": {
+    "client_mode": "focus-existing"
+},
+
       "start_url": "/offline",
       "short_name": "Kiln offline",
       "description": "testing vite pwa",
