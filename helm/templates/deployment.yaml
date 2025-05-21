@@ -17,7 +17,10 @@ spec:
       containers:
         - name: kiln
           image: "{{ .Values.image.tag }}"
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
           resources: {{- toYaml .Values.resources | nindent 12 }}
       restartPolicy: Always
+  strategy:
+    type: Recreate
