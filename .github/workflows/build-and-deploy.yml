@@ -157,12 +157,18 @@ jobs:
       - name: Run container
         run: |
           docker run -d --name kiln -p 8080:8080 ${{ needs.build_for_e2e.outputs.image_tag }}
+      
+      - name: List running containers
+        run: docker ps -a
+
+      - name: Show container logs if not running
+        run: docker logs kiln || true
 
       - name: Wait for frontend root and preview page
         uses: nick-fields/retry@v2
         with:
-          timeout_seconds: 90
-          max_attempts: 25
+          timeout_seconds: 60
+          max_attempts: 10
           command: |
             curl -f http://localhost:8080 && \
             curl -f http://localhost:8080/preview
