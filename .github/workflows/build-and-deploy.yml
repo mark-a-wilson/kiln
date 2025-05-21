@@ -158,11 +158,14 @@ jobs:
         run: |
           docker run -d --name kiln -p 8080:8080 ${{ needs.build_for_e2e.outputs.image_tag }}
 
-      - name: Wait for frontend to be available
-        uses: jakejarvis/wait-action@v0.1.0
+      - name: Wait for frontend root and preview page
+        uses: nick-fields/retry@v2
         with:
-          url: http://localhost:8080
-          timeout: 90
+          timeout_seconds: 90
+          max_attempts: 25
+          command: |
+            curl -f http://localhost:8080 && \
+            curl -f http://localhost:8080/preview
 
       - name: Install Node.js
         uses: actions/setup-node@v4
