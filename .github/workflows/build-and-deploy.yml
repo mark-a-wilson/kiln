@@ -158,13 +158,7 @@ jobs:
         run: |
           docker run -d --name kiln -p 8080:8080 ${{ needs.build_for_e2e.outputs.image_tag }}
       
-      - name: List running containers
-        run: docker ps -a
-
-      - name: Show container logs if not running
-        run: docker logs kiln || true
-
-      - name: Wait for frontend root and preview page
+      - name: Wait for frontend 
         uses: nick-fields/retry@v2
         with:
           timeout_seconds: 60
