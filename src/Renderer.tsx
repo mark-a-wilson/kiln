@@ -1472,8 +1472,8 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
   const saveDataToICMApi = async () => {
     try {
       const saveDataICMEndpoint = API.saveICMData;
-      const state = window.history.state as { formParams?: Record<string,string> };
-      const params = state?.formParams ?? {};
+      const state = sessionStorage.getItem("formParams");
+      const params = state ? (JSON.parse(state) as Record<string,string>) : {};
       const token = keycloak?.token ?? null;
       const savedJson: Record<string, any> = {
         "attachmentId": params["attachmentId"],
@@ -1580,8 +1580,8 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
     try {
 
       const unlockICMFinalEdpoint = API.unlockICMData;
-      const state = window.history.state as { formParams?: Record<string,string> };
-      const params = state?.formParams ?? {};
+      const state = sessionStorage.getItem("formParams");
+      const params = state ? (JSON.parse(state) as Record<string,string>) : {};
       const token = keycloak?.token ?? null;
 
       const body: Record<string, any> = { ...params };
