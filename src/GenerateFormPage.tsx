@@ -56,7 +56,7 @@ const PrintFormPage: React.FC = () => {
     }
   };
 
-  return <Presenter data={jsonContent} mode="preview" />;
+  return <Presenter data={jsonContent} mode="generate" />;
 };
 
 export default PrintFormPage;
