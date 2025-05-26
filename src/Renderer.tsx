@@ -123,6 +123,7 @@ interface SavedData {
   data: SavedFieldData;
   form_definition: Template;
   metadata: {};
+  params?:{};
 }
 
 type GroupState = { [key: string]: string }[]; // New type definition
@@ -1515,6 +1516,42 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
     }
   };
 
+  const saveDataToICMForGenerate = async () => {
+    try {
+      const saveDataICMEndpoint = API.saveICMData;
+     
+      const savedJson: Record<string, any> = {
+        "attachmentId": data.params.attachmentId,
+        "OfficeName": data.params.OfficeName,
+        "username": data.params.username,
+        //"username": "test",
+        "savedForm": JSON.stringify(createSavedData())
+      };
+
+      
+
+      const response = await fetch(saveDataICMEndpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(savedJson),
+      });
+      if (response.ok) {
+        const result = await response.json();
+        console.log("Result ", result);
+        return "success";
+      } else {
+        const errorData = await response.json(); // Parse error response        
+        //throw new Error(errorData.error || "Something went wrong");
+        console.error("Error:",errorData.error);
+        return errorData?.error || "Error saving form. Please try again.";
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      return "failed";
+    }
+  };
 
   /*
   Function for validating all fields before saving . This function will iterate through
@@ -1805,6 +1842,31 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
     });
   };
 
+  const handleGenerate = async () => {
+    setIsLoading(true); // Show loading overlay
+    setModalOpen(false); // Ensure modal is closed when a new request starts
+    try {      
+        const returnMessage =await saveDataToICMForGenerate();
+        if ((returnMessage) === "success") {
+          setModalTitle("Success ✅");
+          setModalMessage("Form Saved Successfully.");
+        } else {
+          setModalTitle("Error ❌ ");
+          setModalMessage(returnMessage);
+        }
+        setModalOpen(true);
+      
+    } catch (error) {
+      setModalTitle("Error ❌ ");
+      setModalMessage("Error saving form. Please try again.");
+      setModalOpen(true);
+    }
+    finally {
+      setIsLoading(false); // Hide loading overlay once request completes
+    }
+
+  };
+
   return (
 
     <div ref={pdfContainerRef} className="full-frame">
@@ -1828,10 +1890,17 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                   <Button onClick={handleSave} kind="secondary" className="no-print">
                     Save
                   </Button>
-                  <Button onClick={handleSaveAndClose} kind="secondary" className="no-print">
+                  <Button onClick={handleSaveAndClose} kind="secondary" className="no-print" id="saveAndClose">
                     Save And Close
                   </Button>
 
+                </>
+              )}
+              {mode == "generate" && (
+                <>
+                  <Button onClick={handleGenerate} kind="secondary" className="no-print" id="generate">
+                    Generate
+                  </Button>                  
                 </>
               )}
               {goBack && (

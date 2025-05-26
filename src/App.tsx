@@ -3,7 +3,7 @@ import NewFormPage from "./NewFormPage";
 import EditFormPage from "./EditFormPage";
 import ViewFormPage from "./ViewFormPage";
 import PreviewFormPage from "./PreviewFormPage";
-import PrintFormPage from "./PrintFormPage";
+import GenerateFormPage from "./GenerateFormPage";
 import UnauthorizedPage from "./UnauthorizedPage";
 import ErrorPage from "./ErrorPage";
 import "@carbon/styles/css/styles.css";
@@ -55,7 +55,7 @@ const App: React.FC = () => {
       <Routes>
         {/* Public Routes */}
         <Route path="/preview" element={<PreviewFormPage />} />
-        <Route path="/printToPDF" element={<PrintFormPage />} />
+        <Route path="/generateForm" element={<GenerateFormPage />} />
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
         <Route path="/error" element={<ErrorPage />} />
 
