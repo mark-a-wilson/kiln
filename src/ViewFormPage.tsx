@@ -17,19 +17,20 @@ const ViewFormPage: React.FC = () => {
 
   useEffect(() => {
 
-    const queryParams = new URLSearchParams(window.location.search);
-    const params: { [key: string]: string | null } = {};
+    const { search, pathname } = window.location;
 
-    // Iterate over all query parameters and store them in the params object
-    queryParams.forEach((value, key) => {
-      params[key] = value;
-    });
-
-    if (params) {
-
+    if (search) {
+      const params = Object.fromEntries(new URLSearchParams(search).entries()) as Record<string,string>;
+      sessionStorage.setItem("formParams", JSON.stringify(params));
       handleLoadTemplate(params);
+      window.history.replaceState({}, document.title, pathname);
     }
-
+    else {
+      const stored = sessionStorage.getItem("formParams");
+      if (stored) {
+        const params = JSON.parse(stored) as Record<string,string>;
+        handleLoadTemplate(params);
+      }}
 
   }, []);
 

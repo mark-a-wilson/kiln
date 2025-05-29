@@ -58,6 +58,7 @@ interface Item {
   listItems?: { value: string; text: string }[];
   groupItems?: { fields: Item[] }[];
   repeater?: boolean;
+  clear_button?: boolean;
   labelText: string;
   helperText?: string;
   value?: string;
@@ -102,6 +103,7 @@ interface Template {
   title: string;
   readOnly?: boolean;
   form_id: string;
+  footer: string;
   data: {
     items: Item[];
   };
@@ -121,6 +123,7 @@ interface SavedData {
   data: SavedFieldData;
   form_definition: Template;
   metadata: {};
+  params?:{};
 }
 
 type GroupState = { [key: string]: string }[]; // New type definition
@@ -474,6 +477,83 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
   };
 
   /*
+   Function to clear the fields in a group.Triggered on Clear button.
+   This method will update the group states by removing the states of the fields 
+   and any validation errors
+  */
+  const handleClearGroup = (groupId: string) => {
+    // Clear the values in groupStates
+    setGroupStates(prev => {
+      const clearedGroup = prev[groupId].map(groupItem =>
+        Object.fromEntries(
+          Object.keys(groupItem).map(fieldId => [fieldId, ""])
+        ) as { [key: string]: string }
+      );
+      return { ...prev, [groupId]: clearedGroup };
+    });
+
+    // Clear any validation errors on those fields
+    setFormErrors(prev => {
+      const next = { ...prev };
+      const sampleItem = groupStates[groupId]?.[0] || {};
+      Object.keys(sampleItem).forEach(fieldId => {
+        next[fieldId] = null;
+      });
+      return next;
+    });
+  };
+
+  /*
+   Function to clear the fields in a container.Triggered on Clear button.
+   This method will clear all the fields and and a group if its nested within the container.
+   Also clear any validation errors.
+ */
+  const handleClearContainer = (containerId: string) => {
+    const containerDef = formData.data.items.find(
+      (it) => it.id === containerId && it.type === "container"
+    );
+    if (!containerDef || !containerDef.containerItems) {
+      return;
+    }
+    const items = containerDef.containerItems;
+
+    // Clear the value of the fields
+    setFormStates((prev) => {
+      const next = { ...prev };
+      for (const ci of items) {
+        if (ci.type !== "group") {
+          next[ci.id] = "";
+        }
+      }
+      return next;
+    });
+
+    // If any of those items are themselves groups, go to handleClearGroup
+    for (const ci of items) {
+      if (ci.type === "group") {
+        handleClearGroup(ci.id);
+      }
+    }
+
+    // Remove any validation errors 
+    setFormErrors((prev) => {
+      const next = { ...prev };
+      for (const ci of items) {
+        if (ci.type === "group") {
+          const sample = groupStates[ci.id]?.[0] || {};
+          for (const fid of Object.keys(sample)) {
+            next[fid] = null;
+          }
+        } else {
+          next[ci.id] = null;
+        }
+      }
+      return next;
+    });
+  };
+
+
+  /*
   Function to verify whether the state of the element should be included in savedJson or not.
   We check whether the field is visible . If not we check whether saveOnSubmit condition is 
   set to be true for the element . If the field is not visible (hidden) and if the
@@ -528,6 +608,11 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
       return true;
     }
 
+  }
+
+  const executeFooter = (footer: string) => {
+    const footerFunction = new Function("formStates", "groupStates", footer);
+    return footerFunction(formStates, groupStates);
   }
 
   const executeCalculatedValueAndSetIfExists = (item: Item, groupId: string | null = null,
@@ -1237,6 +1322,17 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                 </div>)}
                 {!item.repeater && (<div className="group-item-header">
                   {item.label}
+                  {item.groupItems && item.groupItems.length == 1 && !item.repeater && item.clear_button && (mode == "edit" || goBack) && formData.readOnly != true && (
+                    <div className="custom-buttons-no-bg no-print">
+                      <Button
+                        kind="ghost"
+                        onClick={() => handleClearGroup(item.id)}
+                        className="no-print"
+                      >
+                        Clear
+                      </Button>
+                    </div>
+                  )}
                 </div>)}
                 <div
                   className="group-fields-grid"
@@ -1276,7 +1372,25 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
         return (
           <>
             <div key={item.id} className="common-container">
-              <div className="group-header">{item.label}</div>
+              <div className="group-header"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                {item.label}
+                {item.containerItems && item.clear_button && (mode == "edit" || goBack) && formData.readOnly != true && (
+                  <div className="custom-buttons-no-bg no-print">
+                    <Button
+                      kind="ghost"
+                      onClick={() => handleClearContainer(item.id)}
+                      className="no-print"
+                    >
+                      Clear
+                    </Button>
+                  </div>
+                )}</div>
               {item.containerItems?.filter(containerItem => !isHidden(containerItem)).map((containerItem) => (
                 <div
                   key={containerItem.id}
@@ -1361,12 +1475,9 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
   const saveDataToICMApi = async () => {
     try {
       const saveDataICMEndpoint = API.saveICMData;
-      const queryParams = new URLSearchParams(window.location.search);
-      const params: { [key: string]: string | null } = {};
+      const state = sessionStorage.getItem("formParams");
+      const params = state ? (JSON.parse(state) as Record<string,string>) : {};
       const token = keycloak?.token ?? null;
-      queryParams.forEach((value, key) => {
-        params[key] = value;
-      });
       const savedJson: Record<string, any> = {
         "attachmentId": params["attachmentId"],
         "OfficeName": params["OfficeName"],
@@ -1396,8 +1507,10 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
         console.log("Result ", result);
         return "success";
       } else {
-        console.error("Error:", response.statusText);
-        return "failed";
+        const errorData = await response.json(); // Parse error response        
+        //throw new Error(errorData.error || "Something went wrong");
+        console.error("Error:",errorData.error);
+        return errorData?.error || "Error saving form. Please try again.";
       }
     } catch (error) {
       console.error("Error:", error);
@@ -1405,6 +1518,42 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
     }
   };
 
+  const saveDataToICMForGenerate = async () => {
+    try {
+      const saveDataICMEndpoint = API.saveICMData;
+     
+      const savedJson: Record<string, any> = {
+        "attachmentId": data.params.attachmentId,
+        "OfficeName": data.params.OfficeName,
+        "username": data.params.username,
+        //"username": "test",
+        "savedForm": JSON.stringify(createSavedData())
+      };
+
+      
+
+      const response = await fetch(saveDataICMEndpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(savedJson),
+      });
+      if (response.ok) {
+        const result = await response.json();
+        console.log("Result ", result);
+        return "success";
+      } else {
+        const errorData = await response.json(); // Parse error response        
+        //throw new Error(errorData.error || "Something went wrong");
+        console.error("Error:",errorData.error);
+        return errorData?.error || "Error saving form. Please try again.";
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      return "failed";
+    }
+  };
 
   /*
   Function for validating all fields before saving . This function will iterate through
@@ -1469,16 +1618,10 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
   const unlockICMFinalFlags = async () => {
     try {
 
-
-
-
       const unlockICMFinalEdpoint = API.unlockICMData;
-      const queryParams = new URLSearchParams(window.location.search);
-      const params: { [key: string]: string | null } = {};
+      const state = sessionStorage.getItem("formParams");
+      const params = state ? (JSON.parse(state) as Record<string,string>) : {};
       const token = keycloak?.token ?? null;
-      queryParams.forEach((value, key) => {
-        params[key] = value;
-      });
 
       const body: Record<string, any> = { ...params };
 
@@ -1524,13 +1667,13 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
     setModalOpen(false); // Ensure modal is closed when a new request starts
     try {
       if (validateAllFields()) {
-        const returnMessage = saveDataToICMApi();
-        if ((await returnMessage) === "success") {
+        const returnMessage =await saveDataToICMApi();
+        if ((returnMessage) === "success") {
           setModalTitle("Success ✅");
           setModalMessage("Form Saved Successfully.");
         } else {
           setModalTitle("Error ❌ ");
-          setModalMessage("Error saving form. Please try again.");
+          setModalMessage(returnMessage);
         }
         setModalOpen(true);
       } else {
@@ -1560,8 +1703,8 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
     setModalOpen(false); // Ensure modal is closed when a new request starts
     try {
       if (validateAllFields()) {
-        const returnMessage = saveDataToICMApi();
-        if ((await returnMessage) === "success") {
+        const returnMessage = await saveDataToICMApi();
+        if ((returnMessage) === "success") {
           const unlockMessage = unlockICMFinalFlags();
           if ((await unlockMessage) == "success") {
             isFormCleared.current = true;
@@ -1576,7 +1719,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
           }
         } else {
           setModalTitle("Error ❌");
-          setModalMessage("Error saving form. Please try again.");
+          setModalMessage(returnMessage);
           setModalOpen(true);
         }
       } else {
@@ -1625,10 +1768,10 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
 
       setIsPrinting(true); // Force printing mode
       document.body.offsetHeight; // Force reflow
-      const extraFooterInfo = formStates["footerExtraInfo"];
+      const extraFooterInfo = executeFooter(formData.footer);
       const formFooter = formData?.form_id && formData?.title
-  ? formData.form_id + " - " + formData.title + (extraFooterInfo ? " - " + extraFooterInfo : "")
-  : "Unknown Form ID";
+        ? formData.form_id + " - " + formData.title + (extraFooterInfo ? " - " + extraFooterInfo : "")
+        : "Unknown Form ID";
     
         // Set these values as attributes on the <body> tag
       document.documentElement.setAttribute("data-form-id", formFooter);
@@ -1701,6 +1844,31 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
     });
   };
 
+  const handleGenerate = async () => {
+    setIsLoading(true); // Show loading overlay
+    setModalOpen(false); // Ensure modal is closed when a new request starts
+    try {      
+        const returnMessage =await saveDataToICMForGenerate();
+        if ((returnMessage) === "success") {
+          setModalTitle("Success ✅");
+          setModalMessage("Form Saved Successfully.");
+        } else {
+          setModalTitle("Error ❌ ");
+          setModalMessage(returnMessage);
+        }
+        setModalOpen(true);
+      
+    } catch (error) {
+      setModalTitle("Error ❌ ");
+      setModalMessage("Error saving form. Please try again.");
+      setModalOpen(true);
+    }
+    finally {
+      setIsLoading(false); // Hide loading overlay once request completes
+    }
+
+  };
+
   return (
 
     <div ref={pdfContainerRef} className="full-frame">
@@ -1724,10 +1892,17 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                   <Button onClick={handleSave} kind="secondary" className="no-print">
                     Save
                   </Button>
-                  <Button onClick={handleSaveAndClose} kind="secondary" className="no-print">
+                  <Button onClick={handleSaveAndClose} kind="secondary" className="no-print" id="saveAndClose">
                     Save And Close
                   </Button>
 
+                </>
+              )}
+              {mode == "generate" && (
+                <>
+                  <Button onClick={handleGenerate} kind="secondary" className="no-print" id="generate">
+                    Generate
+                  </Button>                  
                 </>
               )}
               {goBack && (
