@@ -103,6 +103,7 @@ interface Template {
   title: string;
   readOnly?: boolean;
   form_id: string;
+  footer: string;
   data: {
     items: Item[];
   };
@@ -122,6 +123,7 @@ interface SavedData {
   data: SavedFieldData;
   form_definition: Template;
   metadata: {};
+  params?:{};
 }
 
 type GroupState = { [key: string]: string }[]; // New type definition
@@ -604,6 +606,11 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
       return true;
     }
 
+  }
+
+  const executeFooter = (footer: string) => {
+    const footerFunction = new Function("formStates", "groupStates", footer);
+    return footerFunction(formStates, groupStates);
   }
 
   const executeCalculatedValueAndSetIfExists = (item: Item, groupId: string | null = null,
@@ -1466,8 +1473,8 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
   const saveDataToICMApi = async () => {
     try {
       const saveDataICMEndpoint = API.saveICMData;
-      const state = window.history.state as { formParams?: Record<string,string> };
-      const params = state?.formParams ?? {};
+      const state = sessionStorage.getItem("formParams");
+      const params = state ? (JSON.parse(state) as Record<string,string>) : {};
       const token = keycloak?.token ?? null;
       const savedJson: Record<string, any> = {
         "attachmentId": params["attachmentId"],
@@ -1498,8 +1505,10 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
         console.log("Result ", result);
         return "success";
       } else {
-        console.error("Error:", response.statusText);
-        return "failed";
+        const errorData = await response.json(); // Parse error response        
+        //throw new Error(errorData.error || "Something went wrong");
+        console.error("Error:",errorData.error);
+        return errorData?.error || "Error saving form. Please try again.";
       }
     } catch (error) {
       console.error("Error:", error);
@@ -1507,6 +1516,42 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
     }
   };
 
+  const saveDataToICMForGenerate = async () => {
+    try {
+      const saveDataICMEndpoint = API.saveICMData;
+     
+      const savedJson: Record<string, any> = {
+        "attachmentId": data.params.attachmentId,
+        "OfficeName": data.params.OfficeName,
+        "username": data.params.username,
+        //"username": "test",
+        "savedForm": JSON.stringify(createSavedData())
+      };
+
+      
+
+      const response = await fetch(saveDataICMEndpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(savedJson),
+      });
+      if (response.ok) {
+        const result = await response.json();
+        console.log("Result ", result);
+        return "success";
+      } else {
+        const errorData = await response.json(); // Parse error response        
+        //throw new Error(errorData.error || "Something went wrong");
+        console.error("Error:",errorData.error);
+        return errorData?.error || "Error saving form. Please try again.";
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      return "failed";
+    }
+  };
 
   /*
   Function for validating all fields before saving . This function will iterate through
@@ -1572,8 +1617,8 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
     try {
 
       const unlockICMFinalEdpoint = API.unlockICMData;
-      const state = window.history.state as { formParams?: Record<string,string> };
-      const params = state?.formParams ?? {};
+      const state = sessionStorage.getItem("formParams");
+      const params = state ? (JSON.parse(state) as Record<string,string>) : {};
       const token = keycloak?.token ?? null;
 
       const body: Record<string, any> = { ...params };
@@ -1620,13 +1665,13 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
     setModalOpen(false); // Ensure modal is closed when a new request starts
     try {
       if (validateAllFields()) {
-        const returnMessage = saveDataToICMApi();
-        if ((await returnMessage) === "success") {
+        const returnMessage =await saveDataToICMApi();
+        if ((returnMessage) === "success") {
           setModalTitle("Success ✅");
           setModalMessage("Form Saved Successfully.");
         } else {
           setModalTitle("Error ❌ ");
-          setModalMessage("Error saving form. Please try again.");
+          setModalMessage(returnMessage);
         }
         setModalOpen(true);
       } else {
@@ -1656,8 +1701,8 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
     setModalOpen(false); // Ensure modal is closed when a new request starts
     try {
       if (validateAllFields()) {
-        const returnMessage = saveDataToICMApi();
-        if ((await returnMessage) === "success") {
+        const returnMessage = await saveDataToICMApi();
+        if ((returnMessage) === "success") {
           const unlockMessage = unlockICMFinalFlags();
           if ((await unlockMessage) == "success") {
             isFormCleared.current = true;
@@ -1672,7 +1717,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
           }
         } else {
           setModalTitle("Error ❌");
-          setModalMessage("Error saving form. Please try again.");
+          setModalMessage(returnMessage);
           setModalOpen(true);
         }
       } else {
@@ -1721,10 +1766,10 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
 
       setIsPrinting(true); // Force printing mode
       document.body.offsetHeight; // Force reflow
-      const extraFooterInfo = formStates["footerExtraInfo"];
+      const extraFooterInfo = executeFooter(formData.footer);
       const formFooter = formData?.form_id && formData?.title
-  ? formData.form_id + " - " + formData.title + (extraFooterInfo ? " - " + extraFooterInfo : "")
-  : "Unknown Form ID";
+        ? formData.form_id + " - " + formData.title + (extraFooterInfo ? " - " + extraFooterInfo : "")
+        : "Unknown Form ID";
     
         // Set these values as attributes on the <body> tag
       document.documentElement.setAttribute("data-form-id", formFooter);
@@ -1797,6 +1842,31 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
     });
   };
 
+  const handleGenerate = async () => {
+    setIsLoading(true); // Show loading overlay
+    setModalOpen(false); // Ensure modal is closed when a new request starts
+    try {      
+        const returnMessage =await saveDataToICMForGenerate();
+        if ((returnMessage) === "success") {
+          setModalTitle("Success ✅");
+          setModalMessage("Form Saved Successfully.");
+        } else {
+          setModalTitle("Error ❌ ");
+          setModalMessage(returnMessage);
+        }
+        setModalOpen(true);
+      
+    } catch (error) {
+      setModalTitle("Error ❌ ");
+      setModalMessage("Error saving form. Please try again.");
+      setModalOpen(true);
+    }
+    finally {
+      setIsLoading(false); // Hide loading overlay once request completes
+    }
+
+  };
+
   return (
 
     <div ref={pdfContainerRef} className="full-frame">
@@ -1820,10 +1890,17 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                   <Button onClick={handleSave} kind="secondary" className="no-print">
                     Save
                   </Button>
-                  <Button onClick={handleSaveAndClose} kind="secondary" className="no-print">
+                  <Button onClick={handleSaveAndClose} kind="secondary" className="no-print" id="saveAndClose">
                     Save And Close
                   </Button>
 
+                </>
+              )}
+              {mode == "generate" && (
+                <>
+                  <Button onClick={handleGenerate} kind="secondary" className="no-print" id="generate">
+                    Generate
+                  </Button>                  
                 </>
               )}
               {goBack && (
