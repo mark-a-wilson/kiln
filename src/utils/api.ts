@@ -9,4 +9,5 @@ export const API = {
   unlockICMData: getApiUrl("/clearICMLockedFlag", import.meta.env.VITE_COMM_API_UNLOCK_ICM_FORM_URL),
   loadSavedJson: getApiUrl("/loadSavedJson", import.meta.env.VITE_COMM_API_LOADSAVEDJSON_ENDPOINT_URL),  
   generateStandalone: getApiUrl("/generateStandalone", import.meta.env.VITE_COMM_API_GENERATE_STANDALONE_ENDPOINT_URL),
+  pdfTemplate:  getApiUrl("/pdfRender", import.meta.env.VITE_COMM_API_PDFTEMPLATE_ENDPOINT_URL)
 };
