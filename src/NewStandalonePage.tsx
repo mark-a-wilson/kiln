@@ -6,14 +6,33 @@ import { useNavigate } from 'react-router-dom';
 import { API } from "./utils/api";
 import LoadingOverlay from "./common/LoadingOverlay";
 
+
 const NewStandalonePage: React.FC = () => {
   const [jsonContent, setJsonContent] = useState<object>({});  
   const navigate = useNavigate();
   const [isNewPageLoading, setIsNewPageLoading] = useState(false);
 
   useEffect(() => {
+    console.log("for new endpoint in useeffect");
+    //
+     const { search, pathname } = window.location;
 
-    const queryParams = new URLSearchParams(window.location.search);
+    if (search) {
+      const params = Object.fromEntries(new URLSearchParams(search).entries()) as Record<string,string>;
+      sessionStorage.setItem("formParams", JSON.stringify(params));
+      handleGenerateTemplate(params);
+      window.history.replaceState({}, document.title, pathname);
+    }
+    else {
+      const stored = sessionStorage.getItem("formParams");
+      if (stored) {
+        const params = JSON.parse(stored) as Record<string,string>;
+        handleGenerateTemplate(params);
+      }}
+
+    //
+
+    /*const queryParams = new URLSearchParams(window.location.search);
     const params: { [key: string]: string | null } = {};
 
     // Iterate over all query parameters and store them in the params object
@@ -24,7 +43,7 @@ const NewStandalonePage: React.FC = () => {
     if (params) {
 
       handleGenerateTemplate(params);
-    }
+    }*/
 
 
   }, []);
@@ -35,6 +54,7 @@ const NewStandalonePage: React.FC = () => {
     try {
       const generateDataEndpoint = API.generateStandalone;
      
+      console.log("for new endpoint in handleGenerateTemplate");
       const body: Record<string, any> = { ...params };
 
      
