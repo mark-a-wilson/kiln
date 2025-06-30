@@ -1,6 +1,6 @@
 import "./App.css";
 import NewFormPage from "./NewFormPage";
-import NewStandalonePage from "./NewStandalonePage";
+import NewPortalFormPage from "./NewPortalFormPage";
 import EditFormPage from "./EditFormPage";
 import ViewFormPage from "./ViewFormPage";
 import PreviewFormPage from "./PreviewFormPage";
@@ -23,8 +23,8 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const location = useLocation(); // Get the current route
 
-  const isStandalone = import.meta.env.VITE_IS_STANDALONE === "true";
-  console.log("Is Standalone",isStandalone);
+  const isPortalIntegrated = import.meta.env.VITE_IS_PORTAL_INTEGRATED === "true";
+  console.log("Is PortalIntegrated",isPortalIntegrated);
 
   // Public Routes
   const publicRoutes = [
@@ -32,10 +32,10 @@ const App: React.FC = () => {
     "/unauthorized",
     "/printToPDF",
     "/error",
-    ...(isStandalone ? ["/new"] : []),
+    ...(isPortalIntegrated ? ["/new"] : []),
   ];
-  const NewFormConditionalRoute = isStandalone ? (
-    <NewStandalonePage/>
+  const NewFormConditionalRoute = isPortalIntegrated ? (
+    <NewPortalFormPage/>
   ) :(
     <PrivateRoute>
       <NewFormPage />

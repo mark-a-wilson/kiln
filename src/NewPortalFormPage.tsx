@@ -7,7 +7,7 @@ import { API } from "./utils/api";
 import LoadingOverlay from "./common/LoadingOverlay";
 
 
-const NewStandalonePage: React.FC = () => {
+const NewPortalFormPage: React.FC = () => {
   const [jsonContent, setJsonContent] = useState<object>({});  
   const navigate = useNavigate();
   const [isNewPageLoading, setIsNewPageLoading] = useState(false);
@@ -52,7 +52,8 @@ const NewStandalonePage: React.FC = () => {
     setIsNewPageLoading(true);
 
     try {
-      const generateDataEndpoint = API.generateStandalone;
+       console.log("for new endpoint in handleGenerateTemplate befoire");
+      const generateDataEndpoint = API.generatePortalForm;
      
       console.log("for new endpoint in handleGenerateTemplate");
       const body: Record<string, any> = { ...params };
@@ -90,4 +91,4 @@ const NewStandalonePage: React.FC = () => {
   );
 };
 
-export default NewStandalonePage
+export default NewPortalFormPage
