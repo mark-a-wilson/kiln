@@ -235,8 +235,10 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
         unlockICMFinalFlags();
       }
     }
+    if (mode != "standalone") {
     window.addEventListener("beforeunload", handleClose);
     return () => window.removeEventListener("beforeunload", handleClose);
+    }
   })
 
   /*
@@ -1306,7 +1308,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                 {item.repeater && (<div className="group-item-header">
                   {item.repeaterItemLabel || item.label}
                   {(item.repeaterItemLabel || item.label) && ` ${groupIndex + 1}`}
-                  {item.groupItems && item.groupItems.length > 1 && (mode == "edit" || goBack) && formData.readOnly != true && (
+                  {item.groupItems && item.groupItems.length > 1 && (mode == "edit" || goBack || mode == "standalone") && formData.readOnly != true && (
                     <div className="custom-buttons-no-bg no-print">
                       <Button
                         kind="ghost"
@@ -1352,7 +1354,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                 </div>
               </div>
             ))}
-            {item.repeater && (mode == "edit" || goBack) && formData.readOnly != true && (
+            {item.repeater && (mode == "edit" || goBack || mode == "standalone") && formData.readOnly != true && (
               <div className="custom-buttons-only">
                 <Button
                   kind="ghost"
