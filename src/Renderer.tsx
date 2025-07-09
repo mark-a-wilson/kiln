@@ -87,6 +87,7 @@ interface Item {
     [key: string]: string | number;
   }
   containerItems?: Item[];
+  attributes?: { [key: string]: any }; // Additional attributes components
 }
 
 /*
@@ -226,6 +227,58 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
     mediaQueryList.addEventListener("change", handlePrint);
     return () => mediaQueryList.removeEventListener("change", handlePrint);
   }, []);
+
+   //Manage style and script tags for web and pdf
+  function getByType<T extends { type: string; content: string }>(arr: T[] | undefined, type: string): string | undefined {
+    return arr?.find((item) => item.type === type)?.content;
+  }
+
+  const styles = data?.form_definition?.data?.styles;
+  const scripts = data?.form_definition?.data?.scripts;
+
+  const webStyleSheet = getByType(styles, 'web');
+  const pdfStyleSheet = getByType(styles, 'pdf');
+  const webFormScript = getByType(scripts, 'web');
+  const pdfFormScript = getByType(scripts, 'pdf');
+
+  useEffect(() => {
+    const mode = isPrinting ? 'pdf' : 'web';
+    const styleId = `${mode}-form-styles`;
+    const scriptId = `${mode}-form-script`;
+
+    // Remove any existing style/script tags for both modes
+    ['web', 'pdf'].forEach((m) => {
+      const s = document.getElementById(`${m}-form-styles`);
+      if (s) s.remove();
+      const sc = document.getElementById(`${m}-form-script`);
+      if (sc) sc.remove();
+    });
+
+    // Add current mode's style/script if present
+    const styleContent = mode === 'pdf' ? pdfStyleSheet : webStyleSheet;
+    const scriptContent = mode === 'pdf' ? pdfFormScript : webFormScript;
+
+    if (styleContent) {
+      const style = document.createElement('style');
+      style.id = styleId;
+      style.textContent = styleContent;
+      document.head.appendChild(style);
+    }
+    if (scriptContent) {
+      const script = document.createElement('script');
+      script.id = scriptId;
+      script.textContent = scriptContent;
+      document.head.appendChild(script);
+    }
+
+    // Cleanup on unmount
+    return () => {
+      const style = document.getElementById(styleId);
+      if (style) style.remove();
+      const script = document.getElementById(scriptId);
+      if (script) script.remove();
+    };
+  }, [isPrinting, webStyleSheet, pdfStyleSheet, webFormScript, pdfFormScript]);
 
   //on close, execute unlock form
   useEffect(() => {
@@ -758,7 +811,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
               handleInputChange(fieldId, e.target.value, groupId, groupIndex, item)
             }
             readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
-
+            {...item.attributes}
           >
             <Component
               className="field-container no-print"
@@ -773,6 +826,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
               }}
               invalid={!!error}
               invalidText={error || ""}
+              {...item.attributes}
             />
           </InputMask>
             <div className="hidden-on-screen field-wrapper-print" style={{
@@ -827,6 +881,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                 }}
                 invalid={!!error}
                 invalidText={error || ""}
+              {...item.attributes}
               />}
           >
           </CurrencyInput>
@@ -872,7 +927,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
               readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
               invalid={!!error}
               invalidText={error || ""}
-
+              {...item.attributes}
             />
             <div className="hidden-on-screen field-wrapper-print" style={{
               ...(isPrinting ? item.pdfStyles : item.webStyles),
@@ -910,6 +965,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                 readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
                 invalid={!!error}
                 invalidText={error || ""}
+                {...item.attributes}
               />
             </div>
             <div className="hidden-on-screen field-wrapper-print" style={{
@@ -954,6 +1010,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
               readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
               invalid={!!error}
               invalidText={error || ""}
+              {...item.attributes}
             />
           </div>
         );
@@ -1004,6 +1061,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
               readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
               invalid={!!error}
               invalidText={error || ""}
+              {...item.attributes}
 
             >
               <DatePickerInput
@@ -1061,6 +1119,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
               readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
               invalid={!!error}
               invalidText={error || ""}
+              {...item.attributes}
             />
             <div className="hidden-on-screen field-wrapper-print text-area" style={{
               ...(isPrinting ? item.pdfStyles : item.webStyles),
@@ -1098,6 +1157,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
             style={{              
               ...(isPrinting ? item.pdfStyles : item.webStyles),
             }}
+            {...item.attributes}
           >
             {item.label}
           </Component>
@@ -1131,6 +1191,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
             }
             invalid={!!error}
             invalidText={error || ""}
+            {...item.attributes}
           />
         );
       case "text-info":
@@ -1144,12 +1205,13 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
             key={fieldId}
             id={fieldId}
             dangerouslySetInnerHTML={{ __html: parseDynamicText(textInfo) }}
+            {...item.attributes}
           />
 
         );
       case "link":
         return (
-          <Component id={fieldId} href={item.value} onClick={handleLinkClick}>
+          <Component id={fieldId} href={item.value} onClick={handleLinkClick} {...item.attributes}>
             {item.label}
           </Component>
         );
@@ -1169,6 +1231,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
               disabled={false}
               iconDescription="Delete file"
               name=""
+              {...item.attributes}
             />
           </div>
         );
@@ -1180,6 +1243,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
             initialRows={item.initialRows}
             initialColumns={item.initialColumns}
             initialHeaderNames={item.initialHeaderNames}
+            {...item.attributes}
           />
         );
       case "radio":
@@ -1215,6 +1279,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                 readOnly={formData.readOnly || doesFieldHasCondition("readOnly", item, groupId, groupIndex) || calcValExists || mode == "view"}
                 invalid={!!error}
                 invalidText={error || ""}
+                {...item.attributes}
               >
 
                 {radioOptions.map((option, index) => (
@@ -1272,6 +1337,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
 
               invalid={!!error}
               invalidText={error || ""}
+              {...item.attributes}
             >
               <SelectItem value="" text="" />
               {itemsForSelect.map((itemForSelect) => (
@@ -1370,7 +1436,14 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
 
         return (
           <>
-            <div key={item.id} className="common-container">
+            <div key={item.id}
+              id={item.id}
+              className={item?.attributes?.containerType == 'page' ? "page-container" : item?.attributes?.containerType == 'section' ? "section-container" : "common-container"}
+              style={{
+                ...(isPrinting ? item.pdfStyles : item.webStyles),
+              }}
+              {...item.attributes}
+            >
               <div className="group-header"
                 style={{
                   display: 'flex',
