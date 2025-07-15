@@ -60,11 +60,11 @@ const NewFormPage: React.FC = () => {
         }
       }
 
-      const originalHost = getCookie("originalHost");
+      const originalServer = getCookie("originalServer");
       
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
-        ...(originalHost ? { "X-Forwarded-Host": originalHost } : {})
+        ...(originalServer ? { "X-Original-Server": originalServer } : {})
       };
 
       const response = await fetch(generateDataEndpoint, {
