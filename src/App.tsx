@@ -1,5 +1,6 @@
 import "./App.css";
 import NewFormPage from "./NewFormPage";
+import NewPortalFormPage from "./NewPortalFormPage";
 import EditFormPage from "./EditFormPage";
 import ViewFormPage from "./ViewFormPage";
 import PreviewFormPage from "./PreviewFormPage";
@@ -22,8 +23,25 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const location = useLocation(); // Get the current route
 
+  const isPortalIntegrated = import.meta.env.VITE_IS_PORTAL_INTEGRATED === "true";
+  console.log("Is PortalIntegrated",isPortalIntegrated);
+
   // Public Routes
-  const publicRoutes = ["/preview", "/unauthorized", "/printToPDF", "/error"];
+  const publicRoutes = [
+    "/preview",
+    "/unauthorized",
+    "/printToPDF",
+    "/error",
+    ...(isPortalIntegrated ? ["/new"] : []),
+  ];
+  const NewFormConditionalRoute = isPortalIntegrated ? (
+    <NewPortalFormPage/>
+  ) :(
+    <PrivateRoute>
+      <NewFormPage />
+    </PrivateRoute>
+  ) ;
+ 
 
   useEffect(() => {
     const initKeycloak = async () => {
@@ -38,7 +56,7 @@ const App: React.FC = () => {
     };
 
     // Initialize Keycloak for protected routes
-    if (!publicRoutes.includes(location.pathname)) {
+    if (!publicRoutes.includes(location.pathname)) {      
       initKeycloak();
     } else {
       setLoading(false);
@@ -60,7 +78,7 @@ const App: React.FC = () => {
         <Route path="/error" element={<ErrorPage />} />
 
         {/* Protected Routes */}
-        <Route path="/new" element={<PrivateRoute><NewFormPage /></PrivateRoute>} />
+        <Route path="/new" element={NewFormConditionalRoute}/>
         <Route path="/edit" element={<PrivateRoute><EditFormPage /></PrivateRoute>} />
         <Route path="/view" element={<PrivateRoute><ViewFormPage /></PrivateRoute>} />
       </Routes>

@@ -104,6 +104,7 @@ interface Template {
   readOnly?: boolean;
   form_id: string;
   footer: string;
+  pdf_template_id?: string,
   data: {
     items: Item[];
   };
@@ -234,8 +235,10 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
         unlockICMFinalFlags();
       }
     }
+    if (mode != "standalone") {
     window.addEventListener("beforeunload", handleClose);
     return () => window.removeEventListener("beforeunload", handleClose);
+    }
   })
 
   /*
@@ -1305,7 +1308,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                 {item.repeater && (<div className="group-item-header">
                   {item.repeaterItemLabel || item.label}
                   {(item.repeaterItemLabel || item.label) && ` ${groupIndex + 1}`}
-                  {item.groupItems && item.groupItems.length > 1 && (mode == "edit" || goBack) && formData.readOnly != true && (
+                  {item.groupItems && item.groupItems.length > 1 && (mode == "edit" || goBack || mode == "standalone") && formData.readOnly != true && (
                     <div className="custom-buttons-no-bg no-print">
                       <Button
                         kind="ghost"
@@ -1351,7 +1354,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
                 </div>
               </div>
             ))}
-            {item.repeater && (mode == "edit" || goBack) && formData.readOnly != true && (
+            {item.repeater && (mode == "edit" || goBack || mode == "standalone") && formData.readOnly != true && (
               <div className="custom-buttons-only">
                 <Button
                   kind="ghost"
@@ -1462,6 +1465,49 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
     };
 
     return savedData;
+  };
+
+  const buildPdfPayload = () => {
+    const payload: Record<string, any> = {};
+  
+    // recursively walk items 
+    const processItems = (items: Item[]) => {
+      items.forEach(item => {
+        // skip anything hidden
+        if (!isFieldVisible(item)) return;
+  
+        if (item.type === "container" && item.containerItems) {
+          // dive into container
+          processItems(item.containerItems);
+  
+        } else if (item.type === "group") {
+          // only include the group itself if it's visible
+          const rows = (groupStates[item.id] || [])
+            .map((rowState, rowIndex) => {
+              const rowPayload: Record<string, any> = {};
+              item.groupItems?.[rowIndex]?.fields.forEach(f => {
+                if (isFieldVisible(f, item.id, rowIndex)) {
+                  rowPayload[f.id] = rowState[f.id];
+                }
+              });
+              return rowPayload;
+            })
+            .filter(r => Object.keys(r).length > 0);
+  
+          if (rows.length) {
+            payload[item.id] = rows;
+          }
+  
+        } else {
+          // simple field
+          payload[item.id] = formStates[item.id];
+        }
+      });
+    };
+  
+    processItems(formData.data.items);
+  
+    return { data: payload };
   };
 
 
@@ -1741,8 +1787,42 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
   */
 
   const handlePrint = async () => {
-    try {
+    
+    const pdfId = formData.pdf_template_id;
+    const PDFTemplateEndpoint = API.pdfTemplate;
 
+    if (pdfId) {
+      try {
+        const downloadUrl = `${PDFTemplateEndpoint}/${pdfId}`;
+        const payload = buildPdfPayload();
+
+        const response = await fetch(downloadUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch PDF (${response.status})`);
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${formData.form_id}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+
+        return;
+      } catch (err) {
+        console.warn("PDF ‐ template download failed, falling back to HTML print:", err);
+      }
+    }
+
+    try {
       const originalTitle = document.title;
       document.title = formData.form_id || 'CustomFormName';
       // Create metadata elements
