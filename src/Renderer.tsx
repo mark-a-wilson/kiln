@@ -1538,7 +1538,6 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
           savedJson.username = username;
         }
       }
-      console.log("Saved JSON:",savedJson);
 
       const response = await fetch(saveDataICMEndpoint, {
         method: "POST",
@@ -1574,14 +1573,17 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
         //"username": "test",
         "savedForm": JSON.stringify(createSavedData())
       };
-      console.log("Save to ICM JSON",savedJson);
-      
+            
+      const originalServer = new URL(data.params.apiHost).hostname;
+
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        ...(originalServer && { "X-Original-Server": originalServer })
+      };  
 
       const response = await fetch(saveDataICMEndpoint, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers,
         body: JSON.stringify(savedJson),
       });
       if (response.ok) {
