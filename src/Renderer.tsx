@@ -1538,6 +1538,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
           savedJson.username = username;
         }
       }
+      console.log("Saved JSON:",savedJson);
 
       const response = await fetch(saveDataICMEndpoint, {
         method: "POST",
@@ -1573,7 +1574,7 @@ const Renderer: React.FC<RendererProps> = ({ data, mode, goBack }) => {
         //"username": "test",
         "savedForm": JSON.stringify(createSavedData())
       };
-
+      console.log("Save to ICM JSON",savedJson);
       
 
       const response = await fetch(saveDataICMEndpoint, {
