@@ -59,9 +59,8 @@ html, body {
 .group-container {
   //border: 1px solid $border-color;
   //padding: 15px;
-  margin: 0px 0;
+  margin: 40px 0;
   //border-radius: 5px;
-  margin-bottom: 32px;
 }
 
 .common-container {
@@ -80,20 +79,15 @@ html, body {
   display: grid !important; /*  Grid Layout for items in Groups */
   grid-template-columns: repeat(4, 1fr) !important;
   //gap: 15px !important;
-  padding: 16px;
+  padding: 0 24px;
 }
 
 .group-item-container {
   border: $border-width $border-color;
-  //padding: 15px;
-  //margin: 20px 0;
-  margin-bottom: 20px;
-  border-radius: 5px;
+  border-radius: 6px;
   font-family: "BC Sans";
-font-size: 30px;
-font-style: normal;
-font-weight: 700;
-line-height: 125%; /* 40px */
+  margin: 32px 0;
+  overflow: hidden;
 }
 
 .fixed {
@@ -215,8 +209,6 @@ margin: auto
 }
 
 .header-title-only { 
-
-  color: #2D2D2D;
 /* Web/Headings/Heading 1 */
 font-family: $default-font-family;
 font-size: 36px;
@@ -256,41 +248,41 @@ margin-bottom: 25px;
   margin: auto;  
 }
 
-
 .group-header {
-  color: #000;
-font-family: $default-font-family;
-font-size: 28px;
-font-style: normal;
-font-weight: 700;
-line-height: normal;
-margin-bottom: 15px;
+  font-family: $default-font-family;
+  font-size: 32px;
+  font-weight: bold;
+  line-height: 125%;
+  margin-bottom: 32px;
+  padding: 38px 0 16px;
 }
 
 .group-item-header {
-/*   color: #000;
-font-family: $default-font-family;
-font-size: 20px;
-font-style: normal;
-font-weight: 700;
-line-height: normal;
-margin-bottom: 15px; */
-display: flex;
-height: 58px;
-padding: 12px 24px;
-justify-content: space-between;
-align-items: center;
-align-self: stretch;
-background: #F2F2F2;
+  /*   color: #000;
+  font-family: $default-font-family;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+  margin-bottom: 15px; */
+  align-items: center;
+  align-self: stretch;
+  background: #F2F2F2;
+  display: flex;
+  font-size: 28px;
+  justify-content: space-between;
+  line-height: 125%;
+  padding: 12px 24px;
 }
 
 .text-block {
-  padding: 10px 0px;
   font: initial;
   font-weight: normal;
   font-family: $default-font-family;
-  font-size: $default-font-size; 
-
+  font-size: $default-font-size;
+  line-height: 150%;
+  margin: 24px 0;
+}
 
   // Nested styles for h1
   h1 {
@@ -360,6 +352,10 @@ h1 {
   font-size:1rem
 }
 
+.cds--form-item {
+  margin: 24px 0;  
+}
+
 .cds--label {
   font-weight: $label-font-weight;
   font-size: $label-font-size;
@@ -397,8 +393,8 @@ h1 {
   border:none
 }
 
-.cds--checkbox-label-text {
-  font-size: 16px;
+.cds--checkbox-label-text, .cds--radio-button__label-text {
+  font-size: 1rem;
 }
 .custom-modal-footer {
   display: flex;
